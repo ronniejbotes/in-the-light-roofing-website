@@ -34,12 +34,16 @@
 /* With a form alongside, the hero does not also need a tall minimum. */
 .hero:has(.hero__grid) { min-height: 0; }
 
-.hero h1, .hero h2, .hero h3, .hero h4 { color: #fff; }
+/* Only headings on the photo itself go white. Cards and panels inside the hero
+   keep their own light surface, so their text must stay dark. */
+.hero :is(h1, h2, h3, h4):not(.card *, .form-card *, .quote *) { color: #fff; }
 .hero h1 { margin-bottom: .35em; }
-.hero .rich { color: color-mix(in srgb, #fff 84%, transparent); }
+.hero > .container > * > .rich,
+.hero .hero__sub .rich { color: color-mix(in srgb, #fff 84%, transparent); }
 .hero .rich a { color: var(--c-primary); }
 
-/* The quote card sits on the photo, so it keeps its own light surface. */
+/* Light surfaces inside the hero keep their own text colour. */
+.hero :is(.card, .form-card, .quote) { color: var(--c-body); }
 .hero .form-card { color: var(--c-body); }
 .hero .form-card h1, .hero .form-card h2,
 .hero .form-card h3, .hero .form-card h4 { color: var(--c-ink); }
@@ -345,3 +349,18 @@
   border-radius: 0;
   font-style: normal;
 }
+
+/* Trust points that open a service-area hero. */
+.hero__points-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+  gap: 12px;
+  margin-top: 30px;
+}
+.hero__points-grid .card { border: 0; background: rgb(255 255 255 / .1); backdrop-filter: blur(6px); }
+.hero__points-grid .card:hover { background: rgb(255 255 255 / .16); }
+.hero__points-grid .card__body { padding: 16px 18px; }
+.hero__points-grid .feature__title { font-size: 16px; line-height: 1.3; color: #fff; }
+.hero__points-grid .feature__text { font-size: var(--fs-tiny); color: color-mix(in srgb, #fff 78%, transparent); }
+.hero .hero__points-grid .card { color: color-mix(in srgb, #fff 84%, transparent); }
+.hero .hero__points-grid :is(h2, h3, h4) { color: #fff; }

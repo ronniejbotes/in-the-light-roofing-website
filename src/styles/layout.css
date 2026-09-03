@@ -35,7 +35,12 @@
    card and disappears. */
 .section--dark :is(h1, h2, h3, h4, h5, h6):not(.card *, .form-card *, .quote *, .accordion *) { color: #fff; }
 .section--dark strong:not(.card *, .form-card *, .quote *, .accordion *) { color: #fff; }
-.section--dark > .container > :not(.card, .form-card) a:not(.btn) { color: var(--c-primary); }
+/* Body links on the dark ground go cyan. Scoped to actual copy: a descendant
+   selector here would also recolour card titles, and cyan on a light card is
+   about 2.2:1 -- well under AA. */
+.section--dark :is(.rich, .prose, .ticks, .section-head) a:not(.btn) { color: var(--c-primary); }
+.section--bg :is(.rich, .prose, .ticks, .section-head) a:not(.btn) { color: var(--c-primary); }
+.section--dark :is(.card, .form-card, .quote) a:not(.btn) { color: var(--c-primary-darker); }
 
 /* A section with a photographic background gets a scrim so text stays legible. */
 .section--bg {

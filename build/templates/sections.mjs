@@ -140,14 +140,23 @@ function renderHero(section, ctx, index) {
         : esc(h1.text)}</h1>`
     : ''
 
+  // Trust points in a hero are a row of small cards, not a stack of full-width
+  // ones -- the service-area pages open with four of them.
+  const heroFeatures = rest.filter((b) => b.type === 'feature')
+  const heroRest = rest.filter((b) => b.type !== 'feature')
+
   const copy =
     `<div data-reveal="left">` +
     headline +
-    each(rest, (b, k) =>
+    each(heroRest, (b, k) =>
       b.type === 'richtext'
         ? `<div class="hero__sub">${renderBlock(b, `${id}-r${k}`)}</div>`
         : `<div class="stack">${renderBlock(b, `${id}-r${k}`)}</div>`
     ) +
+    when(heroFeatures.length, () =>
+      `<div class="hero__points-grid" data-reveal-group>` +
+      each(heroFeatures, (b, k) => renderBlock(b, `${id}-hf${k}`)) +
+      `</div>`) +
     when(buttons.length, () =>
       `<div class="btn-row">${each(buttons, (b, k) =>
         renderBlock(b, `${id}-b${k}`, { secondary: k > 0, onDark: true }))}</div>`

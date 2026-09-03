@@ -53,8 +53,65 @@ for (const [label, w, h, mobile] of [['desktop', 1440, 900, false], ['mobile', 3
             }
           }
         }
+        // Text that fails WCAG AA against its own painted background. Catches
+        // the classic regression where a dark-section rule turns a heading
+        // white on top of a light card.
+        const lum = (c) => {
+          const [r, g, b] = c.map((v) => {
+            const s = v / 255
+            return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+          })
+          return 0.2126 * r + 0.7152 * g + 0.0722 * b
+        }
+        const parse = (s) => {
+          const m = s.match(/rgba?\(([^)]+)\)/)
+          if (!m) return null
+          const p = m[1].split(/[,/]/).map((x) => parseFloat(x))
+          return { rgb: p.slice(0, 3), a: p.length > 3 ? p[3] : 1 }
+        }
+        // Walk up for the first opaque painted background. Returns null when a
+        // gradient or photo is in the way, since the effective backdrop behind
+        // the glyphs cannot be read from computed styles.
+        const bgOf = (el) => {
+          let n = el
+          while (n && n !== document.documentElement) {
+            const cs = getComputedStyle(n)
+            if (cs.backgroundImage && cs.backgroundImage !== 'none') return null
+            const c = parse(cs.backgroundColor)
+            if (c && c.a > 0.85) return c.rgb
+            n = n.parentElement
+          }
+          return [255, 255, 255]
+        }
+        const lowContrast = []
+        const sel = 'h1,h2,h3,h4,h5,h6,p,li,a,span,button,td,th,figcaption,label'
+        for (const el of document.querySelectorAll(sel)) {
+          if (!el.textContent.trim()) continue
+          if (el.querySelector(sel)) continue          // only leaf text
+          const r = el.getBoundingClientRect()
+          if (r.width < 8 || r.height < 8) continue
+          const cs = getComputedStyle(el)
+          if (cs.visibility === 'hidden' || cs.display === 'none' || cs.opacity === '0') continue
+          const fg = parse(cs.color)
+          if (!fg || fg.a < 0.5) continue
+          const bg = bgOf(el)
+          if (!bg) continue
+          const l1 = lum(fg.rgb), l2 = lum(bg)
+          const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
+          const size = parseFloat(cs.fontSize)
+          const large = size >= 24 || (size >= 18.66 && Number(cs.fontWeight) >= 700)
+          if (ratio < (large ? 3 : 4.5)) {
+            lowContrast.push(
+              `${el.tagName.toLowerCase()}.${(el.className || '').toString().split(' ')[0]} ` +
+              `"${el.textContent.trim().slice(0, 28)}" ${ratio.toFixed(1)}:1`
+            )
+            if (lowContrast.length > 4) break
+          }
+        }
+
         const imgs = [...document.images]
         return {
+          lowContrast,
           h1: document.querySelectorAll('h1').length,
           overflow, wide,
           noAlt: imgs.filter((i) => !i.hasAttribute('alt')).length,
@@ -67,6 +124,7 @@ for (const [label, w, h, mobile] of [['desktop', 1440, 900, false], ['mobile', 3
       if (audit.overflow > 2) problems.push([label, route, `overflow ${audit.overflow}px: ${audit.wide.join(', ')}`])
       if (audit.noAlt) problems.push([label, route, `${audit.noAlt} img without alt`])
       if (audit.noDims) problems.push([label, route, `${audit.noDims} img without width/height`])
+      if (audit.lowContrast?.length) problems.push([label, route, `low contrast: ${audit.lowContrast.join(' | ')}`])
     } catch (e) {
       problems.push([label, route, 'LOAD FAILED: ' + e.message.slice(0, 70)])
     }
