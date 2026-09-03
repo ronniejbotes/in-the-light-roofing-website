@@ -1,3 +1,7 @@
+/**
+ * Screenshot individual <section> elements of a page by index, with motion
+ * disabled. Full-page capture is unreliable on very tall pages.
+ */
 import { chromium } from 'playwright-core'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'

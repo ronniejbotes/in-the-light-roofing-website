@@ -1,3 +1,7 @@
+/**
+ * List a single page's first-party assets by size, largest first. Useful for
+ * finding the one file that dominates a page.
+ */
 import { chromium } from 'playwright-core'
 import { join } from 'node:path'
 const EXEC=join(process.env.USERPROFILE||'','AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')

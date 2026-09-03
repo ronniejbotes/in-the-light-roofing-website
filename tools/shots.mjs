@@ -1,3 +1,7 @@
+/**
+ * Desktop and mobile screenshots of one or more routes, reporting console
+ * errors and failed requests alongside. FULL=0 for viewport-only.
+ */
 import { chromium } from 'playwright-core'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'

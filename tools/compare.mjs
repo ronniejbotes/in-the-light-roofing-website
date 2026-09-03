@@ -1,3 +1,7 @@
+/**
+ * Side-by-side page-weight and LCP comparison: the live WordPress site
+ * against the local build, for the same URLs.
+ */
 import { chromium } from 'playwright-core'
 import { join } from 'node:path'
 const EXEC=join(process.env.USERPROFILE||'','AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')
