@@ -1,0 +1,81 @@
+/* --------------------------------------------------------------------------
+   Scroll reveal
+
+   Elements opt in with [data-reveal]. A single IntersectionObserver adds
+   .is-in, and everything animates with transform + opacity only, so no
+   layout or paint work happens on the main thread during the transition.
+
+   Content is visible by default and hidden only once JS confirms it can
+   animate it (html.js-reveal). Without JS, or with reduced motion, nothing
+   is ever hidden -- the page must never depend on script to be readable.
+   -------------------------------------------------------------------------- */
+
+.js-reveal [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity 620ms var(--ease-out),
+    transform 620ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.js-reveal [data-reveal="left"]  { transform: translate3d(-26px, 0, 0); }
+.js-reveal [data-reveal="right"] { transform: translate3d(26px, 0, 0); }
+.js-reveal [data-reveal="zoom"]  { transform: scale(.955); }
+.js-reveal [data-reveal="fade"]  { transform: none; }
+
+.js-reveal [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Stagger children of a group without needing per-element inline styles. */
+.js-reveal [data-reveal-group] > * { --reveal-delay: 0ms; }
+.js-reveal [data-reveal-group] > *:nth-child(2)  { --reveal-delay: 70ms; }
+.js-reveal [data-reveal-group] > *:nth-child(3)  { --reveal-delay: 140ms; }
+.js-reveal [data-reveal-group] > *:nth-child(4)  { --reveal-delay: 210ms; }
+.js-reveal [data-reveal-group] > *:nth-child(5)  { --reveal-delay: 280ms; }
+.js-reveal [data-reveal-group] > *:nth-child(6)  { --reveal-delay: 350ms; }
+.js-reveal [data-reveal-group] > *:nth-child(7)  { --reveal-delay: 400ms; }
+.js-reveal [data-reveal-group] > *:nth-child(n+8) { --reveal-delay: 450ms; }
+
+/* A quiet lift used on stat/number blocks and badges. */
+@keyframes itlr-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+.float { animation: itlr-float 5s var(--ease) infinite; }
+
+/* Header shrink is driven by .is-stuck in chrome.css; this just softens the
+   very first paint so the sticky header does not pop. */
+@keyframes itlr-header-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+.header { animation: itlr-header-in 400ms var(--ease-out) both; }
+
+/* Hover-intent lift shared by tiles that are not .card. */
+.lift { transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+/* --------------------------------------------------------------------------
+   Respect the user's motion preference. This must win over everything above.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal [data-reveal],
+  .js-reveal [data-reveal].is-in {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .float, .header { animation: none !important; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

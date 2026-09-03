@@ -1,0 +1,24 @@
+{
+  "name": "in-the-light-roofing-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static rebuild of inthelightroofing.com - same URLs, same content, faster.",
+  "scripts": {
+    "extract": "python tools/extract.py && python tools/extract_chrome.py",
+    "verify:content": "python tools/verify_text.py",
+    "assets": "node tools/fetch-assets.mjs",
+    "build:bundle": "vite build",
+    "build:html": "node build/build.mjs",
+    "build": "npm run build:bundle && npm run build:html",
+    "dev": "node build/dev.mjs",
+    "serve": "node build/serve.mjs",
+    "verify:build": "node tools/verify-build.mjs",
+    "check": "npm run build && npm run verify:build"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.62.1",
+    "sharp": "^0.35.4",
+    "vite": "^6.0.7"
+  }
+}

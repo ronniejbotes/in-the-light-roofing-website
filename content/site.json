@@ -1,0 +1,482 @@
+{
+ "business": {
+  "name": "In The Light Roofing",
+  "street": "871 N Fenwick St.",
+  "city": "Allentown",
+  "region": "PA",
+  "postal_code": "18109",
+  "country": "US",
+  "phone_display": "(484) 553-0213",
+  "phone_href": "tel:4845530213",
+  "email": "info@inthelightroofing.com",
+  "founded": "2017",
+  "founder": "Bryson Berard",
+  "languages": [
+   "English",
+   "Spanish"
+  ]
+ },
+ "logos": {
+  "header": {
+   "src": "/wp-content/uploads/2023/12/header-logo1.webp",
+   "alt": "header-logo1.",
+   "width": "562",
+   "height": "225"
+  },
+  "footer": {
+   "src": "/wp-content/uploads/2023/12/header-logo.png",
+   "alt": "header-logo"
+  },
+  "favicon": "/wp-content/uploads/2023/12/cropped-header-logo-32x32.png"
+ },
+ "header": {
+  "badges": [
+   {
+    "text": "Based on 237 Reviews",
+    "image": {
+     "src": "/wp-content/uploads/2025/04/Group-62194.webp",
+     "alt": "google-rating"
+    },
+    "href": "https://www.google.com/search?q=in+the+light+roofing&oq=in+the+light+roofing&gs_lcrp=EgZjaHJvbWUqCggAEAAY4wIYgAQyCggAEAAY4wIYgAQyDQgBEC4YrwEYxwEYgAQyBwgCEAAYgAQyBggDEEUYPDIGCAQQRRg8MgYIBRBFGD3SAQg0MTQ4ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x89c43b840ffd0c33:0x21c950328309980d,1,,,,"
+   },
+   {
+    "text": "Based on 18 Reviews",
+    "image": {
+     "src": "/wp-content/uploads/2024/05/facebook-rating.webp",
+     "alt": "facebook-rating"
+    },
+    "href": "https://www.facebook.com/InthelightcontractingLLC/reviews"
+   },
+   {
+    "text": "BBB A+ Rating",
+    "image": {
+     "src": "/wp-content/uploads/2024/05/bbb-rating.webp",
+     "alt": "bbb-rating"
+    },
+    "href": "https://www.bbb.org/us/pa/allentown/profile/roofing-contractors/in-the-light-roofing-llc-0241-236020858"
+   },
+   {
+    "text": "info@inthelightroofing.com",
+    "href": "mailto:info@inthelightroofing.com"
+   },
+   {
+    "text": "Phone Number (484) 553-0213",
+    "href": "tel:4845530213"
+   }
+  ],
+  "cta": [
+   {
+    "label": "Call Now",
+    "href": "tel:4845530213"
+   },
+   {
+    "label": "No Cost Project Estimate",
+    "href": "#elementor-action%3Aaction%3Dpopup%3Aopen%26settings%3DeyJpZCI6IjIwMTciLCJ0b2dnbGUiOmZhbHNlfQ%3D%3D"
+   }
+  ],
+  "nav": [
+   {
+    "label": "Home",
+    "href": "/home/"
+   },
+   {
+    "label": "Services",
+    "href": "/services/",
+    "children": [
+     {
+      "label": "Roof Repairs",
+      "href": "/services/roof-repairs/"
+     },
+     {
+      "label": "Roof Replacement",
+      "href": "/services/roof-replacement/"
+     },
+     {
+      "label": "New Roof Installation",
+      "href": "/services/new-roof-installation/"
+     },
+     {
+      "label": "Roof Inspections",
+      "href": "/services/roof-inspections/"
+     },
+     {
+      "label": "Insurance Claim Facilitation",
+      "href": "/services/insurance-claim-facilitation/"
+     },
+     {
+      "label": "Storm Damage Repair",
+      "href": "/services/storm-damage-repair/"
+     },
+     {
+      "label": "Roof Types",
+      "href": "/roof-types/",
+      "children": [
+       {
+        "label": "Asphalt Shingle Roofing",
+        "href": "/services/asphalt-shingle-roofing/"
+       },
+       {
+        "label": "EPDM Rubber Roofing",
+        "href": "/services/epdm-rubber-roofing/"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "label": "Past Work",
+    "href": "/past-work/"
+   },
+   {
+    "label": "About Us",
+    "href": "/about-us/",
+    "children": [
+     {
+      "label": "Careers",
+      "href": "/careers/",
+      "children": [
+       {
+        "label": "Project Manager",
+        "href": "/project-manager-bethlehem-center-valley/"
+       },
+       {
+        "label": "Roof Repair Technician",
+        "href": "/roof-repair-technician-bethlehem-center-valley/"
+       },
+       {
+        "label": "Outside Sales Representative",
+        "href": "/outside-sales-representative-bethlehem-center-valley/"
+       },
+       {
+        "label": "Inside Sales Representative",
+        "href": "/inside-sales-representative-bethlehem-center-valley/"
+       },
+       {
+        "label": "Blog",
+        "href": "/blog/"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "label": "Service Area",
+    "href": "/service-area/",
+    "children": [
+     {
+      "label": "Lehigh Valley",
+      "href": "/service-area/lehigh-valley/"
+     },
+     {
+      "label": "Allentown",
+      "href": "/service-area/allentown/"
+     },
+     {
+      "label": "Whitehall",
+      "href": "/service-area/whitehall/"
+     },
+     {
+      "label": "Macungie",
+      "href": "/service-area/macungie/"
+     },
+     {
+      "label": "Slatington",
+      "href": "/service-area/slatington/"
+     },
+     {
+      "label": "Catasauqua",
+      "href": "/service-area/catasauqua/"
+     },
+     {
+      "label": "Coplay",
+      "href": "/service-area/coplay/"
+     },
+     {
+      "label": "Center Valley",
+      "href": "/service-area/center-valley-roofing-contractor/"
+     },
+     {
+      "label": "Bethlehem",
+      "href": "/service-area/roofers-bethlehem-pa/"
+     },
+     {
+      "label": "Easton",
+      "href": "/service-area/easton/"
+     },
+     {
+      "label": "Northampton",
+      "href": "/service-area/northampton/"
+     },
+     {
+      "label": "Walnutport",
+      "href": "/service-area/walnutport/"
+     }
+    ]
+   },
+   {
+    "label": "Contact",
+    "href": "/contact/"
+   }
+  ],
+  "socials": [
+   "https://www.facebook.com/InthelightcontractingLLC/",
+   "https://www.instagram.com/inthelightroofing/",
+   "https://www.youtube.com/@inthelightroofing"
+  ]
+ },
+ "footer": {
+  "columns": [
+   {
+    "heading": "Quick Links",
+    "items": [
+     {
+      "label": "Home",
+      "href": "/home/"
+     },
+     {
+      "label": "Services",
+      "href": "/services/",
+      "children": [
+       {
+        "label": "Roof Repairs",
+        "href": "/services/roof-repairs/"
+       },
+       {
+        "label": "Roof Replacement",
+        "href": "/services/roof-replacement/"
+       },
+       {
+        "label": "New Roof Installation",
+        "href": "/services/new-roof-installation/"
+       },
+       {
+        "label": "Roof Inspections",
+        "href": "/services/roof-inspections/"
+       },
+       {
+        "label": "Insurance Claim Facilitation",
+        "href": "/services/insurance-claim-facilitation/"
+       },
+       {
+        "label": "Storm Damage Repair",
+        "href": "/services/storm-damage-repair/"
+       },
+       {
+        "label": "Roof Types",
+        "href": "/roof-types/",
+        "children": [
+         {
+          "label": "Asphalt Shingle Roofing",
+          "href": "/services/asphalt-shingle-roofing/"
+         },
+         {
+          "label": "EPDM Rubber Roofing",
+          "href": "/services/epdm-rubber-roofing/"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "label": "Past Work",
+      "href": "/past-work/"
+     },
+     {
+      "label": "About Us",
+      "href": "/about-us/",
+      "children": [
+       {
+        "label": "Careers",
+        "href": "/careers/",
+        "children": [
+         {
+          "label": "Project Manager",
+          "href": "/project-manager-bethlehem-center-valley/"
+         },
+         {
+          "label": "Roof Repair Technician",
+          "href": "/roof-repair-technician-bethlehem-center-valley/"
+         },
+         {
+          "label": "Outside Sales Representative",
+          "href": "/outside-sales-representative-bethlehem-center-valley/"
+         },
+         {
+          "label": "Inside Sales Representative",
+          "href": "/inside-sales-representative-bethlehem-center-valley/"
+         },
+         {
+          "label": "Blog",
+          "href": "/blog/"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "label": "Service Area",
+      "href": "/service-area/",
+      "children": [
+       {
+        "label": "Lehigh Valley",
+        "href": "/service-area/lehigh-valley/"
+       },
+       {
+        "label": "Allentown",
+        "href": "/service-area/allentown/"
+       },
+       {
+        "label": "Whitehall",
+        "href": "/service-area/whitehall/"
+       },
+       {
+        "label": "Macungie",
+        "href": "/service-area/macungie/"
+       },
+       {
+        "label": "Slatington",
+        "href": "/service-area/slatington/"
+       },
+       {
+        "label": "Catasauqua",
+        "href": "/service-area/catasauqua/"
+       },
+       {
+        "label": "Coplay",
+        "href": "/service-area/coplay/"
+       },
+       {
+        "label": "Center Valley",
+        "href": "/service-area/center-valley-roofing-contractor/"
+       },
+       {
+        "label": "Bethlehem",
+        "href": "/service-area/roofers-bethlehem-pa/"
+       },
+       {
+        "label": "Easton",
+        "href": "/service-area/easton/"
+       },
+       {
+        "label": "Northampton",
+        "href": "/service-area/northampton/"
+       },
+       {
+        "label": "Walnutport",
+        "href": "/service-area/walnutport/"
+       }
+      ]
+     },
+     {
+      "label": "Contact",
+      "href": "/contact/"
+     }
+    ]
+   },
+   {
+    "heading": "Services",
+    "items": [
+     {
+      "label": "Roof Repairs",
+      "href": "/services/roof-repairs/"
+     },
+     {
+      "label": "Roof Replacement",
+      "href": "/services/roof-replacement/"
+     },
+     {
+      "label": "New Roof Installation",
+      "href": "/services/new-roof-installation/"
+     },
+     {
+      "label": "Roof Inspections",
+      "href": "/services/roof-inspections/"
+     },
+     {
+      "label": "Insurance Claim Facilitation",
+      "href": "/services/insurance-claim-facilitation/"
+     },
+     {
+      "label": "Storm Damage Repair",
+      "href": "/services/storm-damage-repair/"
+     }
+    ]
+   }
+  ],
+  "socials": [
+   "https://www.facebook.com/InthelightcontractingLLC/",
+   "https://www.instagram.com/inthelightroofing/",
+   "https://www.youtube.com/@inthelightroofing"
+  ],
+  "cta": [
+   {
+    "label": "No Cost Project Estimate",
+    "href": "#elementor-action%3Aaction%3Dpopup%3Aopen%26settings%3DeyJpZCI6IjIwMTciLCJ0b2dnbGUiOmZhbHNlfQ%3D%3D"
+   }
+  ],
+  "about": "In the heart of Lehigh Valley, Bryson Berard turned a dream into reality in 2017 when he opened the doors at In The Light Roofing.",
+  "contact": [
+   {
+    "text": "Phone: (484) 553-0213",
+    "href": "tel:4845530213"
+   },
+   {
+    "text": "Email: info@inthelightroofing.com",
+    "href": "mailto:info@inthelightroofing.com"
+   },
+   {
+    "text": "Hablamos español"
+   }
+  ],
+  "copyright": "Copyright © 2026. All Rights Reserved."
+ },
+ "third_party": {
+  "gtm": [
+   "GTM-K5VJZNTJ",
+   "GTM-NSS7NJ4W"
+  ],
+  "ga4": [
+   "G-CQVC9JCZG9"
+  ],
+  "trustindex": true,
+  "clickcease": true,
+  "callrail": {
+   "company": "528409341",
+   "path": "wp-0-5-3"
+  },
+  "fastbots_bot_id": "cmp01ox6104b4p61pchbofya1",
+  "cleantalk": {
+   "host": "obseu.kingofbzcc.com",
+   "id": "8c496020e26f3863cc43b0c498690c1e"
+  },
+  "cleantalk_enabled": false
+ },
+ "forms": {
+  "2261": {
+   "id": "2261"
+  },
+  "8072": {
+   "id": "8072"
+  },
+  "8230": {
+   "id": "8230"
+  }
+ },
+ "popups": [
+  {
+   "id": "2017",
+   "heading": "",
+   "has_form": true
+  },
+  {
+   "id": "5645",
+   "heading": "",
+   "has_form": true
+  },
+  {
+   "id": "8239",
+   "heading": "",
+   "has_form": true
+  }
+ ]
+}

@@ -1,0 +1,515 @@
+[
+ {
+  "id": 146,
+  "type": "category",
+  "route": "/asphalt-shingle-roofing/",
+  "slug": "asphalt-shingle-roofing",
+  "name": "Asphalt Shingle Roofing",
+  "count": 5,
+  "description": "",
+  "seo": {
+   "title": "Asphalt Shingle Roofing Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/asphalt-shingle-roofing/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Asphalt Shingle Roofing Archives",
+    "og:url": "https://inthelightroofing.com/asphalt-shingle-roofing/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 17,
+  "type": "category",
+  "route": "/commercial-roofing/",
+  "slug": "commercial-roofing",
+  "name": "Commercial Roofing",
+  "count": 3,
+  "description": "",
+  "seo": {
+   "title": "Commercial Roofing Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/commercial-roofing/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Commercial Roofing Archives",
+    "og:url": "https://inthelightroofing.com/commercial-roofing/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 141,
+  "type": "category",
+  "route": "/damage-roof/",
+  "slug": "damage-roof",
+  "name": "Damage Roof",
+  "count": 4,
+  "description": "",
+  "seo": {
+   "title": "Damage Roof Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/damage-roof/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Damage Roof Archives",
+    "og:url": "https://inthelightroofing.com/damage-roof/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 145,
+  "type": "category",
+  "route": "/epdm-roofing/",
+  "slug": "epdm-roofing",
+  "name": "EPDM Roofing",
+  "count": 6,
+  "description": "",
+  "seo": {
+   "title": "EPDM Roofing Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/epdm-roofing/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "EPDM Roofing Archives",
+    "og:url": "https://inthelightroofing.com/epdm-roofing/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 13,
+  "type": "category",
+  "route": "/gutters/",
+  "slug": "gutters",
+  "name": "Gutters",
+  "count": 1,
+  "description": "",
+  "seo": {
+   "title": "Gutters Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/gutters/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Gutters Archives",
+    "og:url": "https://inthelightroofing.com/gutters/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 148,
+  "type": "category",
+  "route": "/new-roof-installation/",
+  "slug": "new-roof-installation",
+  "name": "New Roof Installation",
+  "count": 2,
+  "description": "",
+  "seo": {
+   "title": "New Roof Installation Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/new-roof-installation/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "New Roof Installation Archives",
+    "og:url": "https://inthelightroofing.com/new-roof-installation/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 142,
+  "type": "category",
+  "route": "/roof-damage/",
+  "slug": "roof-damage",
+  "name": "Roof Damage",
+  "count": 9,
+  "description": "",
+  "seo": {
+   "title": "Roof Damage Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roof-damage/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roof Damage Archives",
+    "og:url": "https://inthelightroofing.com/roof-damage/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 14,
+  "type": "category",
+  "route": "/roof-inspections/",
+  "slug": "roof-inspections",
+  "name": "Roof Inspections",
+  "count": 27,
+  "description": "",
+  "seo": {
+   "title": "Roof Inspections Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roof-inspections/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roof Inspections Archives",
+    "og:url": "https://inthelightroofing.com/roof-inspections/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 12,
+  "type": "category",
+  "route": "/roof-installation/",
+  "slug": "roof-installation",
+  "name": "Roof Installation",
+  "count": 13,
+  "description": "",
+  "seo": {
+   "title": "Roof Installation Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roof-installation/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roof Installation Archives",
+    "og:url": "https://inthelightroofing.com/roof-installation/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 16,
+  "type": "category",
+  "route": "/roof-insurance-claims/",
+  "slug": "roof-insurance-claims",
+  "name": "Roof Insurance Claims",
+  "count": 5,
+  "description": "",
+  "seo": {
+   "title": "Roof Insurance Claims Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roof-insurance-claims/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roof Insurance Claims Archives",
+    "og:url": "https://inthelightroofing.com/roof-insurance-claims/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 144,
+  "type": "category",
+  "route": "/roof-leak/",
+  "slug": "roof-leak",
+  "name": "Roof Leak",
+  "count": 4,
+  "description": "",
+  "seo": {
+   "title": "Roof Leak Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roof-leak/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roof Leak Archives",
+    "og:url": "https://inthelightroofing.com/roof-leak/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 15,
+  "type": "category",
+  "route": "/roof-maintenance/",
+  "slug": "roof-maintenance",
+  "name": "Roof Maintenance",
+  "count": 16,
+  "description": "",
+  "seo": {
+   "title": "Roof Maintenance Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roof-maintenance/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roof Maintenance Archives",
+    "og:url": "https://inthelightroofing.com/roof-maintenance/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 11,
+  "type": "category",
+  "route": "/roof-repair/",
+  "slug": "roof-repair",
+  "name": "Roof Repair",
+  "count": 42,
+  "description": "",
+  "seo": {
+   "title": "Roof Repair Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roof-repair/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roof Repair Archives",
+    "og:url": "https://inthelightroofing.com/roof-repair/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 20,
+  "type": "category",
+  "route": "/roof-replacement/",
+  "slug": "roof-replacement",
+  "name": "Roof Replacement",
+  "count": 23,
+  "description": "",
+  "seo": {
+   "title": "Roof Replacement Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roof-replacement/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roof Replacement Archives",
+    "og:url": "https://inthelightroofing.com/roof-replacement/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 19,
+  "type": "category",
+  "route": "/roofing/",
+  "slug": "roofing",
+  "name": "Roofing",
+  "count": 32,
+  "description": "",
+  "seo": {
+   "title": "Roofing Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roofing/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roofing Archives",
+    "og:url": "https://inthelightroofing.com/roofing/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 149,
+  "type": "category",
+  "route": "/roofing-material/",
+  "slug": "roofing-material",
+  "name": "Roofing Material",
+  "count": 1,
+  "description": "",
+  "seo": {
+   "title": "Roofing Material Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/roofing-material/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Roofing Material Archives",
+    "og:url": "https://inthelightroofing.com/roofing-material/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 143,
+  "type": "category",
+  "route": "/solar-panel-roof/",
+  "slug": "solar-panel-roof",
+  "name": "Solar Panel Roof",
+  "count": 1,
+  "description": "",
+  "seo": {
+   "title": "Solar Panel Roof Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/solar-panel-roof/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Solar Panel Roof Archives",
+    "og:url": "https://inthelightroofing.com/solar-panel-roof/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 147,
+  "type": "category",
+  "route": "/storm-damage/",
+  "slug": "storm-damage",
+  "name": "Storm Damage",
+  "count": 8,
+  "description": "",
+  "seo": {
+   "title": "Storm Damage Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/storm-damage/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Storm Damage Archives",
+    "og:url": "https://inthelightroofing.com/storm-damage/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ },
+ {
+  "id": 1,
+  "type": "category",
+  "route": "/uncategorized/",
+  "slug": "uncategorized",
+  "name": "Uncategorized",
+  "count": 14,
+  "description": "",
+  "seo": {
+   "title": "Uncategorized Archives | In the Light Roofing",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+   "canonical": "https://inthelightroofing.com/uncategorized/",
+   "og": {
+    "og:locale": "en_US",
+    "og:type": "article",
+    "og:title": "Uncategorized Archives",
+    "og:url": "https://inthelightroofing.com/uncategorized/",
+    "og:site_name": "In the Light Roofing"
+   },
+   "schema_types": [
+    "BreadcrumbList",
+    "CollectionPage",
+    "ImageObject",
+    "WebSite"
+   ]
+  }
+ }
+]

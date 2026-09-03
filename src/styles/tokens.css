@@ -1,0 +1,112 @@
+/* ---------------------------------------------------------------------------
+   Design tokens.
+
+   Every value below was read out of the live site's Elementor kit
+   (wp-content/uploads/elementor/css/global.css, `.elementor-kit-7`) so the
+   rebuild keeps the same brand. Source values are noted where useful.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Brand palette -- Elementor global colours, verbatim */
+  --c-primary: #00b6f1;        /* --e-global-color-primary  */
+  --c-secondary: #14161e;      /* --e-global-color-secondary */
+  --c-text: #000000;           /* --e-global-color-text      */
+  --c-accent: #252525;         /* --e-global-color-accent    */
+  --c-white: #ffffff;          /* --e-global-color-e31e8bf   */
+
+  /* Derived tones. Kept close to the originals; used for surfaces and states
+     that the Elementor kit expressed as one-off inline values. */
+  --c-primary-dark: #0092c2;
+  --c-primary-darker: #007ba3;
+  --c-primary-tint: #e6f8fe;
+  --c-ink: #14161e;
+  --c-ink-soft: #3d4149;
+  --c-body: #464a52;
+  --c-muted: #6b7078;
+  --c-line: #e3e6ea;
+  --c-line-soft: #eef1f4;
+  --c-surface: #ffffff;
+  --c-surface-alt: #f6f8fa;
+  --c-surface-dark: #14161e;
+  --c-surface-dark-2: #1c1f29;
+
+  --c-focus: #00b6f1;
+  --c-danger: #c0392b;
+  --c-success: #1e8449;
+
+  /* Typography.
+     "Exo 2" is the family the site's own design system specifies. See
+     src/styles/fonts.css for why it is now actually loaded. */
+  --font-sans: "Exo 2", "Exo 2 Fallback", system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body: var(--font-sans);
+
+  /* Type scale -- the kit's desktop sizes; the media queries at the bottom of
+     this file reproduce its 1366 / 1024 / 767 breakpoint steps exactly. */
+  --fs-h1: 66px;   --lh-h1: 66px;   --fw-h1: 700;
+  --fs-h2: 48px;   --lh-h2: 58px;   --fw-h2: 700;
+  --fs-h3: 30px;   --lh-h3: 38px;   --fw-h3: 700;
+  --fs-h4: 22px;   --lh-h4: 30px;   --fw-h4: 600;
+  --fs-body: 18px; --lh-body: 30px; --fw-body: 300;
+  --fs-small: 16px;--lh-small: 26px;
+  --fs-tiny: 14px; --lh-tiny: 22px;
+  --fs-btn: 14px;
+
+  /* Layout */
+  --container: 1170px;         /* --container-max-width */
+  --container-narrow: 820px;
+  --gutter: 20px;
+  --section-y: 88px;
+  --section-y-sm: 56px;
+
+  /* Shape -- buttons are 25px pill-radius in the kit */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-pill: 25px;
+  --r-round: 999px;
+
+  --shadow-sm: 0 1px 2px rgb(20 22 30 / .06), 0 1px 3px rgb(20 22 30 / .08);
+  --shadow-md: 0 4px 12px rgb(20 22 30 / .08), 0 2px 4px rgb(20 22 30 / .04);
+  --shadow-lg: 0 18px 40px rgb(20 22 30 / .12), 0 4px 12px rgb(20 22 30 / .06);
+  --shadow-cta: 0 10px 24px rgb(0 182 241 / .30);
+
+  /* Motion. Durations stay short and easing stays "out" so the page never
+     feels like it is waiting on an animation. */
+  --dur-fast: 140ms;
+  --dur: 220ms;
+  --dur-slow: 420ms;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+
+  --header-h: 92px;
+  --header-h-sm: 68px;
+  --z-header: 100;
+  --z-menu: 110;
+  --z-modal: 200;
+}
+
+/* The kit's own responsive type steps, reproduced. */
+@media (max-width: 1366px) {
+  :root { --fs-h1: 60px; --fs-h2: 42px; --lh-h2: 50px; }
+}
+@media (max-width: 1024px) {
+  :root {
+    --fs-h1: 50px; --lh-h1: 55px;
+    --fs-h2: 38px; --lh-h2: 42px;
+    --fs-h3: 26px; --lh-h3: 34px;
+    --section-y: 68px;
+    --container: 1024px;
+  }
+}
+@media (max-width: 767px) {
+  :root {
+    --fs-h1: 32px; --lh-h1: 40px;
+    --fs-h2: 24px; --lh-h2: 30px;
+    --fs-h3: 21px; --lh-h3: 28px;
+    --fs-h4: 19px; --lh-h4: 26px;
+    --fs-body: 16px; --lh-body: 24px;
+    --section-y: 52px;
+    --gutter: 18px;
+  }
+}
