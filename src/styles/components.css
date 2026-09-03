@@ -586,3 +586,11 @@ figcaption {
   color: #04222d;
 }
 .carousel__btn:disabled { opacity: .35; cursor: default; }
+
+/* Small inline images (rating stars, trust badges) keep their intrinsic size;
+   the .media treatment would stretch them across the container. */
+.glyph { display: inline-flex; vertical-align: middle; }
+.glyph img { width: auto; height: auto; max-height: 26px; }
+/* Consecutive glyphs read as one row (a five-star rating, for example). */
+.glyph + .glyph { margin-left: 3px; }
+.glyph-row { display: inline-flex; align-items: center; gap: 3px; }

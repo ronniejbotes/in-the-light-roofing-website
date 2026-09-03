@@ -238,6 +238,33 @@ function reviews() {
   )
 }
 
+/**
+ * Customer reviews carried over from the theme's own carousel. Rendered as
+ * plain HTML quote cards -- deliberately with NO Review or aggregateRating
+ * structured data attached, since self-serving review markup on a business's
+ * own pages makes the whole domain ineligible for review rich results.
+ */
+function testimonials(b) {
+  const star =
+    `<svg viewBox="0 0 24 24" aria-hidden="true" class="stars__i">` +
+    `<path d="m12 17.3-6.2 3.7 1.6-7L2 9.2l7.1-.6L12 2l2.9 6.6 7.1.6-5.4 4.8 1.6 7z"/></svg>`
+  return (
+    `<div class="grid grid--3" data-reveal-group>` +
+    each(b.items, (t) =>
+      `<figure class="quote">` +
+      when(t.stars > 0, () =>
+        `<div class="stars" role="img" aria-label="${attr(t.stars)} out of 5 stars">` +
+        star.repeat(Math.min(t.stars, 5)) + `</div>`) +
+      `<blockquote class="quote__text">${esc(t.text)}</blockquote>` +
+      `<figcaption class="quote__name">${esc(t.name)}` +
+      when(t.date || t.source, () =>
+        `<span class="quote__meta">${esc([t.source, t.date].filter(Boolean).join(' · '))}</span>`) +
+      `</figcaption></figure>`
+    ) +
+    `</div>`
+  )
+}
+
 function list(b) {
   return `<ul class="ticks${b.items.length > 5 ? ' ticks--cols' : ''}">` +
     each(b.items, (i) =>
@@ -280,7 +307,14 @@ export function renderBlock(b, id, opts = {}) {
   switch (b.type) {
     case 'heading':   return heading(b)
     case 'richtext':  return `<div class="rich">${fixLinks(b.html)}</div>`
-    case 'image':     return isRule(b) ? '<div class="rule"></div>' : `<div class="media">${img(b, opts)}</div>`
+    case 'image':
+      if (isRule(b)) return '<div class="rule"></div>'
+      // A small image is a glyph (rating star, badge), not a content image --
+      // wrapping it in .media would stretch it to the full container width.
+      if (b.width && b.width <= 120) {
+        return `<span class="glyph">${img(b, { ...opts, sizes: `${b.width}px` })}</span>`
+      }
+      return `<div class="media">${img(b, opts)}</div>`
     case 'button':    return button(b, opts)
     case 'feature':   return feature(b)
     case 'list':      return list(b)
@@ -289,7 +323,11 @@ export function renderBlock(b, id, opts = {}) {
     case 'video':     return video(b)
     case 'map':       return map(b)
     case 'form':      return form(b, { id })
+    case 'glyphs':
+      return `<span class="glyph-row">` +
+        each(b.items, (g, k) => renderBlock(g, `${id}-g${k}`, opts)) + `</span>`
     case 'reviews':   return reviews()
+    case 'testimonials': return testimonials(b)
     case 'carousel':  return carousel(b, id)
     case 'postgrid':  return opts.postgrid || ''
     default:          return ''

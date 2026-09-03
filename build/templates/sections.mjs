@@ -51,6 +51,24 @@ function renderHead(head, id, center) {
 
 const countOf = (blocks, t) => blocks.filter((b) => b.type === t).length
 
+const isGlyph = (b) => b.type === 'image' && b.width && b.width <= 120 && !isRule(b)
+
+/**
+ * Consecutive small images are a single visual unit -- a five-star rating drawn
+ * as five separate widgets, for instance. Collapse each run into one block so
+ * they render as a row rather than stacking.
+ */
+function groupGlyphs(blocks) {
+  const out = []
+  for (const b of blocks) {
+    const prev = out[out.length - 1]
+    if (isGlyph(b) && prev?.type === 'glyphs') { prev.items.push(b); continue }
+    if (isGlyph(b)) { out.push({ type: 'glyphs', items: [b] }); continue }
+    out.push(b)
+  }
+  return out
+}
+
 /**
  * Background images bypass <picture>, so they get the same treatment through
  * image-set(): AVIF first, then WebP, with the original URL last as the
@@ -165,14 +183,15 @@ export function renderSection(section, ctx, index) {
   }
 
   const id = `s${index}`
-  const { head, rest } = partition(blocks)
+  const { head, rest: rawRest } = partition(blocks)
+  const rest = groupGlyphs(rawRest)
 
   const nFeature = countOf(rest, 'feature')
   const nImage = rest.filter((b) => b.type === 'image' && !isRule(b)).length
   const nText = countOf(rest, 'richtext')
   const hasForm = rest.some((b) => b.type === 'form')
   const hasAccordion = rest.some((b) => b.type === 'accordion')
-  const hasReviews = rest.some((b) => b.type === 'reviews')
+  const hasReviews = rest.some((b) => b.type === 'reviews' || b.type === 'testimonials')
   const hasCarousel = rest.some((b) => b.type === 'carousel')
   const hasGallery = rest.some((b) => b.type === 'gallery')
   const hasMapOrVideo = rest.some((b) => b.type === 'map' || b.type === 'video')

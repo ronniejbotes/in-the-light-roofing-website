@@ -8,6 +8,11 @@ html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-h) + 16px);
+  /* The off-canvas mobile menu is parked off-screen with translateX(100%).
+     `clip` stops that from extending the scrollable width -- unlike `hidden`
+     it does not turn the root into a scroll container, so position:sticky on
+     the header keeps working. */
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {

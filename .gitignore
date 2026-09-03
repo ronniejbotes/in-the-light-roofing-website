@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vite-out/
+shots/
+.routes.json
+.probe.json
+.assets-missing.json
+*.log
+.DS_Store
+Thumbs.db

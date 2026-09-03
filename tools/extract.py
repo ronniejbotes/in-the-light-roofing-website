@@ -236,6 +236,37 @@ def extract_widget(el, wtype):
         if el.select_one(".ti-widget") is not None or "trustindex" in str(el).lower():
             return {"type": "reviews", "provider": "trustindex"}
 
+        # The theme's own review carousel (.testimonial_box inside an Owl
+        # carousel). On the live site this renders at 0x0 -- the carousel never
+        # initialises, so none of the 16 reviews is visible to anyone. The
+        # reviews themselves are real and are also published as the testimonial
+        # post type, so they are captured as data here and rendered properly.
+        boxes = el.select(".testimonial_box")
+        if boxes:
+            items = []
+            for bx in boxes:
+                name = txt(bx.select_one(".title"))
+                body = txt(bx.select_one(".content"))
+                if not name and not body:
+                    continue
+                it = {"name": name, "text": body}
+                d = txt(bx.select_one(".date"))
+                if d:
+                    it["date"] = d
+                av = bx.select_one(".image-box .left img")
+                im = img_data(av)
+                if im:
+                    it["avatar"] = im
+                src = bx.select_one(".image-box .right img")
+                if src is not None and src.get("src"):
+                    it["source"] = ("Google" if "google" in src["src"].lower()
+                                    else "Facebook" if "facebook" in src["src"].lower()
+                                    else "")
+                it["stars"] = len(bx.select(".rating-img img"))
+                items.append(it)
+            if items:
+                return {"type": "testimonials", "items": items}
+
         cont = el.select_one(".elementor-widget-container") or el
         inner = clean_inline(cont)
         if not re.sub(r"<[^>]+>", "", inner).strip():

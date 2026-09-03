@@ -74,6 +74,14 @@ def block_words(b, acc):
     if t == "form":
         for f in b.get("fields", []):
             acc.extend(words(f.get("placeholder", "")))
+            for o in f.get("options", []):
+                acc.extend(words(o.get("label", "")))
+    if t == "testimonials":
+        for i in b.get("items", []):
+            acc.extend(words(i.get("name", "")))
+            acc.extend(words(i.get("text", "")))
+            acc.extend(words(i.get("date", "")))
+            acc.extend(words(i.get("source", "")))
 
 
 def our_words(rec, listing_words):

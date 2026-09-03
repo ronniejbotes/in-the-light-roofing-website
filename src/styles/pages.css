@@ -326,3 +326,22 @@
   margin-bottom: .1em;
 }
 .notfound__links { max-width: 640px; margin: 40px auto 0; text-align: left; }
+
+/* Review cards carried over from the theme's (never-rendering) carousel. */
+.stars { display: flex; gap: 3px; margin-bottom: 14px; }
+.stars__i { width: 16px; height: 16px; fill: #f5a623; flex: none; }
+
+.quote figcaption, .quote__name { display: grid; gap: 2px; }
+.quote__meta {
+  font-size: var(--fs-tiny);
+  font-weight: 500;
+  color: var(--c-muted);
+}
+.quote blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  font-style: normal;
+}
