@@ -31,6 +31,43 @@
   will-change: auto;
 }
 
+/* --- section heads ------------------------------------------------------
+   The kicker arrives first and draws its own rule, then the heading follows.
+   It is two extra transitions on elements that were already being revealed,
+   so it costs nothing and it makes the top of every band feel deliberate. */
+.js-reveal [data-reveal] .eyebrow {
+  opacity: 0;
+  transform: translate3d(-8px, 0, 0);
+  transition: opacity 420ms var(--ease-out) 90ms, transform 420ms var(--ease-out) 90ms;
+}
+.js-reveal [data-reveal] .eyebrow::before {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 520ms var(--ease-out) 160ms;
+}
+.js-reveal [data-reveal].is-in .eyebrow { opacity: 1; transform: none; }
+.js-reveal [data-reveal].is-in .eyebrow::before { transform: scaleX(1); }
+
+/* The rule under a heading draws in the same direction the eye reads. */
+.js-reveal [data-reveal] .rule {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 640ms var(--ease-out) 220ms;
+}
+.js-reveal .section-head--center [data-reveal] .rule,
+.js-reveal [data-reveal].section-head--center .rule { transform-origin: center; }
+.js-reveal [data-reveal].is-in .rule { transform: scaleX(1); }
+
+/* Photographs settle rather than appear: a 1.5% scale is below the threshold
+   where it reads as an animation and above the one where it reads as nothing. */
+.js-reveal [data-reveal] :is(.media, .card__icon--photo, .gallery a) > :is(img, picture) {
+  transform: scale(1.015);
+  transition: transform 900ms var(--ease-out);
+}
+.js-reveal [data-reveal].is-in :is(.media, .card__icon--photo, .gallery a) > :is(img, picture) {
+  transform: none;
+}
+
 /* Stagger children of a group without needing per-element inline styles. */
 .js-reveal [data-reveal-group] > * { --reveal-delay: 0ms; }
 .js-reveal [data-reveal-group] > *:nth-child(2)  { --reveal-delay: 70ms; }
@@ -66,11 +103,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .js-reveal [data-reveal],
-  .js-reveal [data-reveal].is-in {
+  .js-reveal [data-reveal].is-in,
+  .js-reveal [data-reveal] .eyebrow,
+  .js-reveal [data-reveal] .eyebrow::before,
+  .js-reveal [data-reveal] .rule,
+  .js-reveal [data-reveal] :is(.media, .card__icon--photo, .gallery a) > :is(img, picture) {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
   }
+  .marquee__track { animation: none !important; }
   .float, .header { animation: none !important; }
   *, *::before, *::after {
     animation-duration: .001ms !important;

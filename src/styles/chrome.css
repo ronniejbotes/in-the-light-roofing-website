@@ -17,7 +17,18 @@
   padding-block: 6px;
 }
 .topbar__badges { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
-.topbar__badge { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.topbar__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .06em;
+}
+/* A hairline between badges reads as one instrument panel rather than three
+   unrelated scraps of text. */
+.topbar__badge + .topbar__badge { border-left: 1px solid rgb(255 255 255 / .12); padding-left: 22px; }
 .topbar__badge img { height: 14px; width: auto; }
 .topbar__links { display: flex; align-items: center; gap: 18px; }
 .topbar a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
@@ -49,6 +60,38 @@
 .header.is-stuck {
   box-shadow: var(--shadow-md);
   border-bottom-color: var(--c-line);
+}
+
+/* --- reading progress ---------------------------------------------------
+   A hairline along the bottom edge of the header. Where the browser supports
+   scroll-driven animation it is composited off the main thread; elsewhere
+   progress.js writes --progress on the same element. */
+.progress {
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  transform-origin: left;
+  transform: scaleX(var(--progress, 0));
+  background: linear-gradient(90deg, var(--c-primary), #7fe0ff);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+.header.is-stuck .progress { opacity: 1; }
+
+@supports (animation-timeline: scroll()) {
+  .progress {
+    animation: itlr-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+  @keyframes itlr-progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress { display: none; }
 }
 
 .header__inner {
@@ -337,12 +380,16 @@ body.is-locked { overflow: hidden; }
    -------------------------------------------------------------------------- */
 
 .footer {
-  background: var(--c-surface-dark);
-  color: color-mix(in srgb, #fff 72%, transparent);
+  position: relative;
+  /* Ground and weave are in surfaces.css, so the footer closes the page on the
+     same blueprint the dark bands are drawn on. */
+  color: color-mix(in srgb, #fff 68%, transparent);
   font-size: var(--fs-small);
   line-height: var(--lh-small);
   margin-top: auto;
+  isolation: isolate;
 }
+.footer > * { position: relative; z-index: 1; }
 .footer a { color: inherit; text-decoration: none; }
 .footer a:hover { color: var(--c-primary); }
 
@@ -358,16 +405,24 @@ body.is-locked { overflow: hidden; }
 .footer__logo img { height: 62px; width: auto; margin-bottom: 20px; }
 .footer__about { margin-bottom: 22px; }
 
+/* Column labels are set as micro-labels rather than as headings: they are
+   signposts for a list of links, not headlines competing with the page's. */
 .footer__heading {
-  font-size: var(--fs-h4);
-  color: #fff;
-  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--c-primary);
+  margin-bottom: 10px;
 }
 .footer__rule {
-  width: 46px; height: 3px;
-  border-radius: 2px;
-  background: var(--c-primary);
-  margin-bottom: 20px;
+  width: 100%;
+  max-width: 120px;
+  height: 1px;
+  border-radius: 0;
+  background: linear-gradient(90deg, var(--c-primary), transparent);
+  margin-bottom: 22px;
 }
 
 .footer__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -394,6 +449,8 @@ body.is-locked { overflow: hidden; }
 .footer__bottom {
   border-top: 1px solid rgb(255 255 255 / .1);
   padding-block: 22px;
+  font-family: var(--font-mono);
+  letter-spacing: .06em;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

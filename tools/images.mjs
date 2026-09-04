@@ -43,6 +43,33 @@ async function walk(dir) {
 const rel = (abs) => '/' + abs.slice(STATIC.length + 1).split('\\').join('/')
 const key = (p) => createHash('sha1').update(p).digest('hex').slice(0, 10)
 
+/**
+ * Is this file a glyph -- a mark drawn to sit on a coloured tile -- rather than
+ * a photograph?
+ *
+ * Dimensions cannot tell them apart here: the service icons are 512x512 and the
+ * service-area photographs are 495x484. Transparency can. A glyph is drawn on
+ * nothing and is mostly empty; a photograph fills its frame. Measured on a
+ * 48px thumbnail, the two populations on this site sit at 48-70% transparent
+ * and 0-4% respectively, so the threshold is not delicate.
+ *
+ * The templates use this to decide whether an icon-box image belongs in a 28px
+ * disc or across the full width of its card.
+ */
+async function isGlyph(file) {
+  try {
+    const { data, info } = await sharp(file).ensureAlpha()
+      .resize(48, 48, { fit: 'inside' }).raw().toBuffer({ resolveWithObject: true })
+    const px = info.width * info.height
+    if (!px) return false
+    let opaque = 0
+    for (let i = 0; i < px; i++) if (data[i * 4 + 3] >= 32) opaque++
+    return 1 - opaque / px >= 0.2
+  } catch {
+    return false
+  }
+}
+
 const manifest = existsSync(MANIFEST)
   ? JSON.parse(await readFile(MANIFEST, 'utf8'))
   : {}
@@ -60,7 +87,13 @@ for (const file of files) {
   const orig = await stat(file)
   before += orig.size
 
-  if (manifest[src]?.size === orig.size) { skipped++; after += manifest[src].bytes || 0; continue }
+  if (manifest[src]?.size === orig.size) {
+    // Cached, but backfill any field added since the entry was written.
+    if (manifest[src].glyph === undefined) manifest[src].glyph = await isGlyph(file)
+    skipped++
+    after += manifest[src].bytes || 0
+    continue
+  }
 
   let meta
   try {
@@ -73,7 +106,11 @@ for (const file of files) {
   if (!meta.width || !meta.height) { failed++; continue }
 
   const k = key(src)
-  const entry = { w: meta.width, h: meta.height, size: orig.size, avif: [], webp: [], bytes: 0 }
+  const entry = {
+    w: meta.width, h: meta.height, size: orig.size,
+    glyph: await isGlyph(file),
+    avif: [], webp: [], bytes: 0,
+  }
   // Never upscale, and always include the native width if it is below the largest step.
   const widths = [...new Set(WIDTHS.filter((w) => w < meta.width).concat(Math.min(meta.width, 1800)))]
     .sort((a, b) => a - b)

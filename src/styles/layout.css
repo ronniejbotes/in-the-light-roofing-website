@@ -18,31 +18,24 @@
 .section--tight { padding-block: var(--section-y-sm); }
 .section--flush-top { padding-top: 0; }
 .section--flush-bottom { padding-bottom: 0; }
-.section--alt { background: var(--c-surface-alt); }
-.section--dark {
-  background: var(--c-surface-dark);
-  color: color-mix(in srgb, #fff 82%, transparent);
-}
-/* Light surfaces inside a dark section keep their own text colour -- the
-   section's light `color` would otherwise cascade into them and leave body
-   copy invisible on a white card. */
-.section--dark :is(.card, .form-card, .quote, .accordion),
-.section--bg :is(.card, .form-card, .quote, .accordion) { color: var(--c-body); }
-
-/* Only headings on the dark ground itself go white. Cards, form panels and
-   accordions inside a dark section keep their own light surface, so their text
-   must stay dark -- without the :not() guard a white heading lands on a white
-   card and disappears. */
-.section--dark :is(h1, h2, h3, h4, h5, h6):not(.card *, .form-card *, .quote *, .accordion *) { color: #fff; }
-.section--dark strong:not(.card *, .form-card *, .quote *, .accordion *) { color: #fff; }
+/* The dark and photographic grounds themselves are drawn in surfaces.css --
+   this only sets the text colour they cascade to their contents. */
+.section--dark { color: color-mix(in srgb, #fff 82%, transparent); }
+/* Headings on the dark ground go white. Panels that carry their own surface
+   (cards, form panels, quotes, accordions) declare their own text and heading
+   colours in components.css, which loads after this file -- so they are never
+   at the mercy of the band they happen to sit in. */
+.section--dark :is(h1, h2, h3, h4, h5, h6) { color: #fff; }
+.section--dark strong { color: #fff; }
 /* Body links on the dark ground go cyan. Scoped to actual copy: a descendant
-   selector here would also recolour card titles, and cyan on a light card is
-   about 2.2:1 -- well under AA. */
-.section--dark :is(.rich, .prose, .ticks, .section-head) a:not(.btn) { color: var(--c-primary); }
+   selector here would also recolour links inside cards, whose own ground is a
+   different colour -- cyan on a white card is about 2.2:1, well under AA.
+   Panels set their own link colours in components.css. */
+.section--dark :is(.rich, .prose, .ticks, .section-head) a:not(.btn),
 .section--bg :is(.rich, .prose, .ticks, .section-head) a:not(.btn) { color: var(--c-primary); }
-.section--dark :is(.card, .form-card, .quote) a:not(.btn) { color: var(--c-primary-darker); }
 
-/* A section with a photographic background gets a scrim so text stays legible. */
+/* A section with a photographic background gets a scrim so text stays legible.
+   The scrim's own gradient is in surfaces.css; this is the box it fills. */
 .section--bg {
   background-size: cover;
   background-position: center;
@@ -52,10 +45,16 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgb(20 22 30 / .86), rgb(20 22 30 / .74));
+  pointer-events: none;
 }
-.section--bg > * { position: relative; z-index: 1; }
-.section--bg :is(h1, h2, h3, h4):not(.card *, .form-card *, .quote *, .accordion *) { color: #fff; }
+.section--bg :is(h1, h2, h3, h4, h5, h6) { color: #fff; }
+
+/* Body copy gets a measure. Without one, a full-width band sets 18px type on a
+   1130px line -- around 110 characters, well past the point where the eye
+   starts losing its place between lines. */
+.rich { max-width: 76ch; }
+.section-head--center .rich,
+.section--cta .rich { margin-inline: auto; }
 
 .stack > * + * { margin-top: 1.1em; }
 .stack--lg > * + * { margin-top: 1.8em; }
@@ -75,37 +74,94 @@
   .grid--2, .grid--3, .grid--4 { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* Section heading group: eyebrow, title, lede, and the brand rule under it. */
+/* Section heading group: kicker, title, lede, and the brand rule under it. */
 .section-head {
-  max-width: 760px;
-  margin-bottom: 44px;
+  max-width: 62ch;
+  margin-bottom: 48px;
 }
 .section-head--center {
   margin-inline: auto;
   text-align: center;
 }
+.section-head h2 { letter-spacing: var(--tracking-display); }
 .section-head p { color: var(--c-body); }
+.section-head .rich > p:last-child { margin-bottom: 0; }
 .section--dark .section-head :is(p, .rich),
-.section--bg .section-head :is(p, .rich) { color: color-mix(in srgb, #fff 84%, transparent); }
+.section--bg .section-head :is(p, .rich) { color: color-mix(in srgb, #fff 78%, transparent); }
 
+/* The lede under a heading is deliberately narrower than the heading itself --
+   a 62ch measure is fine for a 48px line and far too wide for an 18px one. */
+.section-head .rich { max-width: 68ch; font-size: var(--fs-small); line-height: 1.65; }
+.section-head--center .rich { margin-inline: auto; }
+
+/* --- kicker ---------------------------------------------------------------
+   A monospace micro-label above the heading, preceded by a short rule. The
+   index (`01`) is set by the build so a page reads as a numbered sequence. */
 .eyebrow {
-  display: inline-block;
-  margin-bottom: 12px;
-  font-size: var(--fs-tiny);
-  font-weight: 700;
-  letter-spacing: .12em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-mono);
   text-transform: uppercase;
   color: var(--c-primary);
 }
+.eyebrow::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  flex: none;
+  background: currentColor;
+  opacity: .55;
+}
+.section-head--center .eyebrow { justify-content: center; }
+.eyebrow__n { opacity: .55; }
 
+/* The old rule sat under every heading. It now only appears where the source
+   actually had a divider widget, and it is a hairline rather than a bar. */
 .rule {
-  width: 68px;
-  height: 3px;
-  margin: 18px 0 0;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--c-primary), color-mix(in srgb, var(--c-primary) 25%, transparent));
+  width: 100%;
+  max-width: 220px;
+  height: 1px;
+  margin: 26px 0 0;
+  border-radius: 0;
+  background: linear-gradient(90deg,
+    var(--c-primary),
+    color-mix(in srgb, var(--c-primary) 18%, transparent) 70%,
+    transparent);
 }
 .section-head--center .rule { margin-inline: auto; }
+.section--dark .rule, .section--bg .rule {
+  background: linear-gradient(90deg,
+    var(--c-primary),
+    color-mix(in srgb, var(--c-primary) 25%, transparent) 70%,
+    transparent);
+}
+
+/* --------------------------------------------------------------------------
+   CTA band
+
+   A ticker with one call to action under it: the punctuation between two
+   content sections rather than a section in its own right.
+   -------------------------------------------------------------------------- */
+
+.section--cta {
+  background: var(--c-surface);
+  border-block: 1px solid var(--c-line-soft);
+  overflow: hidden;
+}
+.section--cta__body {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  margin-top: 34px;
+  text-align: center;
+}
+.section--cta__body h2 { margin: 0; letter-spacing: var(--tracking-display); }
+.section--cta__body .btn-row { justify-content: center; }
 
 /* --------------------------------------------------------------------------
    Page shell

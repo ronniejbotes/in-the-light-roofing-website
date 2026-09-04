@@ -16,7 +16,7 @@ import { graph } from './lib/schema.mjs'
 import { layout } from './templates/layout.mjs'
 import { renderSections, setBackgroundManifest } from './templates/sections.mjs'
 import { sitemaps, feed, robots } from './lib/feeds.mjs'
-import { renderBlock, form, img, normaliseHref, setImageManifest } from './templates/blocks.mjs'
+import { renderBlock, form, img, normaliseHref, setImageManifest, setReviewPool } from './templates/blocks.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const DIST = join(ROOT, 'dist')
@@ -336,6 +336,21 @@ async function main() {
   setImageManifest(imageManifest)
   setBackgroundManifest(imageManifest)
   IMAGE_MANIFEST = imageManifest
+
+  // The Trustindex slot is filled with the site's own testimonials until that
+  // third-party widget mounts. Longest-first so the cards that show are the
+  // ones with something to say; clipped, with the full review one click away.
+  setReviewPool(
+    [...testimonials]
+      .map((t) => ({
+        name: t.title,
+        href: t.route,
+        date: fmtDate(t.date),
+        text: clip(plain(t.html), 240),
+      }))
+      .filter((t) => t.name && t.text)
+      .sort((a, b) => b.text.length - a.text.length)
+  )
 
   // Service and area lists, derived from the real page tree (used by schema).
   site.services = pages

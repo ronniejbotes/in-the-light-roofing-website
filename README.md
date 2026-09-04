@@ -14,8 +14,8 @@ content was rewritten, and nothing was invented.**
 | Service page, first load | 97 requests, 2 560 KB | **16 requests, 527 KB** |
 | Service page LCP | 2 020 ms | **328 ms** |
 | Blog post LCP | 1 900 ms | **208 ms** |
-| CSS shipped | 337 KB | **8.9 KB gzip** |
-| JS shipped (first load) | 1 418 KB | **2.8 KB gzip** |
+| CSS shipped | 337 KB | **12.1 KB gzip** |
+| JS shipped (first load) | 1 418 KB | **3.2 KB gzip** |
 | Average page HTML | 245 KB (home) | **37 KB** |
 
 Measured with a headless Chromium at 1440×900 against both sites — see
@@ -125,6 +125,7 @@ build/
     blocks.mjs          renders each block type
 
 src/                    Vite entry — styles/ and scripts/
+  styles/surfaces.css   the blueprint grounds, photo scrims and accent band
 static/                 copied verbatim into dist/ (images, fonts, _redirects)
 tools/                  extraction, asset fetching, image processing, verifiers
 ```
@@ -152,13 +153,58 @@ Exo 2 is now self-hosted. The live site declares it everywhere but never loads
 it — there is no `@font-face` and no request to Google Fonts — so every visitor
 currently sees a system sans-serif instead of the brand face.
 
+### The visual system
+
+The brand is the live site's. What is new is the structure the brand is set in,
+and it is deliberately narrow: three surfaces, one accent moment, one voice for
+every micro-label.
+
+**Surfaces** (`src/styles/surfaces.css`). Dark bands are drawn as a blueprint —
+a near-black field, a hairline grid, and a sparse lattice of crosshair survey
+marks — because that is the drawing a roof gets specified on, so it belongs to
+this business rather than being borrowed decoration. It is CSS gradients plus
+one inline SVG tile: no requests, and nothing repaints during scroll. The weave
+is masked out through the middle of each band so it frames the copy instead of
+sitting behind it, and photographic bands get it at 55% so it reads as an
+overlay rather than a defect.
+
+**One accent band per page.** The numbered process section — the part a visitor
+is actually trying to understand — becomes a vivid cyan band with a single roof
+chevron drawn across it. `renderSections` picks it: the first section on the
+page that classifies as a numbered process, and no more than one.
+
+**Panels own their colours.** Cards, form panels, quotes and accordions carry
+their own surface, so they declare their own text, heading and link colours and
+never inherit them from the band they land in. That replaces a set of
+`:not(.card *, …)` guards that had to be extended every time a component was
+added, and it is why a feature card can move from a white section to a dark one
+by swapping `.card--flat` for `.card--glass` and nothing else.
+
+**Micro-labels.** Section kickers, card actions, breadcrumbs, article meta,
+pagination, form labels, footer column headings and the top bar's ratings are
+all set in the system monospace at the same tracking. It costs no request, and
+the fixed advance width is what makes a row of small caps read as a rule rather
+than as leftover text.
+
+**Section numbering.** Each band above the hero carries a two-digit index. It
+adds no words of its own — nothing is invented — but it gives a long page a
+spine. Pages with fewer than three bands do not get it; a lone "01" is
+decoration, not structure.
+
 ### Motion
 
 Scroll reveals use one `IntersectionObserver` and animate only `opacity` and
 `transform`. Content ships visible; the class that hides it is added by JS only
 after confirming the visitor has not asked for reduced motion, so a script
-failure can never leave the page blank. `prefers-reduced-motion` disables
-everything.
+failure can never leave the page blank.
+
+On top of that: section kickers draw their own rule, headings' rules wipe in the
+direction the eye reads, photographs settle from a 1.5% scale, and the header
+carries a reading-progress hairline driven by `animation-timeline: scroll()`
+where the browser supports it — composited off the main thread — with a
+`requestAnimationFrame` fallback that only ever writes one custom property.
+
+`prefers-reduced-motion` disables all of it, including the marquee.
 
 ### Images
 

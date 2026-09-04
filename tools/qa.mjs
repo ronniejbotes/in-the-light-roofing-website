@@ -6,7 +6,10 @@ import { chromium } from 'playwright-core'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const EXEC = join(process.env.USERPROFILE || '', 'AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')
+// Set CHROME to a Chromium/Chrome binary. The default is where Playwright puts
+// its download on Windows; on macOS and Linux, pass CHROME explicitly.
+const EXEC = process.env.CHROME ||
+  join(process.env.USERPROFILE || '', 'AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')
 const BASE = 'http://127.0.0.1:4321'
 
 const routes = JSON.parse(await readFile('.routes.json', 'utf8'))

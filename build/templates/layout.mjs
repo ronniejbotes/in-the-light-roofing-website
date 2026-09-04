@@ -153,6 +153,7 @@ function header(ctx) {
       </button>
     </div>
   </div>
+  <div class="progress" data-progress aria-hidden="true"></div>
 </header>
 
 <div class="mobile-menu" id="mobile-menu" aria-hidden="true">

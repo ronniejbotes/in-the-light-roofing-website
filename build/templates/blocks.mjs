@@ -44,6 +44,13 @@ let IMAGES = {}
 export const setImageManifest = (m) => { IMAGES = m || {} }
 
 /**
+ * The site's own reviews, injected by the build. They fill the Trustindex slot
+ * until (and unless) that third-party widget actually mounts -- see reviews().
+ */
+let REVIEW_POOL = []
+export const setReviewPool = (list) => { REVIEW_POOL = Array.isArray(list) ? list : [] }
+
+/**
  * Render an image.
  *
  * The <img src> is always the original, untouched URL, so anything that has
@@ -103,19 +110,44 @@ function heading(b) {
   return b.sub ? `${h}<p class="lede">${esc(b.sub)}</p>` : h
 }
 
-function feature(b) {
+/**
+ * An icon-box widget's "icon" is not always a glyph. The service-area cards use
+ * town photographs, and a photograph squeezed into a 28px disc is unreadable --
+ * so those are given the card's full width instead.
+ *
+ * Dimensions cannot separate the two here (512x512 icons, 495x484 photographs);
+ * transparency can, and tools/images.mjs measures it into the manifest.
+ */
+function isPhotoIcon(image) {
+  const d = image?.src ? IMAGES[image.src] : null
+  if (!d) return false
+  if (d.glyph) return false
+  // Anything small enough to have been drawn as an icon stays one, flag or not.
+  return Math.max(d.w || 0, d.h || 0) > 200
+}
+
+function feature(b, opts = {}) {
   const lvl = Math.min(Math.max(b.level || 3, 2), 6)
   const href = b.href ? normaliseHref(b.href) : null
   const title = b.title
     ? `<h${lvl} class="feature__title">${href ? `<a href="${attr(href)}">${esc(b.title)}</a>` : esc(b.title)}</h${lvl}>`
     : ''
-  // The icon renders in a fixed 30px box, so it never needs a large candidate.
+
+  const photo = isPhotoIcon(b.image)
   const media = b.image?.src
-    ? `<div class="card__icon">${img(b.image, { sizes: '30px' })}</div>`
+    ? photo
+      ? `<div class="card__icon card__icon--photo">` +
+        `${img(b.image, { sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px' })}</div>`
+      // A glyph renders in a fixed 28px box, so it never needs a large candidate.
+      : `<div class="card__icon">${img(b.image, { sizes: '30px' })}</div>`
     : ''
+
+  const cls = ['feature', 'card', opts.onDark ? 'card--glass' : 'card--flat']
+    .filter(Boolean).join(' ')
+
   return (
-    `<div class="feature card card--flat">` +
-    `<div class="card__body">${media}${title}` +
+    `<div class="${cls}">${photo ? media : ''}` +
+    `<div class="card__body">${photo ? '' : media}${title}` +
     when(b.html, () => `<div class="feature__text">${b.html}</div>`) +
     when(href && /^\//.test(href), () =>
       `<span class="card__more">Learn more ${icon('arrow')}</span>`) +
@@ -123,10 +155,31 @@ function feature(b) {
   )
 }
 
+/**
+ * Elementor's FAQ widget on this site carries every question twice -- once for
+ * the desktop layout and once for the mobile one, both rendered into the same
+ * DOM. Reproducing that faithfully means a visitor reads every question twice,
+ * so identical questions collapse to the first occurrence. Nothing unique is
+ * dropped: only exact repeats of a question already shown.
+ */
+function dedupeQA(items = []) {
+  const seen = new Set()
+  const out = []
+  for (const it of items) {
+    const key = String(it.q || '').replace(/\s+/g, ' ').trim().toLowerCase()
+      .replace(/[\u2018\u2019]/g, "'")
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    out.push(it)
+  }
+  return out
+}
+
 function accordion(b, idBase) {
+  const items = dedupeQA(b.items)
   return (
     `<div class="accordion">` +
-    each(b.items, (it, i) => {
+    each(items, (it, i) => {
       const id = `${idBase}-p${i}`
       return (
         `<div class="accordion__item"${i === 0 ? ' data-open' : ''}>` +
@@ -142,12 +195,22 @@ function accordion(b, idBase) {
   )
 }
 
+/**
+ * A gallery of one is not a grid -- and with a tall portrait original it
+ * becomes a two-thousand-pixel column of nothing. One image is rendered as a
+ * single framed figure with a fixed aspect, the way the source section reads.
+ */
 function gallery(b) {
+  const images = b.images || []
+  const one = images.length === 1
+  const cls = `gallery${one ? ' gallery--single' : images.length === 2 ? ' gallery--pair' : ''}`
+  const sizes = one
+    ? '(max-width: 1210px) 100vw, 1170px'
+    : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px'
   return (
-    `<div class="gallery"${' data-reveal-group'}>` +
-    each(b.images, (im) =>
-      `<a href="${attr(im.src)}" target="_blank" rel="noopener">` +
-      `${img(im, { sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px' })}</a>`
+    `<div class="${cls}" data-reveal-group>` +
+    each(images, (im) =>
+      `<a href="${attr(im.src)}" target="_blank" rel="noopener">${img(im, { sizes })}</a>`
     ) +
     `</div>`
   )
@@ -228,13 +291,21 @@ export function form(b, opts = {}) {
  *  it shows (review count, ratings) is fetched live and is deliberately not
  *  baked into the HTML, so it can never go stale. */
 function reviews() {
+  // The widget is a deferred third-party script. Until it mounts -- and for
+  // every visitor where it never does -- the section shows the site's own
+  // reviews rather than an empty box. reviews.js hides these if it arrives.
+  const picks = REVIEW_POOL.slice(0, 3)
   return (
     `<div class="reviews-embed">` +
     `<div class="ti-widget" data-ti-widget></div>` +
-    `<noscript><p class="reviews-embed__fallback">` +
-    `Our Google and Facebook reviews load here. ` +
-    `<a href="https://www.google.com/search?q=In+The+Light+Roofing+Allentown" target="_blank" rel="noopener">Read them on Google</a>.` +
-    `</p></noscript></div>`
+    `</div>` +
+    when(picks.length, () =>
+      `<div class="reviews-fallback" data-reviews-fallback>` +
+      `<p class="reviews-fallback__head">Selected customer reviews</p>` +
+      testimonials({ items: picks }) +
+      `<p class="reviews-fallback__head">` +
+      `<a href="/testimonial/">Read more reviews</a></p>` +
+      `</div>`)
   )
 }
 
@@ -256,7 +327,8 @@ function testimonials(b) {
         `<div class="stars" role="img" aria-label="${attr(t.stars)} out of 5 stars">` +
         star.repeat(Math.min(t.stars, 5)) + `</div>`) +
       `<blockquote class="quote__text">${esc(t.text)}</blockquote>` +
-      `<figcaption class="quote__name">${esc(t.name)}` +
+      `<figcaption class="quote__name">` +
+      (t.href ? `<a href="${attr(t.href)}">${esc(t.name)}</a>` : esc(t.name)) +
       when(t.date || t.source, () =>
         `<span class="quote__meta">${esc([t.source, t.date].filter(Boolean).join(' · '))}</span>`) +
       `</figcaption></figure>`
@@ -284,7 +356,39 @@ function button(b, opts = {}) {
   return `<a class="btn ${variant}" href="${attr(normaliseHref(b.href))}">${esc(b.label)}</a>`
 }
 
+/**
+ * The homepage carousel is six slides that each contain the same "Contact Us
+ * Now" heading -- on the live site their backgrounds and rotation make them a
+ * decorative band, and that styling did not survive extraction. Paging through
+ * six identical slides is pointless, so a carousel whose every slide is a lone
+ * heading renders as a moving band of CTA pills instead. Every slide's text and
+ * link is preserved; only the control it sits in changes.
+ */
+export function isCtaTicker(b) {
+  const slides = b.slides || []
+  return slides.length >= 3 &&
+    slides.every((s) => s.length === 1 && s[0].type === 'heading' && s[0].text)
+}
+
+function marquee(b) {
+  const items = (b.slides || []).map((s) => s[0])
+  const pill = (it) => {
+    const inner = `${esc(it.text)}${icon('arrow')}`
+    return it.href
+      ? `<a class="marquee__item" href="${attr(normaliseHref(it.href))}">${inner}</a>`
+      : `<span class="marquee__item">${inner}</span>`
+  }
+  // The track is rendered twice so the translate loop has no visible seam. The
+  // copy is inert: aria-hidden, and its links are out of the tab order.
+  const track = `<div class="marquee__track">${each(items, pill)}</div>`
+  const clone = track
+    .replace('<div class="marquee__track">', '<div class="marquee__track" aria-hidden="true">')
+    .replace(/<a class="marquee__item"/g, '<a class="marquee__item" tabindex="-1"')
+  return `<div class="marquee">${track}${clone}</div>`
+}
+
 function carousel(b, idBase) {
+  if (isCtaTicker(b)) return marquee(b)
   return (
     `<div class="carousel" data-carousel>` +
     `<div class="carousel__track">` +
@@ -316,7 +420,7 @@ export function renderBlock(b, id, opts = {}) {
       }
       return `<div class="media">${img(b, opts)}</div>`
     case 'button':    return button(b, opts)
-    case 'feature':   return feature(b)
+    case 'feature':   return feature(b, opts)
     case 'list':      return list(b)
     case 'accordion': return accordion(b, id)
     case 'gallery':   return gallery(b)

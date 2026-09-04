@@ -147,6 +147,52 @@ Several CTAs open Elementor popups via `#elementor-action=…popup:open` hrefs.
 Those popups are all quote forms and there is no Elementor here, so the buttons
 point at `/contact/` instead of a dead fragment.
 
+### 2i. The homepage FAQ no longer asks every question twice
+
+Elementor renders the FAQ accordion twice into the same DOM — once for the
+desktop breakpoint and once for mobile — and the extraction picked up both. All
+nine questions were therefore appearing twice in a row. Identical questions now
+collapse to their first occurrence (`dedupeQA` in `build/templates/blocks.mjs`).
+Nothing unique is dropped: only exact repeats of a question already shown.
+
+### 2j. The "Contact Us Now" carousel is a marquee
+
+The band between the reviews and the founder's story is a six-slide Elementor
+image carousel where every slide contains the same "Contact Us Now" heading. On
+the live site the slides are told apart by container background images and a 3°
+rotation, neither of which is a widget, so neither survived extraction — leaving
+six identical slides and a pair of arrows to page between them.
+
+Every slide's text and link is preserved; they render as a single scrolling band
+of CTA pills instead of a carousel. It pauses on hover, the duplicate track used
+to make the loop seamless is `aria-hidden` and out of the tab order, and
+`prefers-reduced-motion` turns it into a plain scrollable row.
+
+### 2k. The reviews slot is no longer empty until Trustindex loads
+
+Trustindex is a deferred third-party script (README, "Third-party tags"), so
+the homepage reviews
+section painted as ~400px of nothing and stayed that way for any visitor whose
+browser blocked it. The slot now ships with three of the site's own testimonials
+rendered server-side, clipped, each linking to the full review. If the widget
+mounts, `src/scripts/reviews.js` hides them.
+
+No star ratings or review sources are attached to those cards — the testimonial
+records do not carry either, and inventing them would be both false and a
+structured-data problem (see 2d).
+
+### 2l. Photographs are no longer rendered as 28px icons
+
+The service-area cards use an Elementor icon-box whose "icon" is a photograph of
+the town, at 495x484. The service cards use the same widget with a 512x512 white
+glyph. Dimensions cannot tell those two apart, so `tools/images.mjs` now measures
+transparency into `content/images.json` (`glyph: true`): a mark drawn to sit on a
+coloured tile is mostly transparent, a photograph is not. On this site the two
+populations sit at 48-70% and 0-4%, so the threshold is not delicate.
+
+Glyphs render in a cyan disc, as they do on the live site. Photographs get the
+full width of their card.
+
 ---
 
 ## 3. Needs a decision or an answer
@@ -165,7 +211,19 @@ point at `/contact/` instead of a dead fragment.
    live number and drop the hard-coded ones. Kept as-is for now — changing a
    published claim is the client's call.
 
-3. **Certification and licensing claims.** Eight pages state GAF certification,
+3. **Two console errors that come from your Google Tag Manager container, not
+   from this site.** Both reproduce on the live site as well:
+
+   - `jQuery is not defined` — a custom HTML tag inside `GTM-NSS7NJ4W` runs
+     jQuery. WordPress happened to have jQuery on the page; nothing here does,
+     and nothing should ship 90KB of it for one tag. The tag needs rewriting in
+     plain JavaScript, or removing. It is in your GTM container, so it is a
+     change you make there.
+   - `Duplicated clickcease <script/> found` — ClickCease is loaded both by this
+     site's own tag and by a tag in the GTM container. One of the two should go.
+     We cannot see inside the container to tell which, so both are left in place.
+
+4. **Certification and licensing claims.** Eight pages state GAF certification,
    "licensed and insured" and "decades of experience", and six named
    "GAF-certified" experts appear on one page and nowhere else on the site. All
    of this is carried over verbatim. Before it is promoted further it should be
@@ -173,12 +231,12 @@ point at `/contact/` instead of a dead fragment.
    those six people are current staff. A HICPA number displayed in the footer is
    a genuine local-SEO signal, but only if it is real.
 
-4. **The legal entity name.** The Facebook profile slug is
+5. **The legal entity name.** The Facebook profile slug is
    `InthelightcontractingLLC`, which hints at "In the Light Contracting LLC" —
    but a profile slug is not evidence of a registered name, so nothing has been
    recorded. Confirm before putting a legal name or licence number on the site.
 
-5. **`/home/` and `/home-in-the-light-roofing-new-design/`.** Both are live,
+6. **`/home/` and `/home-in-the-light-roofing-new-design/`.** Both are live,
    indexable, self-canonicalising **duplicates of the homepage** with identical
    titles and descriptions, and both are in the sitemap. Worse, the main
    navigation's "Home" link points at `/home/`, not `/`, on every page — so the
@@ -189,23 +247,23 @@ point at `/contact/` instead of a dead fragment.
    `/`, then 301 both duplicates to `/`. That is a real ranking gain and costs
    nothing, but it changes live URLs, so it needs sign-off.
 
-6. **`/thank-you/` is indexable** and carries the blog's exact title and meta
+7. **`/thank-you/` is indexable** and carries the blog's exact title and meta
    description. A form-confirmation page should be `noindex`. Reproduced as-is;
    one line to change when approved.
 
-7. **`/services/asphalt-shingle-roofing/` canonicalises to
+8. **`/services/asphalt-shingle-roofing/` canonicalises to
    `/asphalt-shingle-roofing/`** — a service page pointing at a thin category
    archive, which is why the service page is excluded from the sitemap.
    Reproduced exactly. Recommended: make it self-canonical.
 
-8. **Copy that reads like a typo.** `New Roof Installtion` (homepage service
+9. **Copy that reads like a typo.** `New Roof Installtion` (homepage service
    card), `Get a No Cost ROOf REPLACEMENT Estimate` (every blog post sidebar),
    `In the Light Roofing Serving catasauqua` (lower-case town name),
    `Insurance Claim Facilitation Insurance Claim Facilitation` (duplicated H1).
    All reproduced verbatim. Fixing them changes no URL and no ranking signal —
    just say the word.
 
-9. **CleanTalk.** Its bot-detection script (`ct_clicktrue`, served from rotating
+10. **CleanTalk.** Its bot-detection script (`ct_clicktrue`, served from rotating
    `obseu.*` domains) existed to protect the WordPress forms. With WordPress
    gone it has nothing to protect, so it is recorded in `site.json` but
    **disabled**. The rebuild's forms use a honeypot field instead. Re-enable via

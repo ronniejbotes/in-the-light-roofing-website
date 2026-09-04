@@ -1,0 +1,192 @@
+/* ---------------------------------------------------------------------------
+   Surfaces.
+
+   The dark bands of the site are drawn as a blueprint: a deep field, a hairline
+   grid, and a sparse lattice of crosshair tick marks. It is the drawing a roof
+   gets specified on, so it belongs to this brand rather than being decoration
+   borrowed from somewhere else.
+
+   It is all drawn in CSS on pseudo-elements -- gradients plus one inline SVG
+   tile -- so it costs no request and nothing repaints during scroll.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --grid-size: 68px;
+  --tick-size: 136px;
+  /* The weave is two layers: hairlines on a fine pitch, and crosshair survey
+     marks on a coarser one. The crosshairs are an inline SVG tile because a
+     linear-gradient can only vary along one axis -- expressed as gradients
+     they come out as a second grid rather than as isolated marks. The tile is
+     authored at --tick-size, so the two must be changed together. */
+  --tick-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='136' height='136'%3E%3Cpath d='M68 62.5v11M62.5 68h11' stroke='%2300b6f1' stroke-opacity='.5' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+.blueprint {
+  background-image:
+    linear-gradient(to right, var(--c-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--c-grid) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+}
+
+/* ---------------------------------------------------------------------------
+   Dark sections
+   --------------------------------------------------------------------------- */
+
+.section--dark {
+  background: var(--c-void);
+  isolation: isolate;
+}
+
+/* The texture is a layer of its own so the section's own background-color and
+   any photo behind it stay independent of it. */
+.section--dark::before,
+.pagehead::before,
+.footer::before,
+.section--bg::after,
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--c-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--c-grid) 1px, transparent 1px),
+    var(--tick-mark);
+  background-size:
+    var(--grid-size) var(--grid-size),
+    var(--grid-size) var(--grid-size),
+    var(--tick-size) var(--tick-size);
+  /* Fade the weave out towards the middle of the band so it frames the content
+     instead of sitting behind every line of copy. */
+  -webkit-mask-image: radial-gradient(110% 80% at 50% 50%, transparent 22%, #000 82%);
+  mask-image: radial-gradient(110% 80% at 50% 50%, transparent 22%, #000 82%);
+}
+
+/* Over a photograph the weave has an image to compete with, so it is quieter
+   still -- enough to read as an overlay, not enough to look like a defect. */
+.hero::after, .section--bg::after { opacity: .55; }
+
+.section--dark > *,
+.pagehead > * { position: relative; z-index: 1; }
+
+/* Interior page headers are the same dark ground as a section band, so they
+   get the same weave -- otherwise the blog and archive pages read as a
+   different site from the one the homepage introduced. */
+.pagehead, .footer { background: var(--c-void); isolation: isolate; }
+
+/* A soft cyan bloom anchored to one corner keeps the dark bands from reading
+   as flat black once the grid fades out. */
+.section--dark::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: auto -10% -40% auto;
+  left: -10%;
+  height: 70%;
+  background: radial-gradient(60% 100% at 20% 100%,
+    color-mix(in srgb, var(--c-primary) 13%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+/* Alternate dark bands lean the bloom the other way, so a run of them does not
+   look like the same tile repeated. */
+.section--dark:nth-of-type(even)::after {
+  inset: auto auto -40% -10%;
+  right: -10%;
+  left: auto;
+  background: radial-gradient(60% 100% at 80% 100%,
+    color-mix(in srgb, var(--c-primary) 13%, transparent), transparent 70%);
+}
+
+/* ---------------------------------------------------------------------------
+   Photo sections
+
+   The old scrim was a flat 86% wash that killed the photograph without making
+   the type much easier to read. This one is directional: dense where the copy
+   sits, open where the image is worth seeing.
+   --------------------------------------------------------------------------- */
+
+.section--bg {
+  background-color: var(--c-void);
+  isolation: isolate;
+}
+.section--bg::before {
+  background:
+    linear-gradient(100deg, rgb(11 13 19 / .95) 0%, rgb(11 13 19 / .88) 38%, rgb(11 13 19 / .64) 100%),
+    linear-gradient(180deg, rgb(11 13 19 / .55), rgb(11 13 19 / .35) 40%, rgb(11 13 19 / .8));
+}
+.section--bg::after { z-index: 0; }
+.section--bg > * { position: relative; z-index: 1; }
+
+/* Sections whose head is centred read better with a symmetrical scrim. */
+.section--bg:has(.section-head--center)::before {
+  background:
+    radial-gradient(90% 70% at 50% 45%, rgb(11 13 19 / .82), rgb(11 13 19 / .94) 75%),
+    linear-gradient(180deg, rgb(11 13 19 / .6), transparent 30%, rgb(11 13 19 / .75));
+}
+
+/* ---------------------------------------------------------------------------
+   Accent band
+
+   One vivid cyan section per page, used for the process/steps band. The live
+   site does the same thing and it is the single loudest moment on the page.
+   --------------------------------------------------------------------------- */
+
+.section--accent {
+  background:
+    linear-gradient(140deg, var(--c-primary) 0%, #0aa3d8 55%, #0687b8 100%);
+  color: #04222d;
+  isolation: isolate;
+  overflow: hidden;
+}
+.section--accent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / .10) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / .10) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  -webkit-mask-image: radial-gradient(110% 90% at 50% 40%, transparent 12%, #000 72%);
+  mask-image: radial-gradient(110% 90% at 50% 40%, transparent 12%, #000 72%);
+}
+/* A single wide chevron, the roof shape, drawn once across the band. */
+.section--accent::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: -18%;
+  width: min(1400px, 130%);
+  aspect-ratio: 2 / 1;
+  translate: -50% 0;
+  background: linear-gradient(180deg, rgb(255 255 255 / .12), transparent 62%);
+  clip-path: polygon(50% 0, 100% 46%, 100% 58%, 50% 12%, 0 58%, 0 46%);
+  pointer-events: none;
+}
+.section--accent > * { position: relative; z-index: 1; }
+
+.section--accent :is(h1, h2, h3, h4, h5, h6) { color: #042733; }
+.section--accent :is(p, .rich, .section-head p) { color: rgb(4 34 45 / .82); }
+.section--accent .eyebrow { color: rgb(4 39 51 / .72); }
+.section--accent .eyebrow::before { background: #042733; }
+.section--accent .rule { background: linear-gradient(90deg, #042733, rgb(4 39 51 / .25)); }
+
+/* ---------------------------------------------------------------------------
+   Hairline separators between adjacent bands of the same colour.
+   --------------------------------------------------------------------------- */
+
+.section--dark + .section--dark { border-top: 1px solid rgb(255 255 255 / .06); }
+.section--alt {
+  background: var(--c-surface-alt);
+  border-block: 1px solid var(--c-line-soft);
+}
+
+/* On a phone the grid tightens; the crosshair tile keeps its authored size, so
+   the marks simply thin out rather than shrinking into specks. */
+@media (max-width: 640px) {
+  :root { --grid-size: 44px; }
+}

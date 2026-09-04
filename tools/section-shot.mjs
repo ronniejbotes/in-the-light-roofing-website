@@ -5,7 +5,9 @@
 import { chromium } from 'playwright-core'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-const EXEC=join(process.env.USERPROFILE||'','AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')
+// Set CHROME to a Chromium/Chrome binary; the default is Playwright's
+// Windows download location.
+const EXEC=process.env.CHROME||join(process.env.USERPROFILE||'','AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')
 const url=process.argv[2]||'/'; const idxs=(process.argv[3]||'0').split(',').map(Number); const name=process.argv[4]||'seg'
 await mkdir('shots',{recursive:true})
 const b=await chromium.launch({executablePath:EXEC})

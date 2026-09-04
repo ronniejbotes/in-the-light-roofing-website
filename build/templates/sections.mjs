@@ -1,5 +1,6 @@
 import { esc, attr, each, when } from '../lib/html.mjs'
-import { renderBlock, isRule, img, normaliseHref } from './blocks.mjs'
+import { renderBlock, isRule, img, normaliseHref, isCtaTicker } from './blocks.mjs'
+import { icon } from '../lib/site.mjs'
 
 /* ---------------------------------------------------------------------------
    Section composer.
@@ -41,12 +42,21 @@ function partition(blocks) {
   return { head, rest: blocks.slice(i) }
 }
 
-function renderHead(head, id, center) {
+/**
+ * A monospace index above each section heading. It carries no words of its own
+ * -- nothing is invented -- but it gives a long page a spine, and it is what
+ * turns a stack of bands into a sequence a reader can hold their place in.
+ */
+const kicker = (n) =>
+  n ? `<p class="eyebrow"><span class="eyebrow__n">${String(n).padStart(2, '0')}</span></p>` : ''
+
+function renderHead(head, id, center, index) {
   if (!head.length) return ''
   const inner = head
     .map((b, k) => renderBlock(b, `${id}-h${k}`))
     .join('')
-  return `<div class="section-head${center ? ' section-head--center' : ''}"${rev(head[0])}>${inner}</div>`
+  return `<div class="section-head${center ? ' section-head--center' : ''}"${rev(head[0])}>` +
+    kicker(index) + inner + `</div>`
 }
 
 const countOf = (blocks, t) => blocks.filter((b) => b.type === t).length
@@ -140,37 +150,81 @@ function renderHero(section, ctx, index) {
         : esc(h1.text)}</h1>`
     : ''
 
-  // Trust points in a hero are a row of small cards, not a stack of full-width
-  // ones -- the service-area pages open with four of them.
-  const heroFeatures = rest.filter((b) => b.type === 'feature')
+  /* The blocks that follow the form in source order are not part of the form.
+     On the homepage they are the four assurances, the certification badges and
+     a strapline -- three different things stacked into one column, which is
+     why the form panel used to run for most of the viewport. Split them out
+     and give each the treatment it wants. */
+  const formHead = []
+  const stripFeatures = []
+  const badges = []
+  const notes = []
+  for (const b of asideBlocks) {
+    if (b === formBlock) continue
+    if (isRule(b)) continue
+    if (b.type === 'feature') { stripFeatures.push(b); continue }
+    if (b.type === 'gallery') { badges.push(b); continue }
+    if (asideBlocks.indexOf(b) < asideBlocks.indexOf(formBlock)) { formHead.push(b); continue }
+    notes.push(b)
+  }
+
+  /* Assurances belong under the headline, not beside the form: they qualify
+     the claim the headline just made. This is the arrangement the live site
+     uses too. */
+  const stripSource = stripFeatures.length ? stripFeatures : rest.filter((b) => b.type === 'feature')
+  const strip = when(stripSource.length, () =>
+    `<ul class="hero__strip" data-reveal-group>` +
+    each(stripSource, (b) =>
+      `<li><span class="hero__strip__icon">` +
+      (b.image?.src ? img(b.image, { sizes: '20px' }) : icon('check')) +
+      `</span><span>${esc(b.title || '')}</span></li>`) +
+    `</ul>`)
+
+  // Trust points on the service-area heroes are richer than a label and an
+  // icon, so those stay as cards.
+  const heroFeatures = stripFeatures.length ? [] : rest.filter((b) => b.type === 'feature' && b.html)
   const heroRest = rest.filter((b) => b.type !== 'feature')
 
   const copy =
-    `<div data-reveal="left">` +
+    `<div class="hero__copy" data-reveal="left">` +
     headline +
     each(heroRest, (b, k) =>
       b.type === 'richtext'
         ? `<div class="hero__sub">${renderBlock(b, `${id}-r${k}`)}</div>`
         : `<div class="stack">${renderBlock(b, `${id}-r${k}`)}</div>`
     ) +
-    when(heroFeatures.length, () =>
-      `<div class="hero__points-grid" data-reveal-group>` +
-      each(heroFeatures, (b, k) => renderBlock(b, `${id}-hf${k}`)) +
-      `</div>`) +
     when(buttons.length, () =>
       `<div class="btn-row">${each(buttons, (b, k) =>
         renderBlock(b, `${id}-b${k}`, { secondary: k > 0, onDark: true }))}</div>`
     ) +
+    when(heroFeatures.length, () =>
+      `<div class="hero__points-grid" data-reveal-group>` +
+      each(heroFeatures, (b, k) => renderBlock(b, `${id}-hf${k}`, { onDark: true })) +
+      `</div>`) +
+    (heroFeatures.length ? '' : strip) +
     `</div>`
 
   const aside = formBlock
-    ? `<div class="form-card" data-reveal="right">` +
-      each(asideBlocks, (b, k) => renderBlock(b, `${id}-a${k}`)) +
+    ? `<div class="hero__aside" data-reveal="right">` +
+      `<div class="form-card">` +
+      each(formHead, (b, k) => renderBlock(b, `${id}-fh${k}`)) +
+      renderBlock(formBlock, `${id}-form`) +
+      `</div>` +
+      each(badges, (b, k) =>
+        `<div class="hero__badges">` +
+        each(b.images || [], (im) =>
+          `<a href="${attr(im.src)}" target="_blank" rel="noopener">` +
+          `${img(im, { sizes: '64px' })}</a>`) +
+        `</div>`) +
+      each(notes, (b, k) =>
+        b.type === 'heading'
+          ? `<p class="hero__note">${esc(b.text || '')}</p>`
+          : `<div class="hero__note">${renderBlock(b, `${id}-n${k}`)}</div>`) +
       `</div>`
     : ''
 
   // A hero that is just a page title (several interior pages are exactly that)
-  // should be a title band, not a 78vh photo panel with nothing in it.
+  // should be a title band, not a tall photo panel with nothing in it.
   const sparse = !aside && !buttons.length && rest.length === 0
 
   return (
@@ -182,7 +236,7 @@ function renderHero(section, ctx, index) {
   )
 }
 
-export function renderSection(section, ctx, index) {
+export function renderSection(section, ctx, index, opts = {}) {
   const blocks = section.blocks || []
   if (!blocks.length) return ''
 
@@ -217,13 +271,21 @@ export function renderSection(section, ctx, index) {
   const dark = isDark(section)
   const bg = section.background
 
-  const sectionAttrs =
-    ` class="section${dark && !bg ? ' section--dark' : ''}` +
-    `${isTint(section) ? ' section--alt' : ''}${bg ? ' section--bg' : ''}"` +
-    (bg ? ` style="background-image:${bgValue(bg)}"` : '')
+  /* A numbered process is the one section on a page that earns the loud cyan
+     band -- it is the part a visitor is trying to understand, and giving it a
+     colour of its own is what stops a long page reading as one grey run. Its
+     own background photo is dropped: the band replaces it. */
+  const accent = opts.accent === true
 
+  const sectionAttrs = accent
+    ? ` class="section section--accent"`
+    : ` class="section${dark && !bg ? ' section--dark' : ''}` +
+      `${isTint(section) ? ' section--alt' : ''}${bg ? ' section--bg' : ''}"` +
+      (bg ? ` style="background-image:${bgValue(bg)}"` : '')
+
+  const n = opts.number
   const wrap = (inner, center = false) =>
-    `<section${sectionAttrs}><div class="container">${renderHead(head, id, center)}${inner}</div></section>`
+    `<section${sectionAttrs}><div class="container">${renderHead(head, id, center, n)}${inner}</div></section>`
 
   /* --- contact-style section: details on one side, quote form on the other */
   if (hasForm && nFeature >= 2) {
@@ -239,8 +301,8 @@ export function renderSection(section, ctx, index) {
     return wrap(
       `<div class="split">` +
       `<div class="stack stack--lg" data-reveal="left">` +
-      `<div class="grid grid--${feats.length >= 3 ? 1 : 1}" data-reveal-group>` +
-      each(feats, (b, k) => renderBlock(b, `${id}-c${k}`)) +
+      `<div class="grid grid--1" data-reveal-group>` +
+      each(feats, (b, k) => renderBlock(b, `${id}-c${k}`, { onDark })) +
       `</div>` +
       each(others, (b, k) => renderBlock(b, `${id}-o${k}`)) +
       `</div>` +
@@ -283,8 +345,8 @@ export function renderSection(section, ctx, index) {
         `<div${rev(s.block)}>` +
         (numbered
           ? `<div class="step">${when(s.num, () => `<div class="step__num">${esc(s.num)}</div>`)}` +
-            `${renderBlock(s.block, `${id}-f${k}`)}</div>`
-          : renderBlock(s.block, `${id}-f${k}`)) +
+            `${renderBlock(s.block, `${id}-f${k}`, { onDark: onDark && !accent })}</div>`
+          : renderBlock(s.block, `${id}-f${k}`, { onDark })) +
         `</div>`) +
       `</div>` + btnRow,
       true
@@ -312,6 +374,21 @@ export function renderSection(section, ctx, index) {
       `<div class="form-card"${rev(f, 'right')}>${renderBlock(f, `${id}-form`)}</div>` +
       `</div>`
     )
+  }
+
+  /* --- CTA band ------------------------------------------------------
+     A ticker plus a heading plus a button is not a content section, it is a
+     punctuation mark between two of them. It gets a tight band with the
+     ticker running edge to edge and the call to action centred under it. */
+  const ticker = rest.find((b) => b.type === 'carousel' && isCtaTicker(b))
+  if (ticker && nonButtons.every((b) => b === ticker || b.type === 'heading')) {
+    const heads = nonButtons.filter((b) => b !== ticker)
+    return `<section class="section section--tight section--cta">` +
+      `<div${rev(ticker, 'fade')}>${renderBlock(ticker, `${id}-t`)}</div>` +
+      `<div class="container section--cta__body">` +
+      each(heads, (b, k) => `<div${rev(b, 'fade')}>${renderBlock(b, `${id}-h${k}`)}</div>`) +
+      btnRow +
+      `</div></section>`
   }
 
   if (hasReviews || hasCarousel || hasGallery || hasMapOrVideo) {
@@ -344,7 +421,7 @@ export function renderSection(section, ctx, index) {
       `<div class="split${reverse ? '' : ' split--reverse'}">` +
       `<div class="media"${rev(image, reverse ? 'right' : 'left')}>${renderBlock(image, `${id}-img`, { sizes: '(max-width: 900px) 100vw, 50vw' })}</div>` +
       `<div${rev(head[0] || others[0], reverse ? 'left' : 'right')}>` +
-      renderHead(head, id, false).replace('section-head', 'section-head section-head--split') +
+      renderHead(head, id, false, n).replace('section-head', 'section-head section-head--split') +
       `<div class="stack">${each(others, (b, k) => renderBlock(b, `${id}-o${k}`))}</div>${btnRow}` +
       `</div></div></div></section>`
   }
@@ -359,7 +436,42 @@ export function renderSection(section, ctx, index) {
   )
 }
 
+/**
+ * Does this section render as a numbered process? The classifier in
+ * renderSection asks the same question of the same data; asking it up front
+ * lets renderSections give that one band its accent colour.
+ */
+function isNumberedProcess(section) {
+  const blocks = section.blocks || []
+  if (blocks.filter((b) => b.type === 'feature').length < 2) return false
+  if (blocks.some((b) => b.type === 'form' || b.type === 'accordion')) return false
+  return blocks.some((b) => b.type === 'heading' && /^\d{1,2}$/.test((b.text || '').trim()))
+}
+
 /** Render all sections of a page. */
 export function renderSections(sections, ctx) {
-  return each(sections, (s, i) => renderSection(s, ctx, i))
+  const list = sections || []
+
+  // The hero is section zero and is not numbered; everything after it is.
+  // A page with only a couple of bands does not need an index -- a lone "01"
+  // is decoration, not structure.
+  const heroFirst = !!list[0]?.blocks?.some((b) => b.type === 'heading' && b.level === 1)
+  const numberable = list.length - (heroFirst ? 1 : 0)
+  const numbering = numberable >= 3
+
+  // At most one accent band per page: the first numbered process on it.
+  let accentAt = -1
+  for (let i = heroFirst ? 1 : 0; i < list.length; i++) {
+    if (isNumberedProcess(list[i])) { accentAt = i; break }
+  }
+
+  let n = 0
+  return each(list, (s, i) => {
+    const isHero = i === 0 && heroFirst
+    if (!isHero && (s.blocks || []).length) n++
+    return renderSection(s, ctx, i, {
+      number: numbering && !isHero ? n : 0,
+      accent: i === accentAt,
+    })
+  })
 }

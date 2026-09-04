@@ -4,7 +4,9 @@
  */
 import { chromium } from 'playwright-core'
 import { join } from 'node:path'
-const EXEC=join(process.env.USERPROFILE||'','AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')
+// Set CHROME to a Chromium/Chrome binary; the default is Playwright's
+// Windows download location.
+const EXEC=process.env.CHROME||join(process.env.USERPROFILE||'','AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')
 const b=await chromium.launch({executablePath:EXEC})
 const ctx=await b.newContext({viewport:{width:1440,height:900}})
 const p=await ctx.newPage()

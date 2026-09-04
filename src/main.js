@@ -2,6 +2,7 @@ import './styles/tokens.css'
 import './styles/fonts.css'
 import './styles/base.css'
 import './styles/layout.css'
+import './styles/surfaces.css'
 import './styles/components.css'
 import './styles/chrome.css'
 import './styles/pages.css'
@@ -14,6 +15,8 @@ import { initCarousel } from './scripts/carousel.js'
 import { initVideo } from './scripts/video.js'
 import { initForms } from './scripts/forms.js'
 import { initToTop } from './scripts/to-top.js'
+import { initProgress } from './scripts/progress.js'
+import { initReviews } from './scripts/reviews.js'
 import { initThirdParty } from './scripts/third-party.js'
 
 const boot = () => {
@@ -24,6 +27,8 @@ const boot = () => {
   initVideo()
   initForms()
   initToTop()
+  initProgress()
+  initReviews()
   initThirdParty()
 }
 

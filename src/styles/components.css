@@ -87,6 +87,25 @@
   border-color: #fff;
 }
 
+/* Primary calls to action carry a trailing arrow, the way the live site's do.
+   It is drawn from currentColor through a mask rather than inserted into the
+   markup, so it inherits every button state and reads as decoration to a
+   screen reader. `order` puts it after the label inside the flex row. */
+.btn--primary::before {
+  content: "";
+  order: 1;
+  width: 15px; height: 15px;
+  flex: none;
+  background: currentColor;
+  -webkit-mask: var(--icon-arrow) center / contain no-repeat;
+  mask: var(--icon-arrow) center / contain no-repeat;
+  transition: transform var(--dur) var(--ease);
+}
+.btn--primary:hover::before, .btn--primary:focus-visible::before { transform: translateX(4px); }
+/* The full-width form submit centres its own label; an arrow pinned to the end
+   of a 100%-wide button would float in the middle of nothing. */
+.btn--block::before { content: none; }
+
 .btn--lg { padding: 18px 38px; font-size: 15px; }
 .btn--sm { padding: 11px 22px; font-size: 13px; }
 .btn--block { display: flex; width: 100%; }
@@ -108,23 +127,69 @@
    Cards
    -------------------------------------------------------------------------- */
 
+/* Cards carry their own surface, so they also carry their own text colour --
+   they must read the same whether they sit on a white band or a dark one. */
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
   background: var(--c-surface);
   border: 1px solid var(--c-line);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-md);
   overflow: hidden;
+  color: var(--c-body);
   transition: transform var(--dur) var(--ease),
               box-shadow var(--dur) var(--ease),
-              border-color var(--dur) var(--ease);
+              border-color var(--dur) var(--ease),
+              background-color var(--dur) var(--ease);
 }
+.card :is(h2, h3, h4, h5, h6) { color: var(--c-ink); }
+
+/* A cyan hairline draws itself along the top edge on hover: the whole card
+   acknowledges the pointer without anything moving except one scale. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, var(--c-primary), color-mix(in srgb, var(--c-primary) 20%, transparent));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-slow) var(--ease-out);
+  z-index: 2;
+}
+.card:hover::before, .card:focus-within::before { transform: scaleX(1); }
+
 .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-line));
 }
+
+/* --- glass variant --------------------------------------------------------
+   Feature cards on a dark or photographic band. A white tile there punches a
+   hole in the blueprint; a translucent one sits inside it. */
+.card--glass {
+  background: rgb(255 255 255 / .045);
+  border-color: rgb(255 255 255 / .11);
+  color: color-mix(in srgb, #fff 74%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.card--glass :is(h2, h3, h4, h5, h6) { color: #fff; }
+.card--glass:hover {
+  background: rgb(255 255 255 / .08);
+  border-color: color-mix(in srgb, var(--c-primary) 55%, transparent);
+  box-shadow: 0 20px 44px rgb(0 0 0 / .35);
+}
+.card--glass .card__more { color: var(--c-primary); }
+
+/* Links inside a panel take their colour from the panel, never from the band
+   behind it. A title that is also a link stays the title's colour: it is the
+   card's heading first and a link second. */
+.card a:not(.btn) { color: var(--c-primary-darker); }
+.card--glass a:not(.btn) { color: var(--c-primary); }
+.card :is(.card__title, .feature__title) a { color: inherit; }
 
 .card__media {
   position: relative;
@@ -141,15 +206,20 @@
 .card:hover .card__media img { transform: scale(1.05); }
 
 .card__body { padding: 26px 24px 28px; display: flex; flex-direction: column; flex: 1; }
+.card__body--roomy { padding: 32px 30px 34px; }
 .card__title { font-size: var(--fs-h4); line-height: var(--lh-h4); margin-bottom: .5em; }
 .card__title a { color: inherit; text-decoration: none; }
 .card__title a::after { content: ""; position: absolute; inset: 0; }
 .card__text { font-size: var(--fs-small); line-height: var(--lh-small); margin-bottom: 1em; }
+/* Every micro-label on the site -- card actions, breadcrumbs, article meta,
+   pagination -- is set in the same monospace at the same tracking. It is what
+   makes a page of unrelated components read as one system. */
 .card__more {
   margin-top: auto;
-  font-size: var(--fs-tiny);
-  font-weight: 700;
-  letter-spacing: .08em;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-mono);
   text-transform: uppercase;
   color: var(--c-primary-darker);
   display: inline-flex;
@@ -165,24 +235,60 @@
 .card:hover .card__more svg { transform: translateX(4px); }
 
 .card__icon {
-  width: 58px; height: 58px;
+  position: relative;
+  width: 56px; height: 56px;
   display: grid; place-items: center;
-  margin-bottom: 18px;
-  border-radius: var(--r-md);
-  /* The service icons are white artwork drawn for a dark ground, so the tile
-     is dark by default and lifts to brand cyan on hover. */
-  background: var(--c-secondary);
+  margin-bottom: 20px;
+  border-radius: 50%;
+  /* The service icons are white artwork drawn for a dark ground, so the disc
+     behind them is brand cyan -- the same treatment the live site uses. */
+  background: var(--c-primary);
   color: #fff;
-  transition: background-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
-.card:hover .card__icon { background: var(--c-primary); transform: translateY(-2px); }
-.card__icon img { width: 30px; height: 30px; object-fit: contain; }
+/* A ring that expands on hover, so the icon reads as the card's focal point. */
+.card__icon::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--c-primary) 45%, transparent);
+  opacity: 0;
+  transform: scale(.86);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.card:hover .card__icon { transform: translateY(-2px); box-shadow: var(--shadow-cta); }
+.card:hover .card__icon::after { opacity: 1; transform: scale(1); }
+.card__icon img { width: 28px; height: 28px; object-fit: contain; }
 
-.card--flat { border: 0; background: var(--c-surface-alt); }
+/* Some "icons" in the source are photographs, not glyphs. Squeezed into a
+   28px disc they are unreadable mush, so they get the full tile instead. */
+.card__icon--photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  margin: 0;
+  border-radius: 0;
+  background: var(--c-surface-alt);
+  box-shadow: none;
+}
+.card__icon--photo::after { content: none; }
+.card__icon--photo img { width: 100%; height: 100%; object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out); }
+.card:hover .card__icon--photo { transform: none; box-shadow: none; }
+.card:hover .card__icon--photo img { transform: scale(1.06); }
+
+.card--flat { background: var(--c-surface-alt); border-color: transparent; }
 .card--flat:hover { background: var(--c-surface); }
 
-.card--meta { font-size: var(--fs-tiny); color: var(--c-muted); margin-bottom: 10px; }
-.card--meta a { color: var(--c-primary-darker); text-decoration: none; font-weight: 600; }
+.card--meta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .06em;
+  color: var(--c-muted);
+  margin-bottom: 12px;
+}
+.card--meta a { color: var(--c-primary-darker); text-decoration: none; }
 
 /* --------------------------------------------------------------------------
    Feature / step blocks
@@ -193,16 +299,32 @@
 .feature__title a { color: inherit; text-decoration: none; }
 .feature__text { font-size: var(--fs-small); line-height: var(--lh-small); }
 
-.step { position: relative; padding-top: 8px; }
+/* A numbered process step. The numeral sits on a hairline that runs the width
+   of the step, so a row of them reads as one measured sequence. */
+.step { position: relative; display: flex; flex-direction: column; height: 100%; }
 .step__num {
-  font-size: 46px;
-  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
   line-height: 1;
-  color: color-mix(in srgb, var(--c-primary) 30%, transparent);
-  margin-bottom: 10px;
+  letter-spacing: var(--tracking-mono);
+  color: var(--c-primary-darker);
 }
+.step__num::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: .28;
+}
+.step > .card { flex: 1; }
 .section--dark .step__num,
-.section--bg .step__num { color: color-mix(in srgb, var(--c-primary) 85%, transparent); }
+.section--bg .step__num { color: var(--c-primary); }
+.section--accent .step__num { color: #042733; }
 
 /* --------------------------------------------------------------------------
    Media
@@ -211,6 +333,16 @@
 .media { border-radius: var(--r-lg); overflow: hidden; }
 .media img { width: 100%; }
 .media--round { border-radius: var(--r-round); }
+
+/* A standalone photograph in a section is a moment, not a scroll. Several of
+   the originals are 1130x1900 at container width, which is most of a viewport
+   of floor. Cap the frame and crop towards the top third, where the subject
+   of a photograph of people almost always is. Article images (.prose) are
+   deliberately untouched -- there the full image is the point. */
+.section .media { max-height: min(76vh, 660px); }
+.section .media img { height: 100%; object-fit: cover; object-position: center 28%; }
+.split .media { max-height: none; }
+.split .media img { height: auto; object-fit: contain; }
 
 figure { margin: 1.8em 0; }
 figcaption {
@@ -275,6 +407,13 @@ figcaption {
   border-radius: var(--r-md);
   background: var(--c-surface-alt);
 }
+/* One image is a figure, not a grid. Without a fixed aspect a tall portrait
+   original renders as a two-thousand-pixel column. */
+.gallery--single { grid-template-columns: 1fr; }
+.gallery--single a { aspect-ratio: 16 / 9; border-radius: var(--r-lg); }
+.gallery--pair { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 640px) { .gallery--pair { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .gallery--single a { aspect-ratio: 4 / 3; } }
 .gallery img {
   width: 100%; height: 100%;
   object-fit: cover;
@@ -312,21 +451,34 @@ figcaption {
    Accordion (FAQ)
    -------------------------------------------------------------------------- */
 
-.accordion { border-top: 1px solid var(--c-line); }
-.accordion__item { border-bottom: 1px solid var(--c-line); }
+/* Each question is its own panel rather than a row in a ruled list: on a
+   photographic band a hairline list has nothing to sit on and the copy floats. */
+.accordion { display: grid; gap: 12px; color: var(--c-body); }
+.accordion__item {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.accordion__item:hover { border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-line)); }
+.accordion__item.is-open {
+  border-color: color-mix(in srgb, var(--c-primary) 55%, var(--c-line));
+  box-shadow: var(--shadow-md);
+}
 
 .accordion__btn {
   width: 100%;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 22px 0;
+  padding: 20px 22px;
   background: none;
   border: 0;
   font-family: inherit;
-  font-size: var(--fs-h4);
-  line-height: var(--lh-h4);
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.35;
   font-weight: 600;
   color: var(--c-ink);
   text-align: left;
@@ -337,8 +489,7 @@ figcaption {
 
 .accordion__icon {
   flex: none;
-  width: 30px; height: 30px;
-  margin-top: 2px;
+  width: 32px; height: 32px;
   display: grid; place-items: center;
   border-radius: 50%;
   background: var(--c-primary-tint);
@@ -377,10 +528,13 @@ figcaption {
 .accordion__panel > div { overflow: hidden; }
 .accordion__item.is-open .accordion__panel { grid-template-rows: 1fr; }
 .accordion__panel .accordion__inner {
-  padding-bottom: 24px;
+  padding: 0 22px 22px;
   font-size: var(--fs-small);
-  line-height: var(--lh-small);
+  line-height: 1.7;
   color: var(--c-body);
+  border-top: 1px solid var(--c-line-soft);
+  margin-top: 2px;
+  padding-top: 18px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -388,7 +542,8 @@ figcaption {
 }
 
 @media (max-width: 640px) {
-  .accordion__btn { font-size: 17px; line-height: 1.35; padding: 18px 0; }
+  .accordion__btn { font-size: 16px; padding: 16px 16px; gap: 14px; }
+  .accordion__panel .accordion__inner { padding-inline: 16px; }
 }
 
 /* --------------------------------------------------------------------------
@@ -398,9 +553,10 @@ figcaption {
 .form { display: grid; gap: 14px; }
 .form__field { display: grid; gap: 6px; }
 .form__label {
-  font-size: var(--fs-tiny);
-  font-weight: 600;
-  letter-spacing: .04em;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-mono);
   text-transform: uppercase;
   color: var(--c-muted);
 }
@@ -438,12 +594,18 @@ figcaption {
   pointer-events: none;
 }
 
+/* Like a card, a form panel carries its own surface -- so it carries its own
+   text and heading colours too, and never inherits them from the band it is
+   sitting on. Without this a white heading lands on a white panel. */
 .form-card {
   padding: 28px;
   background: var(--c-surface);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
+  color: var(--c-body);
 }
+.form-card :is(h1, h2, h3, h4, h5, h6) { color: var(--c-ink); }
+.form-card a:not(.btn) { color: var(--c-primary-darker); }
 .form-card h2, .form-card h3 { margin-bottom: .35em; }
 /* Compact field rhythm so the whole form stays close to the fold. */
 .form-card .form { gap: 11px; }
@@ -456,7 +618,9 @@ figcaption {
    -------------------------------------------------------------------------- */
 
 .breadcrumbs {
-  font-size: var(--fs-tiny);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .06em;
   line-height: 1.5;
   color: var(--c-muted);
   padding-block: 16px;
@@ -491,8 +655,9 @@ figcaption {
   justify-content: center;
   border-radius: var(--r-sm);
   border: 1px solid var(--c-line);
-  font-size: var(--fs-small);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
   color: var(--c-ink);
   transition: all var(--dur-fast) var(--ease);
@@ -518,8 +683,10 @@ figcaption {
   border-radius: var(--r-round);
   background: var(--c-surface-alt);
   border: 1px solid var(--c-line);
-  font-size: var(--fs-tiny);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .06em;
+  font-weight: 500;
   color: var(--c-ink-soft);
   text-decoration: none;
   transition: all var(--dur-fast) var(--ease);
@@ -534,7 +701,10 @@ figcaption {
    Reviews widget slot (Trustindex loads into this)
    -------------------------------------------------------------------------- */
 
-.reviews-embed { min-height: 220px; }
+/* No reserved height: the fallback cards below fill the slot until (and
+   unless) the widget mounts, so an empty box would just be a gap. */
+.reviews-embed:empty { display: none; }
+.reviews-embed .ti-widget:empty { display: none; }
 .reviews-embed__fallback {
   padding: 26px;
   border: 1px dashed var(--c-line);
@@ -586,6 +756,128 @@ figcaption {
   color: #04222d;
 }
 .carousel__btn:disabled { opacity: .35; cursor: default; }
+
+/* Prev/next glyphs are drawn rotated from the shared chevron, so the icon set
+   stays at one path per direction pair. */
+.carousel__btn svg { width: 20px; height: 20px; fill: currentColor; }
+.carousel__btn[data-carousel-prev] svg { transform: rotate(90deg); }
+.carousel__btn[data-carousel-next] svg { transform: rotate(-90deg); }
+
+/* --------------------------------------------------------------------------
+   Marquee
+
+   A run of identical CTA slides in the source (six "Contact Us Now" cards in
+   a carousel nobody can meaningfully page through) reads as one moving band
+   instead. The track is duplicated so the loop has no seam.
+   -------------------------------------------------------------------------- */
+
+.marquee {
+  --marquee-dur: 34s;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  padding-block: 6px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee__track {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: none;
+  padding-right: 18px;
+  animation: itlr-marquee var(--marquee-dur) linear infinite;
+}
+.marquee:hover .marquee__track,
+.marquee:focus-within .marquee__track { animation-play-state: paused; }
+
+@keyframes itlr-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-100%, 0, 0); }
+}
+
+.marquee__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 26px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--c-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color var(--dur) var(--ease),
+              color var(--dur) var(--ease),
+              border-color var(--dur) var(--ease);
+}
+.marquee__item svg { width: 15px; height: 15px; fill: var(--c-primary); flex: none;
+  transition: fill var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.marquee__item:hover {
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+  color: #04222d;
+}
+.marquee__item:hover svg { fill: #04222d; transform: translateX(3px); }
+
+/* Every second pill is filled, so the band has rhythm rather than reading as
+   one long dashed line. */
+.marquee__item:nth-child(even) {
+  background: var(--c-ink);
+  border-color: var(--c-ink);
+  color: #fff;
+}
+.marquee__item:nth-child(even):hover { background: var(--c-primary); border-color: var(--c-primary); color: #04222d; }
+
+:is(.section--dark, .section--bg) .marquee__item {
+  background: rgb(255 255 255 / .05);
+  border-color: rgb(255 255 255 / .14);
+  color: #fff;
+}
+:is(.section--dark, .section--bg) .marquee__item:nth-child(even) {
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+  color: #04222d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee { -webkit-mask-image: none; mask-image: none; overflow-x: auto; }
+  .marquee__track { animation: none; }
+  .marquee__track + .marquee__track { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Static review cards
+
+   The Trustindex widget is a deferred third-party script, so the slot it
+   mounts into is empty on first paint and stays empty if the script never
+   arrives. These are the site's own reviews, rendered server-side, and they
+   are removed the moment the widget actually populates.
+   -------------------------------------------------------------------------- */
+
+.reviews-fallback { display: grid; gap: 22px; }
+.reviews-fallback[hidden] { display: none; }
+.reviews-fallback__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+.reviews-fallback__head strong { color: var(--c-ink); font-weight: 600; }
+.section--dark .reviews-fallback__head,
+.section--bg .reviews-fallback__head { color: color-mix(in srgb, #fff 62%, transparent); }
+.section--dark .reviews-fallback__head strong,
+.section--bg .reviews-fallback__head strong { color: #fff; }
 
 /* Small inline images (rating stars, trust badges) keep their intrinsic size;
    the .media treatment would stretch them across the container. */
