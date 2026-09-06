@@ -90,8 +90,14 @@ createServer(async (req, res) => {
   // Fixes layered over the mirrored markup. They live outside mirror/ so the
   // clone stays byte-faithful; see overrides/ for what they do and how to move
   // them to WordPress.
-  if (url === '/_overrides.css' || url === '/_overrides.js') {
-    const f = join(ROOT, 'overrides', url === '/_overrides.css' ? 'overrides.css' : 'overrides.js')
+  const OVERRIDE_FILES = {
+    '/_overrides.css': 'overrides.css',
+    '/_overrides.js': 'overrides.js',
+    '/_reviews.css': 'reviews.css',
+    '/_reviews.js': 'reviews.js',
+  }
+  if (OVERRIDE_FILES[url]) {
+    const f = join(ROOT, 'overrides', OVERRIDE_FILES[url])
     if (existsSync(f)) {
       res.writeHead(200, {
         'Content-Type': url.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/javascript; charset=utf-8',
@@ -124,7 +130,9 @@ createServer(async (req, res) => {
     let out = body
     if (type.startsWith('text/html') && process.env.OVERRIDES !== 'off') {
       const tags = '<link rel="stylesheet" href="/_overrides.css">'
+        + '<link rel="stylesheet" href="/_reviews.css">'
         + '<script src="/_overrides.js" defer></script>'
+        + '<script src="/_reviews.js" defer></script>'
       const html = body.toString('utf8')
       const i = html.lastIndexOf('</head>')
       out = Buffer.from(i === -1 ? html + tags : html.slice(0, i) + tags + html.slice(i), 'utf8')
