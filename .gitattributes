@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# The mirror is a byte-faithful copy of what the live server sends. Normalising
+# its line endings would rewrite those bytes on checkout, so the working copy
+# would no longer match what was captured. Store and check it out verbatim.
+mirror/** -text

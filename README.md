@@ -1,4 +1,37 @@
-# inthelightroofing.com — static rebuild
+# inthelightroofing.com
+
+This repo now holds **two** different things. Read this first, or the rest of
+the document will mislead you.
+
+### 1. `mirror/` — the faithful clone (current work)
+
+A byte-faithful static copy of the live site: every page at its own URL, every
+asset, the redirects the live site serves. This is what `npm run dev` serves and
+what is being worked on now.
+
+**See [MIRROR.md](MIRROR.md)** for how it is captured, why it has to be driven
+through a real browser, and what does not work (forms need PHP).
+
+```bash
+npm run dev            # serve the clone at http://127.0.0.1:4321
+npm run check:mirror   # load every page, report broken assets and JS errors
+npm run verify:mirror  # pixel-diff a sample against the live site
+```
+
+### 2. `src/` + `content/` + `build/` — the earlier hand-built rebuild
+
+Everything below this line describes an earlier attempt: a hand-written
+HTML/CSS reconstruction that built to `dist/`. It is much faster than the live
+site, but it had drifted into a *redesign* rather than a copy — different hero
+image, different typography, a hero form the live site does not have, and copy
+referencing the wrong town. It is kept for its performance work and its
+extracted content, and is **not** what the site currently is.
+
+Its build still runs via `npm run build` and is served by `npm run serve`.
+
+---
+
+# The earlier static rebuild
 
 A static rebuild of the live WordPress site at **https://inthelightroofing.com/**,
 captured 3–4 September 2026.

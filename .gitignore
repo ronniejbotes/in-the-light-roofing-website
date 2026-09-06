@@ -9,3 +9,7 @@ shots/
 .DS_Store
 Thumbs.db
 __pycache__/
+
+# scratch diagnostics
+tools/.tmp-*
+mirror-test/

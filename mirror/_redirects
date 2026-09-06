@@ -1,0 +1,19 @@
+# Redirects the live site serves today, each verified with curl against
+# https://inthelightroofing.com/ before being written here.
+# Replayed by build/serve.mjs; see DEPLOY.md for nginx / Apache equivalents.
+#
+# Format: <from> <to> <status>
+
+# WordPress redirects the front page's own slug to the site root.
+/home-in-the-light-roofing-final-update/   /                                                301
+/home-in-the-light-roofing-final-update    /                                                301
+
+# Yoast serves the sitemap index from /sitemap.xml.
+/sitemap.xml                               /sitemap_index.xml                               301
+
+# The post feed is disabled and redirects home. /comments/feed/ is NOT a
+# redirect -- it returns RSS, and is mirrored as a file.
+/feed/                                     /                                                301
+
+# Linked in-content from other pages; 301s to the fuller Center Valley page.
+/service-area/center-valley/               /service-area/center-valley-roofing-contractor/  301

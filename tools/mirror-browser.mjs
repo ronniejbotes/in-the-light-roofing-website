@@ -53,6 +53,30 @@ function rewrite(text, protectMeta) {
   return out.replace(/ MIRROR_KEEP_(\d+) /g, (_, i) => vault[Number(i)])
 }
 
+// A real page on this site is a full WordPress render: hundreds of KB with a
+// head and a body. Anything far smaller, or carrying a server error title, is
+// the site failing under load rather than a page worth mirroring.
+const ERROR_MARKERS = [
+  'Database Error',
+  'Error establishing a database connection',
+  'Service Temporarily Unavailable',
+  '503 Service',
+  'Too Many Requests',
+  'Bad Gateway',
+]
+const MIN_PAGE_BYTES = Number(process.env.MIN_PAGE_BYTES || 20000)
+
+function describeBadPage(html) {
+  for (const m of ERROR_MARKERS) if (html.includes(m)) return `server error page (${m})`
+  if (html.length < MIN_PAGE_BYTES) return `only ${html.length} bytes`
+  return 'unrecognised'
+}
+function isPlausiblePage(html) {
+  if (!html || html.length < MIN_PAGE_BYTES) return false
+  for (const m of ERROR_MARKERS) if (html.includes(m)) return false
+  return /<body/i.test(html)
+}
+
 function pathToFile(urlPath) {
   let p = decodeURIComponent(urlPath.split('?')[0].split('#')[0])
   if (p.endsWith('/') || p === '') return join(OUT, p, 'index.html')
@@ -114,7 +138,11 @@ async function store(res) {
 async function visit(route) {
   return withContext(async (ctx) => {
   const page = await ctx.newPage()
-  page.on('response', (r) => { store(r).catch(() => {}) })
+  // Response bodies must be read before the context closes, so keep hold of
+  // every store() promise and settle them below. Fire-and-forget here silently
+  // loses any asset whose body is still being read when the page goes away.
+  const pending = []
+  page.on('response', (r) => { pending.push(store(r).catch(() => {})) })
   try {
     const res = await page.goto(ORIGIN + route, { waitUntil: 'load', timeout: 60000 })
     // Scroll so lazy images and any deferred CSS actually get requested.
@@ -129,6 +157,17 @@ async function visit(route) {
     // Save the document from the server, not the mutated DOM, so the mirrored
     // markup still boots its own scripts the way the original does.
     const html = await res.text()
+
+    // Under load WordPress answers with a "Database Error" page, still at HTTP
+    // 200. Writing that would bake a broken page into the mirror and look like
+    // a successful capture, so refuse it and let the route be retried.
+    if (!isPlausiblePage(html)) {
+      stats.failed.push(`${route} — rejected: ${describeBadPage(html)}`)
+      await Promise.allSettled(pending)
+      await page.close()
+      return
+    }
+
     const file = pathToFile(route)
     await mkdir(dirname(file), { recursive: true })
     await writeFile(file, rewrite(html, true))
@@ -136,6 +175,7 @@ async function visit(route) {
   } catch (e) {
     stats.failed.push(`${route} — ${e.message.split('\n')[0]}`)
   }
+  await Promise.allSettled(pending)
   await page.close()
   if (stats.pages % 20 === 0) console.log(`  …${stats.pages}/${routes.length} pages, ${stats.assets} assets`)
   })
@@ -146,6 +186,54 @@ let i = 0
 await Promise.all(Array.from({ length: TABS }, async () => {
   while (i < routes.length) await visit(routes[i++])
 }))
+
+/**
+ * Nothing on a page links to the sitemaps, robots.txt or the feeds, so a
+ * browser never requests them and they would be missing from the mirror.
+ * Crawlers do ask for them, so fetch them directly.
+ */
+const recordedRedirects = []
+
+async function fetchDirect(urlPath) {
+  try {
+    // Do not follow: some of these URLs are redirects on the live site
+    // (/feed/ 301s to the homepage). Following one would save a copy of the
+    // target under the source's path instead of reproducing the redirect.
+    const res = await fetch(ORIGIN + urlPath, {
+      headers: { 'User-Agent': UA }, redirect: 'manual',
+    })
+    if (res.status >= 300 && res.status < 400) {
+      const to = (res.headers.get('location') || '').replace(ORIGIN, '') || '/'
+      recordedRedirects.push(`${urlPath}  ${to}  ${res.status}`)
+      return null
+    }
+    if (!res.ok) return `${res.status} ${urlPath}`
+    const body = Buffer.from(await res.arrayBuffer())
+    const file = pathToFile(urlPath)
+    await mkdir(dirname(file), { recursive: true })
+    const isText = /\.(xml|txt)$/.test(urlPath) || !extname(urlPath)
+    await writeFile(file, isText ? rewrite(body.toString('utf8'), true) : body)
+    stats.assets++
+    return null
+  } catch (e) { return `${urlPath} — ${e.message}` }
+}
+
+const orphans = ['/robots.txt', '/sitemap_index.xml', '/post-sitemap.xml', '/page-sitemap.xml',
+  '/testimonial-sitemap.xml', '/category-sitemap.xml', '/feed/', '/comments/feed/']
+console.log(`\nFetching ${orphans.length} files no page links to (sitemaps, robots, feeds)…`)
+for (const o of orphans) {
+  const err = await fetchDirect(o)
+  if (err) stats.failed.push(`orphan ${err}`)
+}
+
+// serve.mjs replays this file, so a redirect on the live site stays a redirect
+// here rather than becoming a duplicate page under the wrong URL.
+if (recordedRedirects.length) {
+  const header = '# Redirects observed on the live site, replayed by build/serve.mjs\n'
+  await writeFile(join(OUT, '_redirects'), header + recordedRedirects.join('\n') + '\n')
+  console.log(`recorded ${recordedRedirects.length} redirect(s) to _redirects`)
+  for (const r of recordedRedirects) console.log(`   ${r}`)
+}
 
 await browser.close()
 console.log('\n--- browser mirror complete ---')
