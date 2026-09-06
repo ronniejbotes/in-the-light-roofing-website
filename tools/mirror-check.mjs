@@ -6,7 +6,7 @@
  * mirror-verify.mjs for pixel comparison against live.
  *
  * Usage:
- *   node tools/mirror-check.mjs                 # every route in the mirror
+ *   node tools/mirror-check.mjs                 # every route in routes.txt
  *   ROUTES_FILE=shots/all-routes.txt node tools/mirror-check.mjs
  */
 import { chromium } from 'playwright-core'
@@ -20,10 +20,13 @@ const CONCURRENCY = Number(process.env.CONCURRENCY || 4)
 const EXEC = process.env.CHROME || join(process.env.USERPROFILE || process.env.HOME || '',
   'AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe')
 
+// routes.txt is the tracked manifest of every URL the mirror must contain; # lines
+// are comments. See mirror-browser.mjs for why it is tracked rather than gitignored.
 async function routeList() {
   if (process.argv.slice(2).length) return process.argv.slice(2)
-  const file = process.env.ROUTES_FILE || join(ROOT, 'shots/all-routes.txt')
-  return (await readFile(file, 'utf8')).split('\n').map((s) => s.trim()).filter(Boolean)
+  const file = process.env.ROUTES_FILE || join(ROOT, 'routes.txt')
+  return (await readFile(file, 'utf8')).split('\n')
+    .map((s) => s.trim()).filter((s) => s && !s.startsWith('#'))
 }
 
 const routes = await routeList()

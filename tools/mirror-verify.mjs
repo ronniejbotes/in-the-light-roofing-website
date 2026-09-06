@@ -38,7 +38,8 @@ const MASK_CSS = `
 const routes = process.argv.slice(2).length
   ? process.argv.slice(2)
   : process.env.ROUTES_FILE
-    ? (await readFile(process.env.ROUTES_FILE, 'utf8')).split('\n').map((s) => s.trim()).filter(Boolean)
+    ? (await readFile(process.env.ROUTES_FILE, 'utf8')).split('\n')
+        .map((s) => s.trim()).filter((s) => s && !s.startsWith('#'))
     : ['/', '/about-us/', '/contact/', '/services/', '/past-work/', '/service-area/']
 
 await mkdir(OUT, { recursive: true })

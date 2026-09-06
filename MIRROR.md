@@ -10,11 +10,11 @@ have, and stray copy referencing the wrong town. The brief was a clone, so this
 captures the real thing instead of re-interpreting it.
 
 ```bash
-npm run dev            # serve the mirror at http://127.0.0.1:4321
+npm run dev            # serve the mirror at http://127.0.0.1:4322
 npm run mirror:browser # re-capture every page
 npm run check:mirror   # load all pages, report broken assets and JS errors
 npm run verify:mirror  # pixel-diff a sample against the live site
-npm run audit:mirror   # static checks: canonicals, crawler-facing URLs
+npm run audit:mirror   # static checks: route coverage, canonicals, crawler URLs
 ```
 
 ---
@@ -50,6 +50,36 @@ non-guest build again.
 `tools/mirror.mjs` is the older HTTP-based crawler. It is faster and still
 useful for discovering URLs, but it captures the guest build — prefer the
 browser one for anything that will be served.
+
+---
+
+## The route manifest
+
+`routes.txt` at the repo root lists every URL the mirror must contain, and is the
+input to a full `npm run mirror:browser`. It is **tracked on purpose**.
+
+Before it existed, the capture list lived in `shots/all-routes.txt` and the build's
+own inventory in `.routes.json` — and both are gitignored. So the definition of
+"the whole site" was not in version control: a fresh clone could not run a full
+capture, and nothing compared the list against reality. That is how the 127 `/tag/`
+archives sat outside the mirror without any check noticing. They are real pages,
+they return 200, and the capture list simply never mentioned them.
+
+Lines beginning with `#` are comments. `mirror-browser.mjs`, `mirror-check.mjs`
+and `mirror-verify.mjs` all read it, and all still accept explicit routes as
+arguments or a different file via `ROUTES_FILE`.
+
+`tools/mirror-audit-routes.mjs` compares the manifest against the mirror in both
+directions, and is the check that was missing:
+
+- **listed but not mirrored** — a URL the capture failed to fetch.
+- **mirrored but not listed** — a page that will go stale, because the next full
+  capture will not re-fetch it.
+
+Pass `--live` to also HEAD every URL against the live site; it is slow and paced
+deliberately, because this WordPress install returns errors under load. Every
+other check the repo had took the capture list as its definition of "the whole
+site", so none of them could ever notice a URL the list had never mentioned.
 
 ---
 
@@ -127,12 +157,19 @@ mirrored as-is rather than quietly repaired:
 - `/service-area/roofing-contractors-bethlehem-pa/` — linked in-content, 404s.
 - `/wp-content/uploads/2024/10/resi-17.webp` — referenced by
   `/service-area/easton/`, 404s.
+- `/wp-content/uploads/2024/09/aero-down.webp` — referenced as a background image
+  by LiteSpeed's own generated CSS, 404s. Nothing in page HTML asks for it, which
+  is why only the asset backstop finds it.
 - `/services/asphalt-shingle-roofing/` returns 200 but canonicalises to
   `/asphalt-shingle-roofing/`, so it asks Google to credit the category archive
   instead of the service page. `mirror-audit-canonical.py` flags it; it is
   faithful, verified against live. Worth fixing at source — a service page
   should be its own canonical.
-- `/services/roof-repairs-campaign/` has no canonical tag and no robots meta,
-  so it is indexable but unclaimed. Also faithful, also worth fixing at source.
 
 All four are worth fixing in WordPress.
+
+`/services/roof-repairs-campaign/` also has no canonical, but it carries
+`noindex, nofollow` and is a campaign landing page, so that is correct rather
+than a defect — Yoast omits the canonical on noindex pages by design. It is
+recorded here only because a first pass mistook it for a problem: the robots
+meta is single-quoted, and a `name="robots"` grep does not find it.

@@ -9,7 +9,8 @@
  * browser actually received.
  *
  * Usage:
- *   node tools/mirror-browser.mjs                       # every route in shots/all-routes.txt
+ *   node tools/mirror-browser.mjs                       # every route in routes.txt
+ *   ROUTES_FILE=other.txt node tools/mirror-browser.mjs  # a different manifest
  *   node tools/mirror-browser.mjs / /contact/           # specific routes
  *   MIRROR_DIR=mirror2 node tools/mirror-browser.mjs
  */
@@ -83,10 +84,29 @@ function pathToFile(urlPath) {
   return extname(p) ? join(OUT, p) : join(OUT, p, 'index.html')
 }
 
+/**
+ * routes.txt is the tracked manifest of every URL the mirror must contain. It is
+ * tracked because shots/all-routes.txt and .routes.json are both gitignored, so a
+ * fresh clone had no definition of "the whole site" -- which is how the 127 /tag/
+ * archives stayed off the capture list without anything noticing. Lines starting
+ * with # are comments.
+ */
+async function routeManifest() {
+  const file = process.env.ROUTES_FILE || 'routes.txt'
+  const text = await readFile(join(ROOT, file), 'utf8')
+  return text.split('\n').map((s) => s.trim()).filter((s) => s && !s.startsWith('#'))
+}
+
 const routes = process.argv.slice(2).length
   ? process.argv.slice(2)
-  : (await readFile(join(ROOT, 'shots/all-routes.txt'), 'utf8'))
-      .split('\n').map((s) => s.trim()).filter(Boolean)
+  : await routeManifest()
+
+// Routes on the command line mean "capture just these". The orphan files and
+// _redirects describe the whole site, not the routes being captured, and both
+// are written by replacing what is there. Doing that from a subset would swap a
+// verified 19-line redirect list for the one redirect this run happened to see.
+// So they are full-run only.
+const FULL_RUN = process.argv.slice(2).length === 0
 
 const stats = { pages: 0, assets: 0, skipped: 0, failed: [] }
 const written = new Set()
@@ -225,15 +245,19 @@ async function fetchDirect(urlPath) {
 
 const orphans = ['/robots.txt', '/sitemap_index.xml', '/post-sitemap.xml', '/page-sitemap.xml',
   '/testimonial-sitemap.xml', '/category-sitemap.xml', '/feed/', '/comments/feed/']
-console.log(`\nFetching ${orphans.length} files no page links to (sitemaps, robots, feeds)…`)
-for (const o of orphans) {
-  const err = await fetchDirect(o)
-  if (err) stats.failed.push(`orphan ${err}`)
+if (FULL_RUN) {
+  console.log(`\nFetching ${orphans.length} files no page links to (sitemaps, robots, feeds)…`)
+  for (const o of orphans) {
+    const err = await fetchDirect(o)
+    if (err) stats.failed.push(`orphan ${err}`)
+  }
+} else {
+  console.log('\nPartial run: leaving the sitemaps, robots.txt, feeds and _redirects alone.')
 }
 
 // serve.mjs replays this file, so a redirect on the live site stays a redirect
 // here rather than becoming a duplicate page under the wrong URL.
-if (recordedRedirects.length) {
+if (FULL_RUN && recordedRedirects.length) {
   const header = '# Redirects observed on the live site, replayed by build/serve.mjs\n'
   await writeFile(join(OUT, '_redirects'), header + recordedRedirects.join('\n') + '\n')
   console.log(`recorded ${recordedRedirects.length} redirect(s) to _redirects`)

@@ -13,7 +13,7 @@ what is being worked on now.
 through a real browser, and what does not work (forms need PHP).
 
 ```bash
-npm run dev            # serve the clone at http://127.0.0.1:4321
+npm run dev            # serve the clone at http://127.0.0.1:4322
 npm run check:mirror   # load every page, report broken assets and JS errors
 npm run verify:mirror  # pixel-diff a sample against the live site
 ```
