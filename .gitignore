@@ -16,3 +16,6 @@ mirror-test/
 
 # Client audit report — contains live vulnerability detail. Never commit to a public repo.
 audit-live-site.md
+
+# Keyword map — client deliverable, keep local until reviewed
+keyword-map.md
