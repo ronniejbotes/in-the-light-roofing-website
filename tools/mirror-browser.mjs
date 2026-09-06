@@ -132,16 +132,42 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 
 /**
- * Every page is captured in a fresh context, i.e. as a first-time visit with no
- * LiteSpeed cookie yet. That is what a visitor arriving from search gets, and
- * it is the state the live site is measured in. Reusing one context would let
- * the cookie carry over and hand us the non-guest build from page two onward,
- * which renders differently.
+ * ONE context for the whole run, primed with LiteSpeed's _lscache_vary cookie.
+ *
+ * Guest mode serves two different documents. Without the cookie you get a
+ * placeholder: 50 script tags but only ONE with src, twelve more parked on
+ * data-src, and a call to guest.vary.php that sets the cookie and tells the page
+ * to reload. The reload is what serves the real document -- 75 scripts, 60 of them
+ * with a live src. A visitor is on the placeholder for a few hundred milliseconds
+ * and spends the rest of the visit on the real one.
+ *
+ * Capturing per-fresh-context froze the placeholder on all 427 pages. Nothing in
+ * a static mirror performs that reload -- serve.mjs answers guest.vary.php with
+ * reload:no, because there is nothing to reload to -- so the deferred scripts never
+ * loaded: 2 same-origin scripts per page instead of 33-40, no elementorFrontend, no
+ * Swiper, and every carousel, accordion, tab and popup dead. The homepage's six
+ * badge images sat spinning on data-src that nothing swapped in.
+ *
+ * So the cookie is acquired up front and kept. Every page is then requested the way
+ * a visitor sees it after the reload, which is the build worth mirroring.
  */
-async function withContext(fn) {
+async function primedContext() {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, userAgent: UA })
-  try { return await fn(ctx) } finally { await ctx.close() }
+  await ctx.request.post(`${ORIGIN}/wp-content/plugins/litespeed-cache/guest.vary.php`)
+    .catch(() => {})
+  const vary = (await ctx.cookies()).find((c) => c.name === '_lscache_vary')
+  if (!vary) {
+    console.error('WARNING: no _lscache_vary cookie. This run would capture the')
+    console.error('         LiteSpeed guest placeholder, whose JavaScript never loads.')
+    console.error('         Aborting rather than mirroring a site with no working JS.')
+    await browser.close()
+    process.exit(3)
+  }
+  console.log('LiteSpeed vary cookie acquired -- capturing the build a visitor ends on.')
+  return ctx
 }
+
+const CTX = await primedContext()
 
 /** Persist one response if it belongs to this site and we have not stored it. */
 async function store(res) {
@@ -178,7 +204,7 @@ async function store(res) {
 }
 
 async function visit(route) {
-  return withContext(async (ctx) => {
+  const ctx = CTX
   const page = await ctx.newPage()
   // Response bodies must be read before the context closes, so keep hold of
   // every store() promise and settle them below. Fire-and-forget here silently
@@ -241,7 +267,6 @@ async function visit(route) {
   await Promise.allSettled(pending)
   await page.close()
   if (stats.pages % 20 === 0) console.log(`  …${stats.pages}/${routes.length} pages, ${stats.assets} assets`)
-  })
 }
 
 console.log(`Browser-mirroring ${routes.length} routes into ${OUT}`)

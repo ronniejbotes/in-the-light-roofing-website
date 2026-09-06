@@ -15,41 +15,55 @@ npm run mirror:browser # re-capture every page
 npm run check:mirror   # load all pages, report broken assets and JS errors
 npm run verify:mirror  # pixel-diff a sample against the live site
 npm run audit:mirror   # static checks: route coverage, canonicals, crawler URLs
+npm run audit:js       # load pages and check the JavaScript actually runs
 ```
 
 ---
 
-## Why it is captured through a browser
+## Why it is captured through a browser, with the cookie
 
-The obvious approach — fetch each URL with an HTTP client and save the bytes —
-produces a mirror that renders subtly wrong, and the reason took a while to
-find.
+The site runs LiteSpeed Cache with **guest mode**, and that means it serves two
+genuinely different documents at the same URL.
 
-The site runs LiteSpeed Cache with **guest mode**. A visitor with no
-`_lscache_vary` cookie is served a stripped "guest" build of the page. Its
-JavaScript then calls `guest.vary.php`, which sets the cookie, and the *next*
-request gets a different build. Crucially, **the same CSS URL serves different
-bytes depending on that cookie**.
+A visitor with no `_lscache_vary` cookie gets a **placeholder**: 50 `<script>`
+tags but only *one* with a real `src`, twelve more parked on `data-src`, and a
+call to `guest.vary.php` that sets the cookie and answers `{"reload":"yes"}`.
+The page reloads, and the second request — now carrying the cookie — returns the
+**real document**: 75 scripts, 60 of them loading normally, no guest machinery.
 
-So a plain `fetch()` captures a self-consistent but wrong combination: guest
-HTML paired with guest CSS. A real browser ends up in a mixed state — the HTML
-arrives before the cookie exists, the stylesheet request goes out after it does.
-That mixture is what visitors actually see.
+A visitor is on the placeholder for a few hundred milliseconds. They spend the
+whole visit on the real one. **That is the build worth mirroring**, so
+`mirror-browser.mjs` acquires the cookie from `guest.vary.php` before it starts
+and keeps one context for the run. Without the cookie it aborts rather than
+capture a site whose JavaScript will not run.
 
-The symptom was a header rendering 81px shorter than live, which shifted every
-pixel below it and dragged whole pages below the similarity bar, while the HTML
-and CSS files compared byte-identical. `.elementor-icon-box-wrapper` computed to
-`display:flex` locally and `display:block` on live, from what looked like the
-same stylesheet.
+### The mistake this replaces
 
-`tools/mirror-browser.mjs` therefore drives a real Chromium, **one fresh context
-per page**, and saves whatever the browser received. A fresh context matters:
-reuse one and the cookie carries over from page two onward, handing you the
-non-guest build again.
+An earlier version captured every page in a *fresh* context, reasoning that a
+first-time visitor arrives without the cookie and that the resulting mixed state
+— guest HTML, non-guest CSS — was what people actually see. It is not: it is the
+moment before the reload, and it froze the placeholder onto all 427 pages.
 
-`tools/mirror.mjs` is the older HTTP-based crawler. It is faster and still
-useful for discovering URLs, but it captures the guest build — prefer the
-browser one for anything that will be served.
+Nothing in a static mirror performs that reload. `serve.mjs` answers
+`guest.vary.php` with `reload:no`, because a static copy has nowhere different to
+reload to. So the deferred scripts never loaded: **2 same-origin scripts per page
+instead of 33–40**, no `jQuery` handlers, no `elementorFrontend`, no `Swiper` —
+every carousel, accordion, tab, popup and mobile menu inert across the whole
+site. The visible tell was six badge logos on the homepage sitting on `data-src`
+that nothing swapped in, which had been written off as "broken on live too". They
+are not: live loads all 18 carousel images.
+
+The lesson is narrow and worth keeping. **Byte-similarity and pixel-similarity
+both passed.** The pages were the right size, the right shape, and 99% pixel-
+identical, because the placeholder renders nearly the same as the real page. What
+differed was what ran afterwards. Check the JavaScript actually executes —
+`typeof window.elementorFrontend`, and the count of same-origin `.js` responses
+against live — because no diff of the stored bytes will tell you.
+
+`tools/mirror.mjs` is the older HTTP crawler. It acquires the vary cookie too,
+but then deliberately fetches *pages* without it, so it has the same defect;
+prefer the browser one for anything that will be served.
+
 
 ---
 
@@ -99,19 +113,29 @@ catches this by comparing each page's own canonical tag against the path it was
 saved at. Verified live redirects live in `mirror/_redirects`, which
 `build/serve.mjs` replays.
 
-**Which build gets captured.** Three document responses arrive per page: the real
-build that `page.goto()` returns, LiteSpeed's guest-mode reload of the *same URL*
-about 20% smaller, and any iframe. `res.text()` on `page.goto()`'s own response is
-the right one. Capturing from the `response` event keyed by URL takes the reload
-instead, which shrinks pages by ~95 KB while still looking like a clean capture —
-compare a page's byte size against live if you ever suspect it.
+**Reading the document body.** Chromium keeps a response body only while it holds
+the resource, and it sometimes evicts the document before `res.text()` is called.
+That used to throw, `visit()` bailed before its rewritten write, and the verbatim
+copy `store()` had already made stayed on disk — which is how nine pages ended up
+serving their CSS, JS and every nav link from the live site. `store()` no longer
+writes documents at all; `visit()` owns them, and a copy taken from the *first*
+response per URL is kept purely as a fallback for the eviction.
 
-Chromium also keeps a response body only while it holds the resource, and sometimes
-evicts the document before `res.text()` is called. That used to throw, `visit()`
-bailed before its rewritten write, and the verbatim copy `store()` had already
-written stayed on disk — which is how nine pages ended up serving their CSS, JS and
-every nav link from the live site. `store()` no longer writes documents at all, and
-a copy taken from the *first* response per URL is kept purely as a fallback.
+The *first* matters. Before the vary cookie was acquired up front, each page
+produced two documents at the same URL — the placeholder and the reload — plus an
+iframe. Keeping the last body per URL took the wrong one. With the cookie there is
+only one document per page, but the guard costs nothing and what it prevents is
+silent.
+
+**Do not size-check against `curl`.** A plain `curl` has no cookie, so it receives
+the guest placeholder — a *different, larger* document than the one the mirror now
+stores. Mirrored pages are legitimately ~20% smaller than a curl fetch of the same
+URL, and that gap is correct rather than a sign of a truncated capture. This
+tripped up an earlier pass: the right build was captured by accident, judged
+"20% short of live", and reverted. To compare like with like, fetch with the
+`_lscache_vary` cookie, or compare rendered behaviour with
+`tools/mirror-audit-js.mjs --live`.
+
 
 **Assets the browser never requests.** Sitemaps, `robots.txt` and feeds are not
 linked from any page, so a crawl alone misses them; they are fetched directly.
