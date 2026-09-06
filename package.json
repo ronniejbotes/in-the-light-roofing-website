@@ -22,7 +22,8 @@
     "extract": "python tools/extract.py && python tools/extract_chrome.py",
     "verify:content": "python tools/verify_text.py",
     "assets": "node tools/fetch-assets.mjs",
-    "audit:js": "node tools/mirror-audit-js.mjs"
+    "audit:js": "node tools/mirror-audit-js.mjs",
+    "dev:raw": "node -e \"process.env.SERVE_DIR='mirror';process.env.OVERRIDES='off';process.env.PORT=process.env.PORT||'4322';import('./build/serve.mjs')\""
   },
   "devDependencies": {
     "playwright-core": "^1.62.1",

@@ -1,0 +1,79 @@
+/*
+ * Fixes layered over the mirrored WordPress markup.
+ *
+ * mirror/ stays a byte-faithful clone -- these are injected by build/serve.mjs
+ * instead of edited in, so the clone keeps its value as a record of what the
+ * live site actually serves. Everything here is plain CSS and is meant to be
+ * pasted into WordPress (Elementor -> Site Settings -> Custom CSS, or the
+ * theme's Additional CSS) when the same fix is made live.
+ */
+
+/* ---------------------------------------------------------------------------
+ * 1. Service grid: one icon size for all six cards.
+ *
+ * The six service cards use the same Elementor image-box markup, but the source
+ * artwork is not the same size: four icons are 60x60 and two -- roof replacement
+ * (wp-image-5320) and roof inspections (wp-image-5322) -- are 330x330. Nothing
+ * constrained them, so those two rendered at 330px, swallowing the photograph
+ * behind them and making their cards five times taller than the rest.
+ *
+ * Constraining the icon rather than patching the two files keeps every card the
+ * same height whatever artwork is dropped in later.
+ * ------------------------------------------------------------------------- */
+/* Scoped to the two offending images by their WordPress attachment ids, NOT to
+ * .elementor-image-box-wrapper generally -- the Service Area town cards use the
+ * same widget, and a blanket 60px rule shrinks all thirteen town photographs to
+ * thumbnails. Learned the hard way; do not widen this selector.
+ *
+ *   wp-image-5320  roof-replacement-icon.webp  (330x330 source)
+ *   wp-image-5322  roof-inspection-icon.webp   (330x330 source)
+ *
+ * The other four service icons are already 60x60 and are left untouched, so all
+ * six cards end up the same height.
+ */
+.elementor-image-box-img img.wp-image-5320,
+.elementor-image-box-img img.wp-image-5322 {
+  width: 60px !important;
+  height: 60px !important;
+  max-width: 60px !important;
+  object-fit: contain;
+  display: block;
+  margin-inline: auto;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. Past Work carousel: full-bleed, continuously scrolling.
+ *
+ * It sat inside the 1170px container and advanced a slide at a time. Now it
+ * spans the viewport and moves at a constant rate. The width break-out uses the
+ * margin trick rather than position:fixed so it still behaves in the document
+ * flow and does not introduce a horizontal scrollbar.
+ * ------------------------------------------------------------------------- */
+.itlr-marquee-carousel {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  overflow: hidden;
+}
+
+/* Constant speed: Swiper sets a transition per slide, and the default easing
+   makes a continuous loop visibly pulse at each boundary. */
+.itlr-marquee-carousel .swiper-wrapper {
+  transition-timing-function: linear !important;
+}
+
+/* The arrows are meaningless once it never stops, and they cover the images. */
+.itlr-marquee-carousel .elementor-swiper-button,
+.itlr-marquee-carousel .swiper-button-next,
+.itlr-marquee-carousel .swiper-button-prev,
+.itlr-marquee-carousel .swiper-pagination {
+  display: none !important;
+}
+
+/* Someone who has asked for less motion should not be handed an endless one. */
+@media (prefers-reduced-motion: reduce) {
+  .itlr-marquee-carousel .swiper-wrapper {
+    transition-duration: 0s !important;
+  }
+}

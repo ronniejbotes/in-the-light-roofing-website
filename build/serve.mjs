@@ -87,6 +87,20 @@ createServer(async (req, res) => {
     return res.end('{}')
   }
 
+  // Fixes layered over the mirrored markup. They live outside mirror/ so the
+  // clone stays byte-faithful; see overrides/ for what they do and how to move
+  // them to WordPress.
+  if (url === '/_overrides.css' || url === '/_overrides.js') {
+    const f = join(ROOT, 'overrides', url === '/_overrides.css' ? 'overrides.css' : 'overrides.js')
+    if (existsSync(f)) {
+      res.writeHead(200, {
+        'Content-Type': url.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/javascript; charset=utf-8',
+        'Cache-Control': 'no-store',
+      })
+      return res.end(await readFile(f))
+    }
+  }
+
   let file = within(url)
   try {
     if (!file) throw new Error('outside the served directory')
@@ -104,8 +118,19 @@ createServer(async (req, res) => {
         ? 'application/rss+xml; charset=utf-8'
         : 'application/xml; charset=utf-8'
     }
+    // Inject the overrides into HTML documents only -- not the RSS feed that
+    // also lives in an index.html, and not when OVERRIDES=off, which is how you
+    // view the mirror exactly as captured.
+    let out = body
+    if (type.startsWith('text/html') && process.env.OVERRIDES !== 'off') {
+      const tags = '<link rel="stylesheet" href="/_overrides.css">'
+        + '<script src="/_overrides.js" defer></script>'
+      const html = body.toString('utf8')
+      const i = html.lastIndexOf('</head>')
+      out = Buffer.from(i === -1 ? html + tags : html.slice(0, i) + tags + html.slice(i), 'utf8')
+    }
     res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' })
-    res.end(body)
+    res.end(out)
   } catch {
     const nf = join(DIST, '404.html')
     const body = existsSync(nf) ? await readFile(nf) : 'Not found'

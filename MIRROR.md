@@ -173,6 +173,49 @@ the bare form is left to become `/`.
 
 ---
 
+## Fixes layered on top: `overrides/`
+
+`mirror/` is a record of what the live site serves, so nothing is edited in it.
+Fixes live in `overrides/` and are injected into every HTML response by
+`build/serve.mjs`:
+
+```bash
+npm run dev                 # mirror + fixes (what you review)
+OVERRIDES=off npm run dev   # the mirror exactly as captured
+```
+
+With `OVERRIDES=off` the served bytes are identical to the committed file —
+verified, not assumed. Both files are written to be pasted into WordPress:
+the CSS into Elementor → Site Settings → Custom CSS, the JS into a footer
+snippet.
+
+**What is in there.**
+
+*Service grid icons.* The six service cards use one Elementor image-box widget,
+but the artwork is not one size: four icons are 60×60 and two — roof replacement
+and roof inspections — are 330×330. Nothing constrained them, so those two
+rendered at full size, swallowing the photograph behind them and making their
+cards five times taller than the rest. The two are pinned to 60×60 by attachment
+id, which makes all six cards the same height.
+
+The selector is deliberately narrow. A first attempt scoped it to
+`.elementor-image-box-wrapper` generally, which also hit the thirteen Service
+Area town cards and shrank every town photograph to a thumbnail. Do not widen it.
+
+*Past Work carousel.* It sat in the 1170px container and stepped one slide at a
+time. It now spans the viewport and crawls continuously: `autoplay.delay: 0`,
+a long `speed`, linear easing and `freeMode`, applied to the Swiper instance
+Elementor has already built. The arrows are hidden, since they mean nothing once
+it never stops, and `prefers-reduced-motion` leaves the carousel as Elementor
+built it.
+
+The script identifies the carousel by content, not by Elementor's generated
+element id, which changes whenever the page is re-saved. The certification-badge
+strip is also a Swiper on the same page, so the match additionally requires
+non-square images larger than 600px — the badges are 450×450 squares.
+
+---
+
 ## Known gaps
 
 **Forms do not submit.** The contact forms are Forminator, posting to
