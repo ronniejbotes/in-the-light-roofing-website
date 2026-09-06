@@ -77,3 +77,42 @@
     transition-duration: 0s !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * 3. Former employee: suppress his slides before the browser fetches them.
+ *
+ * The team carousel gives each crew member a slide with their portrait as a CSS
+ * background and a second portrait on hover. Three Elementor elements carry his
+ * pair -- 6d5023c on the homepage, 56194a8 and 8ac57c0 on /about-us/ -- and each
+ * was checked against the stylesheets to be sure it holds no other crew
+ * member's photograph.
+ *
+ * overrides.js removes these slides from the DOM so Swiper recounts, but that
+ * runs a few hundred milliseconds after load, by which time the browser has
+ * already fetched the background and shown his face. Nulling the image here
+ * means the request is never made: a computed background-image of none fetches
+ * nothing. Verified by watching the network for SEMI7879 and SEMI7885.
+ *
+ * :has() hides the whole slide immediately where supported; the JS removal is
+ * the fallback and the thing that keeps the carousel's slide count honest.
+ * ------------------------------------------------------------------------- */
+.elementor-element-56194a8,
+.elementor-element-6d5023c,
+.elementor-element-8ac57c0,
+.elementor-element-56194a8:hover,
+.elementor-element-6d5023c:hover,
+.elementor-element-8ac57c0:hover,
+.elementor-element-56194a8::before,
+.elementor-element-6d5023c::before,
+.elementor-element-8ac57c0::before,
+.elementor-element-56194a8:hover::before,
+.elementor-element-6d5023c:hover::before,
+.elementor-element-8ac57c0:hover::before {
+  background-image: none !important;
+}
+
+.swiper-slide:has(.elementor-element-56194a8),
+.swiper-slide:has(.elementor-element-6d5023c),
+.swiper-slide:has(.elementor-element-8ac57c0) {
+  display: none !important;
+}
