@@ -2,12 +2,31 @@
 import { createServer } from 'node:http'
 import { readFile, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { join, extname, resolve, dirname } from 'node:path'
+import { join, extname, resolve, dirname, relative, isAbsolute } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const DIST = join(ROOT, process.env.SERVE_DIR || 'dist')
+const DIST = resolve(join(ROOT, process.env.SERVE_DIR || 'dist'))
 const PORT = Number(process.env.PORT || 4321)
+// Loopback by default. Node binds every interface when no host is given, which
+// put this preview -- and, before the check below, every file the traversal
+// could reach -- on the local network.
+const HOST = process.env.HOST || '127.0.0.1'
+
+/**
+ * Resolve a request path inside DIST, or null if it escapes.
+ *
+ * The URL is percent-decoded before it is joined, so "/%2e%2e/package.json"
+ * arrives here as "/../package.json" and join() happily normalises its way out
+ * of the served directory. Confining the resolved path is the only reliable
+ * check: stripping ".." from the raw string misses encoded and doubled forms.
+ */
+function within(urlPath) {
+  const p = resolve(join(DIST, urlPath))
+  const rel = relative(DIST, p)
+  if (rel !== '' && (rel.startsWith('..') || isAbsolute(rel))) return null
+  return p
+}
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -59,11 +78,13 @@ createServer(async (req, res) => {
     return res.end('{}')
   }
 
-  let file = join(DIST, url)
+  let file = within(url)
   try {
+    if (!file) throw new Error('outside the served directory')
     const s = await stat(file).catch(() => null)
-    if (s?.isDirectory() || url.endsWith('/')) file = join(DIST, url, 'index.html')
-    if (!existsSync(file) && !extname(file)) file = join(DIST, url, 'index.html')
+    if (s?.isDirectory() || url.endsWith('/')) file = within(join(url, 'index.html'))
+    if (file && !existsSync(file) && !extname(file)) file = within(join(url, 'index.html'))
+    if (!file) throw new Error('outside the served directory')
     const body = await readFile(file)
     // WordPress feeds live at extension-less URLs, so they land in index.html
     // files. Sniff the payload rather than trusting the extension, or a reader
@@ -82,4 +103,4 @@ createServer(async (req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' })
     res.end(body)
   }
-}).listen(PORT, () => console.log(`Preview: http://127.0.0.1:${PORT}/`))
+}).listen(PORT, HOST, () => console.log(`Preview: http://${HOST}:${PORT}/`))
