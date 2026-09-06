@@ -12,43 +12,105 @@ These are on **inthelightroofing.com right now**. They are not caused by this
 rebuild and they are not fixed by it: the WordPress install keeps serving the
 site until cutover, and the exposure continues until someone acts.
 
-### 1a. Arbitrary PHP execution through the contact form's file upload
+### 1a. The site is compromised — a webshell still executes today
 
-Someone has uploaded PHP files through a Forminator file-upload field and the
-server **executes them**. Verified on 4 September 2026:
+Someone uploaded script files through a Forminator file-upload field and the
+server **executes them**. First verified 4 September 2026; re-checked and still
+live on 6 September 2026.
 
-```
-GET /wp-content/uploads/forminator/8230_4ddfcf0a11b756c0c2a3006d23a77668/uploads/hL8qv27mdGTb-nx-7f3a9c2e.php
-  → 200, text/html, 33 bytes:  Nxploited_Forminator_Sig_7f3a9c2e
+**Specifics are deliberately not written here — see below.** Twelve attacker
+files sit in one Forminator upload folder across six extensions (`.php`, `.php3`,
+`.php4`, `.php5`, `.phtml`, `.phar`), all carrying the signature of a known
+automated exploit kit.
 
-GET .../qPEGYxDIhZVs-nx-7f3a9c2e.phar
-  → 200, application/octet-stream, 51 bytes:  <?php echo 'Nxploited_Forminator_Sig_7f3a9c2e'; ?>
-```
+Execution is proven by a control case rather than inferred: the `.phar` sibling
+returns its `<?php` source intact as `application/octet-stream`, while the `.php`
+returns only the echoed output with the tags gone. The server ran the file.
 
-The `.phar` comes back as raw source with its `<?php` tags intact. The `.php`
-comes back with the tags gone and only the echoed string left — the server ran
-it. There are **12 such files** (`.php`, `.php3`, `.php4`, `.php5`, `.phtml`,
-`.phar`), all signed `Nxploited`, which is the marker of an automated exploit
-scanner. They are proof-of-concept payloads, but the upload-and-execute path
-they prove is real and is open.
+**This is not only proof-of-concept.** One of the twelve is a password-gated
+"Admin Login" form. Its source — readable through the non-executing `.phar`
+sibling — shows an MD5 password gate that on success fetches a payload from a
+public GitHub repository and `eval()`s it into the running site. That remote
+payload still returns HTTP 200 and is roughly 62 KB. This is a functioning
+backdoor, not a calling card.
 
-**What to do, today, on the live site:**
+The uploads arrived in **two waves, 22 and 24 August 2026** (the later confirmed
+by a `last-modified` header, the earlier from the REST media endpoint and worth
+confirming against filesystem timestamps). Something came back two days later and
+re-confirmed the hole, which is what automated tooling does when a host stays
+open.
 
-1. Delete `/wp-content/uploads/forminator/` entirely.
-2. Update or remove the Forminator plugin.
-3. Block PHP execution under `wp-content/uploads` at the server level.
-4. Audit `wp-content/uploads` for anything else written since these appeared,
-   and check for unexpected admin users, scheduled tasks and modified core files.
-5. Rotate WordPress, hosting and database credentials.
+**What to do, on the live site, in this order:**
+
+0. **Before deleting anything**, copy the applicant CVs and the price list off
+   the webroot — they are personal data and may be the client's only copy — and
+   preserve the twelve files with their filesystem timestamps. Those timestamps
+   are the only record of when this began, and step 1 destroys them.
+1. Maintenance mode. Delete `/wp-content/uploads/forminator/` entirely.
+2. Update or remove Forminator.
+3. Deny PHP execution anywhere under `wp-content/uploads` at server level — an
+   `.htaccess` in `uploads` denying `\.(php|php3|php4|php5|phtml|phar)$`.
+4. Audit for what a repeat visit may have left: unexpected administrator
+   accounts, unexpected WP-Cron entries, files in `wp-includes` / `wp-admin`
+   modified since 22 August.
+5. Rotate WordPress, hosting and database credentials — **after** the door is
+   shut, not before. Rotating first buys false assurance while the server still
+   executes uploaded PHP.
+
+Because a working backdoor was reachable for at least two weeks, restoring from a
+pre-22-August backup is safer than cleaning in place. That is the client's call,
+but put it to them as a call.
+
+---
+
+**Why the exploit path is not written down here.** This repository is public on
+GitHub, and until 6 September 2026 this section published the exact filename,
+directory hash and payload signature — a working route to remote code execution
+on a client site that is still compromised, indexed and searchable by anyone
+looking for exactly that string. The specifics now live only in the local,
+gitignored audit report (`audit-live-site.md`), which is not committed. Do not
+paste them back into any file in this repo while it is public.
 
 ### 1b. Job applicants' CVs and an internal price list are publicly downloadable
 
-The same upload directories are world-readable and **directory listing is on**
-(`/wp-content/uploads/forminator/8230_231d5779a1c51cc3ec5a5a5eeffbe707/uploads/`
-returns 200). Confirmed reachable by URL with no authentication:
+**Correction (6 Sep 2026): directory listing is already OFF, and turning it off
+would therefore fix nothing.** `/wp-content/uploads/` returns a LiteSpeed 404,
+and the Forminator folders return HTTP 200 with `content-length: 0` — an empty
+`index.html`, not a listing. The files are reachable by two other routes:
 
-- Four named individuals' CVs submitted through the careers form (PDF/DOCX).
-- `PRICE-LIST-2025_july.docx`.
+- `/wp-json/wp/v2/media?media_type=application` publishes an index of them
+  (`x-wp-total: 9`), and
+- `/?attachment_id=<id>` redirects straight to a file, so nobody needs to know
+  the random folder hash.
+
+Each file also has a public attachment permalink whose slug contains the
+applicant's surname, so a name is exposed in the URL string itself. `robots.txt`
+has no `Disallow` for `/wp-content/uploads/`.
+
+Still reachable with no authentication, re-checked 6 September 2026:
+
+- Eight resumes belonging to four named job applicants (PDF/DOCX). One sampled
+  returned HTTP 200, 67,774 bytes.
+- The company's internal price list (filename withheld here — see the local
+  audit report) — HTTP 200, 110,972 bytes.
+
+**Delete the attachment records, not just the files.** `/wp-json/wp/v2/media`
+reads `wp_posts`; removing the files from disk leaves the media entries still
+publishing the ids, filenames and applicant surnames. In WP Admin, Media Library
+→ Bulk Select → Delete Permanently for attachment IDs **8875, 9523, 9632, 9830,
+9831, 9872, 10151, 10152, 10153**, then confirm `x-wp-total` drops to 0.
+
+There is no attachment sitemap in `sitemap_index.xml`, so these were never
+actively submitted to Google — the exposure is reachability, not confirmed
+indexing. After deleting, check Search Console and file a Removals request for
+anything that appears.
+
+**On the legal framing, be careful.** Pennsylvania's breach-notification statute
+keys on a name combined with a Social Security number, driver's licence or
+financial account number. A resume alone may not trigger a statutory duty. None
+of these documents were opened, deliberately, so nobody knows what is in them.
+Put it to the client as confidential applicant data exposed on the open web and a
+decision they make knowingly — do not assert a legal obligation.
 
 This is personal data belonging to job applicants. It should come down
 regardless of the rebuild, and it is worth a conversation about whether it needs
@@ -85,16 +147,47 @@ Every page carries this in `<head>`:
       href="http://inthelightroofing.zb167wadjd-ez94dq1rz3mr.p.temp-site.link/wp-content/uploads/2024/05/bnr-bg.webp">
 ```
 
-That host does not resolve, the URL is plain `http://`, and the file 404s. So
-every page load spends a request on a failed high-priority image preload. There
-are 568 references to that staging host across the site in total, on all 427
-pages. All of them are gone here; the LCP preload now points at the real image.
+The URL is plain `http://` and the file 404s, so every page load spends a
+request on a failed high-priority image preload. There are 568 references to that
+staging host across the site in total, on all 427 pages. All of them are gone
+here; the LCP preload now points at the real image.
+
+**Correction (6 Sep 2026).** An earlier version of this note said the host does
+not resolve. It does: `nslookup` returns 3.23.6.147 and the root returns HTTP 200
+serving the hosting provider's "Website Unavailable" placeholder. Every asset
+path under it 404s, which is what matters, but the host is a live placeholder
+rather than a dead DNS record.
+
+The preload is the least of it. The same hostname is stored in the WordPress
+database and reaches the served HTML in two more places: the `og:image` meta tag
+on **49 pages**, and the Yoast JSON-LD `ImageObject` (`url`, `contentUrl`,
+`thumbnailUrl`) on **31 pages**. All five staging URLs 404; all five files serve
+200 from the real domain at identical paths. So every time someone shares a
+service or town page — Facebook, WhatsApp, iMessage, Nextdoor — the link preview
+comes back with no photo. Fix it in WordPress with Better Search Replace or
+`wp search-replace` (not raw SQL: Elementor stores serialised postmeta and the
+`s:NN:` length prefixes must be rewritten).
 
 ### 2c. The reviews on /past-work/ now actually render
 
-`/past-work/` contains 16 customer reviews in its markup. On the live site the
-carousel never initialises: the wrapper computes to **0 × 0 and none of the 16
-is visible to anyone** (verified in a browser, not just from the CSS).
+`/past-work/` contains 16 customer reviews in its markup. On the live site none
+of the 16 is visible to anyone, at any screen size.
+
+**Correction (6 Sep 2026).** The observed outcome was right; the cause recorded
+here was wrong. It is not a carousel failing to initialise. The wrapper section
+`cb80e2d` carries all seven of Elementor's responsive-hide classes at once —
+`elementor-hidden-widescreen` through `elementor-hidden-mobile` — so it is
+`display:none` at every breakpoint, deliberately. That changes the fix from
+debugging a script to unticking seven checkboxes under Advanced → Responsive.
+
+It also explains the alt-text finding: 112 of the 123 `<img>` tags on the live
+page have no `alt`, and all 112 sit inside this hidden section. Writing alt text
+for them before unhiding it would be wasted work.
+
+Do not simply unhide it. The newest of the 16 reviews is dated 20/03/2024 and
+eleven predate 2024; publishing a proof page whose freshest review is two years
+old reads worse than no page. Refresh the reviews first, and settle the
+conflicting counts (see §3.2) — the header says 237 and 18, this section says 39.
 
 They are real, published reviews — the same ones that exist as the testimonial
 post type — so they are rendered here as a proper card grid. If the client would

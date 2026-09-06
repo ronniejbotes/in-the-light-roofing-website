@@ -13,3 +13,6 @@ __pycache__/
 # scratch diagnostics
 tools/.tmp-*
 mirror-test/
+
+# Client audit report — contains live vulnerability detail. Never commit to a public repo.
+audit-live-site.md
