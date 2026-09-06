@@ -6,7 +6,7 @@ import { join, extname, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const DIST = join(ROOT, 'dist')
+const DIST = join(ROOT, process.env.SERVE_DIR || 'dist')
 const PORT = Number(process.env.PORT || 4321)
 
 const TYPES = {
@@ -41,16 +41,40 @@ createServer(async (req, res) => {
     return res.end()
   }
 
+  // LiteSpeed's guest-mode script POSTs here on every page load and parses the
+  // reply as JSON. Without a valid answer the parse throws, and the exception
+  // takes out the rest of that bundle -- which is what leaves nav submenus
+  // expanded. Live answers {"reload":"yes"}; a static copy has nothing to
+  // reload to, so it declines instead.
+  if (url.endsWith('/litespeed-cache/guest.vary.php')) {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
+    return res.end('{"reload":"no"}')
+  }
+
+  // CallRail's beacon posts visit data to a WordPress REST route. There is no
+  // PHP here to receive it, and an unanswered POST logs an error on every page,
+  // so acknowledge it and drop it on the floor.
+  if (req.url.includes('rest_route=/Calltrk/')) {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
+    return res.end('{}')
+  }
+
   let file = join(DIST, url)
   try {
     const s = await stat(file).catch(() => null)
     if (s?.isDirectory() || url.endsWith('/')) file = join(DIST, url, 'index.html')
     if (!existsSync(file) && !extname(file)) file = join(DIST, url, 'index.html')
     const body = await readFile(file)
-    res.writeHead(200, {
-      'Content-Type': TYPES[extname(file)] || 'application/octet-stream',
-      'Cache-Control': 'no-store',
-    })
+    // WordPress feeds live at extension-less URLs, so they land in index.html
+    // files. Sniff the payload rather than trusting the extension, or a reader
+    // asking for /comments/feed/ would be handed text/html.
+    let type = TYPES[extname(file)] || 'application/octet-stream'
+    if (extname(file) === '.html' && body.subarray(0, 5).toString() === '<?xml') {
+      type = body.includes('<rss') || body.includes('<feed')
+        ? 'application/rss+xml; charset=utf-8'
+        : 'application/xml; charset=utf-8'
+    }
+    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' })
     res.end(body)
   } catch {
     const nf = join(DIST, '404.html')

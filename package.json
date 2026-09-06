@@ -14,7 +14,10 @@
     "dev": "node build/dev.mjs",
     "serve": "node build/serve.mjs",
     "verify:build": "node tools/verify-build.mjs",
-    "check": "npm run build && npm run verify:build"
+    "check": "npm run build && npm run verify:build",
+    "mirror": "node tools/mirror.mjs",
+    "serve:mirror": "node -e \"process.env.SERVE_DIR='mirror';process.env.PORT=process.env.PORT||'4322';import('./build/serve.mjs')\"",
+    "verify:mirror": "node tools/mirror-verify.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.62.1",
