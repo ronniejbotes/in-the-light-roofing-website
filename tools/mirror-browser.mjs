@@ -47,10 +47,25 @@ function rewrite(text, protectMeta) {
       out = out.replace(re, (m) => { vault.push(m); return ` MIRROR_KEEP_${vault.length - 1} ` })
     }
   }
-  for (const host of [ORIGIN, ...ALIAS_HOSTS.map((h) => `https://${h}`), 'http://inthelightroofing.com']) {
-    out = out.split(host).join('')
+  const hosts = [ORIGIN, ...ALIAS_HOSTS.map((h) => `https://${h}`), 'http://inthelightroofing.com']
+
+  // A bare origin -- the host with no path after it -- is a link to the homepage.
+  // Stripping it outright leaves href="", which a browser resolves to the current
+  // document, so the "Home" breadcrumb on 178 pages pointed at the page it was
+  // already on. The with-path form is parked under a sentinel first so that only
+  // the bare form is left to become '/'.
+  const MARK = 'MIRROR_ORIGIN_MARK'
+  for (const host of hosts) {
+    out = out.split(host + '/').join(MARK)
+    out = out.split(host).join('/')
+    out = out.split(MARK).join('/')
   }
-  out = out.split(ORIGIN.replace(/\//g, '\\/')).join('')
+
+  // The same origin appears slash-escaped inside JSON payloads.
+  const esc = ORIGIN.replace(/\//g, '\\/')
+  out = out.split(esc + '\\/').join(MARK)
+  out = out.split(esc).join('\\/')
+  out = out.split(MARK).join('\\/')
   return out.replace(/ MIRROR_KEEP_(\d+) /g, (_, i) => vault[Number(i)])
 }
 
@@ -133,6 +148,13 @@ async function store(res) {
   const url = res.url()
   if (!url.startsWith(ORIGIN)) return
   if (res.status() !== 200) return
+  // visit() writes the page's own document, rewritten. This handler fires for
+  // that same response, and store() writes anything that is not CSS or JS
+  // verbatim -- so both write the same path and whichever lands last decides
+  // whether the page keeps live-origin URLs. It is a race, and it was lost on
+  // 9 of 427 pages, each left with ~130 links and assets pointing at the live
+  // site. Documents belong to visit(); everything else to store().
+  if (res.request().resourceType() === 'document') return
   const urlPath = url.slice(ORIGIN.length) || '/'
   const bare = urlPath.split('?')[0]
   if (/\.php(\?|$)/.test(bare)) return
@@ -162,9 +184,34 @@ async function visit(route) {
   // every store() promise and settle them below. Fire-and-forget here silently
   // loses any asset whose body is still being read when the page goes away.
   const pending = []
-  page.on('response', (r) => { pending.push(store(r).catch(() => {})) })
+  // Three document responses arrive per page: the real build that page.goto()
+  // returns, then LiteSpeed's guest-mode reload of the SAME URL -- about 20%
+  // smaller -- and any iframe. Keep only the FIRST body per URL: keying by URL and
+  // letting the last win captures the reload, which is the wrong build and shrank
+  // nine pages by ~95 KB when it was tried.
+  //
+  // This copy exists only as a fallback. Chromium keeps a response body just while
+  // it holds the resource, and it sometimes evicts the document before res.text()
+  // is called -- which threw, so visit() bailed before its rewritten write and left
+  // whatever store() had written verbatim. That is what stranded those nine pages.
+  const docs = new Map()
+  page.on('response', (r) => {
+    if (r.request().resourceType() === 'document') {
+      if (!docs.has(r.url())) {
+        docs.set(r.url(), r.body().then((b) => b.toString('utf8')).catch(() => null))
+      }
+      return
+    }
+    pending.push(store(r).catch(() => {}))
+  })
   try {
     const res = await page.goto(ORIGIN + route, { waitUntil: 'load', timeout: 60000 })
+
+    // page.goto()'s own response is the right build; the captured copy is only for
+    // when Chromium has already evicted it.
+    let html = await res.text().catch(() => null)
+    if (html === null) html = await docs.get(res.url())
+    if (html === null || html === undefined) throw new Error('could not read the document body')
     // Scroll so lazy images and any deferred CSS actually get requested.
     await page.evaluate(async () => {
       for (let y = 0; y < document.body.scrollHeight; y += 800) {
@@ -173,10 +220,6 @@ async function visit(route) {
       window.scrollTo(0, 0)
     }).catch(() => {})
     await page.waitForTimeout(1500)
-
-    // Save the document from the server, not the mutated DOM, so the mirrored
-    // markup still boots its own scripts the way the original does.
-    const html = await res.text()
 
     // Under load WordPress answers with a "Database Error" page, still at HTTP
     // 200. Writing that would bake a broken page into the mirror and look like
@@ -258,10 +301,27 @@ if (FULL_RUN) {
 // serve.mjs replays this file, so a redirect on the live site stays a redirect
 // here rather than becoming a duplicate page under the wrong URL.
 if (FULL_RUN && recordedRedirects.length) {
-  const header = '# Redirects observed on the live site, replayed by build/serve.mjs\n'
-  await writeFile(join(OUT, '_redirects'), header + recordedRedirects.join('\n') + '\n')
-  console.log(`recorded ${recordedRedirects.length} redirect(s) to _redirects`)
-  for (const r of recordedRedirects) console.log(`   ${r}`)
+  const dest = join(OUT, '_redirects')
+  if (!existsSync(dest)) {
+    const header = '# Redirects observed on the live site, replayed by build/serve.mjs\n'
+    await writeFile(dest, header + recordedRedirects.join('\n') + '\n')
+    console.log(`wrote ${recordedRedirects.length} redirect(s) to _redirects`)
+  } else {
+    // _redirects is curated: every rule was verified against live by hand, and the
+    // file carries the comments explaining why. A run only ever observes redirects
+    // among the handful of orphan files, so rebuilding the file from that drops the
+    // rest -- it would have been 5 verified rules replaced by 1 observed. Report the
+    // drift and let a person reconcile it.
+    const have = new Set((await readFile(dest, 'utf8')).split('\n')
+      .filter((l) => l.trim() && !l.startsWith('#'))
+      .map((l) => l.trim().split(/\s+/)[0]))
+    const novel = recordedRedirects.filter((r) => !have.has(r.split(/\s+/)[0]))
+    console.log(`observed ${recordedRedirects.length} redirect(s); _redirects left alone (curated)`)
+    if (novel.length) {
+      console.log(`  ${novel.length} not in _redirects -- add by hand if real:`)
+      for (const r of novel) console.log(`     ${r}`)
+    }
+  }
 }
 
 await browser.close()

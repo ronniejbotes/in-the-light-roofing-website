@@ -50,7 +50,16 @@ if (existsSync(rf)) {
 }
 
 createServer(async (req, res) => {
-  const url = decodeURIComponent(req.url.split('?')[0])
+  // A malformed escape ("/%zz") makes decodeURIComponent throw. Unhandled, the
+  // request is answered with a dropped connection rather than a status, which is
+  // indistinguishable from the server being down. Answer 400 and carry on.
+  let url
+  try {
+    url = decodeURIComponent(req.url.split('?')[0])
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' })
+    return res.end('Bad request')
+  }
 
   const hit = redirects.find((r) =>
     r.from.endsWith('/*') ? url.startsWith(r.from.slice(0, -1)) : r.from === url

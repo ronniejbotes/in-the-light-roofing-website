@@ -9,6 +9,15 @@
  *                   the live site emits, byte for byte.
  *
  * Exits non-zero on any failure so it can gate a deploy.
+ *
+ * Checks 1 and 3 compare against a capture of the live site: capture-results.json
+ * and raw/ under ITLR_SCRATCH. Both used to skip silently when that was absent --
+ * check 1 warned, check 3 did not even do that -- and the run still finished with
+ * "All checks passed" having compared nothing. Since the default location is a
+ * machine-local temp directory that Windows clears, that is what any other machine,
+ * a fresh clone, or CI would have got. Missing input is now a failure, not a pass.
+ *
+ *   ITLR_SCRATCH=/path/to/live-capture npm run verify:build
  */
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
@@ -70,7 +79,14 @@ if (existsSync(capturePath)) {
     .filter(([, v]) => v.code === 200)
     .map(([p]) => p)
 } else {
-  note(warn, `No live capture at ${capturePath}; skipping URL-parity check.`)
+  note(fail,
+    `No live capture at ${capturePath}, so URL parity and SEO parity cannot run.
+` +
+    `    Two of this tool's three checks compare against a capture of the live site.
+` +
+    `    Point ITLR_SCRATCH at a directory holding capture-results.json and raw/,
+` +
+    `    or treat this run as unverified -- it is not a pass.`)
 }
 
 const missing = liveRoutes.filter((r) => !covered(r))
@@ -171,6 +187,15 @@ console.log(`  live 200 URLs        ${liveRoutes.length}`)
 console.log(`  redirects declared   ${redirects.size}`)
 console.log(`  internal links check ${checkedLinks}`)
 console.log(`  SEO fields compared  ${seoChecked * 4} across ${seoChecked} pages`)
+
+// A silent zero here is the failure mode this tool used to hide: every route
+// skipped for want of a live file, and a green "All checks passed" on the end.
+if (seoChecked === 0) {
+  note(fail, `SEO parity compared 0 pages -- no live HTML found under ${join(SCRATCH, 'raw')}.`)
+} else if (seoChecked < built.size) {
+  note(warn, `SEO parity covered ${seoChecked} of ${built.size} built pages; ` +
+    `${built.size - seoChecked} had no live capture to compare against.`)
+}
 
 for (const w of warn) console.log('\nWARN  ' + w)
 for (const f of fail) console.log('\nFAIL  ' + f)

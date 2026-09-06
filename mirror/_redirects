@@ -17,3 +17,13 @@
 
 # Linked in-content from other pages; 301s to the fuller Center Valley page.
 /service-area/center-valley/               /service-area/center-valley-roofing-contractor/  301
+
+# Insurance.svg and INSURANCE.svg are two files on the live host differing only
+# in filename case -- the same artwork at a 60x60 and an 80x80 viewBox (every
+# coordinate scales by 4/3: 35.625 -> 47.5, 6.875 -> 9.16667). NTFS cannot hold
+# both names in one directory, so the mirror stores the uppercase file and sends
+# the lowercase URL to it. SVG scales and the rendered size is set in CSS, so
+# they are visually interchangeable. Without this, the three pages that
+# reference the lowercase name lose the icon on any case-sensitive host --
+# which is every Linux and macOS checkout, and most static hosts.
+/wp-content/uploads/2023/12/Insurance.svg  /wp-content/uploads/2023/12/INSURANCE.svg        301

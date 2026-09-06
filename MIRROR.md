@@ -99,6 +99,20 @@ catches this by comparing each page's own canonical tag against the path it was
 saved at. Verified live redirects live in `mirror/_redirects`, which
 `build/serve.mjs` replays.
 
+**Which build gets captured.** Three document responses arrive per page: the real
+build that `page.goto()` returns, LiteSpeed's guest-mode reload of the *same URL*
+about 20% smaller, and any iframe. `res.text()` on `page.goto()`'s own response is
+the right one. Capturing from the `response` event keyed by URL takes the reload
+instead, which shrinks pages by ~95 KB while still looking like a clean capture —
+compare a page's byte size against live if you ever suspect it.
+
+Chromium also keeps a response body only while it holds the resource, and sometimes
+evicts the document before `res.text()` is called. That used to throw, `visit()`
+bailed before its rewritten write, and the verbatim copy `store()` had already
+written stayed on disk — which is how nine pages ended up serving their CSS, JS and
+every nav link from the live site. `store()` no longer writes documents at all, and
+a copy taken from the *first* response per URL is kept purely as a fallback.
+
 **Assets the browser never requests.** Sitemaps, `robots.txt` and feeds are not
 linked from any page, so a crawl alone misses them; they are fetched directly.
 `tools/mirror-fill.mjs` is the backstop — it scans every mirrored page and
@@ -125,6 +139,13 @@ XML sitemap — so the rewrite flattened all 270 of those URLs before this was
 caught. `mirror-browser.mjs` now writes these files verbatim, and
 `tools/mirror-audit-crawler-urls.py` fails the build if anything flattens them
 again.
+
+**A bare origin becomes `/`, not nothing.** The strip loop used to replace the
+origin with an empty string, so a URL that was *just* the origin — the Essential
+Addons breadcrumb's "Home" link — became `href=""`, which a browser resolves to
+the current document. 178 pages had a Home link that reloaded the page the visitor
+was already on. The with-path form is now parked under a sentinel first, so only
+the bare form is left to become `/`.
 
 ---
 
