@@ -7,4 +7,4 @@ Disallow: /trackback/
 Disallow: /xmlrpc.php
 
 # Sitemap index location
-Sitemap: /sitemap_index.xml
+Sitemap: https://inthelightroofing.com/sitemap_index.xml

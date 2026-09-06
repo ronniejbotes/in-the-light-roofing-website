@@ -211,8 +211,13 @@ async function fetchDirect(urlPath) {
     const body = Buffer.from(await res.arrayBuffer())
     const file = pathToFile(urlPath)
     await mkdir(dirname(file), { recursive: true })
-    const isText = /\.(xml|txt)$/.test(urlPath) || !extname(urlPath)
-    await writeFile(file, isText ? rewrite(body.toString('utf8'), true) : body)
+    // Written verbatim, deliberately. These files exist to tell a crawler where
+    // things are, and both specs require an absolute URL to do it: a sitemap
+    // <loc> that is root-relative makes the whole file invalid, and a relative
+    // Sitemap: line in robots.txt is ignored. The rewrite that makes pages
+    // origin-independent would flatten every one of them, so it is not applied
+    // here. KEEP_ABSOLUTE cannot help: it matches HTML tags, not <loc> or RSS.
+    await writeFile(file, body)
     stats.assets++
     return null
   } catch (e) { return `${urlPath} — ${e.message}` }

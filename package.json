@@ -11,6 +11,7 @@
     "mirror:browser": "node tools/mirror-browser.mjs",
     "check:mirror": "node tools/mirror-check.mjs",
     "verify:mirror": "node tools/mirror-verify.mjs",
+    "audit:mirror": "python tools/mirror-audit-canonical.py && python tools/mirror-audit-crawler-urls.py",
     "functions:mirror": "node tools/mirror-functions.mjs",
     "serve": "node build/serve.mjs",
     "build": "npm run build:bundle && npm run build:html",

@@ -14,6 +14,7 @@ npm run dev            # serve the mirror at http://127.0.0.1:4321
 npm run mirror:browser # re-capture every page
 npm run check:mirror   # load all pages, report broken assets and JS errors
 npm run verify:mirror  # pixel-diff a sample against the live site
+npm run audit:mirror   # static checks: canonicals, crawler-facing URLs
 ```
 
 ---
@@ -85,6 +86,16 @@ those would tell a crawler every page is the homepage and strip the schema of
 the `@id` values that tie its entities together. An early version of the rewrite
 did exactly that; the `KEEP_ABSOLUTE` list in both mirror tools prevents it.
 
+**The crawler-facing files are not rewritten at all.** The five sitemaps,
+`robots.txt` and `/comments/feed/` exist to tell a crawler where things are, and
+both specs require an absolute URL to do it: a root-relative `<loc>` makes the
+whole sitemap invalid, and a relative `Sitemap:` line in `robots.txt` is ignored.
+`KEEP_ABSOLUTE` was no help here — it matches HTML tags, and there are none in an
+XML sitemap — so the rewrite flattened all 270 of those URLs before this was
+caught. `mirror-browser.mjs` now writes these files verbatim, and
+`tools/mirror-audit-crawler-urls.py` fails the build if anything flattens them
+again.
+
 ---
 
 ## Known gaps
@@ -110,11 +121,18 @@ kills the rest of that script bundle:
   nothing to reload to)
 - CallRail's `rest_route=/Calltrk/` beacon → `{}`
 
-**Defects reproduced faithfully.** Two things are broken on the live site and
-are mirrored as-is rather than quietly repaired:
+**Defects reproduced faithfully.** These are wrong on the live site and are
+mirrored as-is rather than quietly repaired:
 
 - `/service-area/roofing-contractors-bethlehem-pa/` — linked in-content, 404s.
 - `/wp-content/uploads/2024/10/resi-17.webp` — referenced by
   `/service-area/easton/`, 404s.
+- `/services/asphalt-shingle-roofing/` returns 200 but canonicalises to
+  `/asphalt-shingle-roofing/`, so it asks Google to credit the category archive
+  instead of the service page. `mirror-audit-canonical.py` flags it; it is
+  faithful, verified against live. Worth fixing at source — a service page
+  should be its own canonical.
+- `/services/roof-repairs-campaign/` has no canonical tag and no robots meta,
+  so it is indexable but unclaimed. Also faithful, also worth fixing at source.
 
-Both are worth fixing at source in WordPress.
+All four are worth fixing in WordPress.
