@@ -18,9 +18,14 @@
  * twitter:description and the WebPage description follow. Search, social and
  * schema then agree, which is the point.
  */
+import { readFileSync, existsSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
   SITE, getTitle, setTitle, getMeta, setMeta, getYoastGraph, replaceJsonLd, replaceOnce, replaceAll, escapeHtml,
 } from './lib.mjs'
+
+const HERE = dirname(fileURLToPath(import.meta.url))
 
 /* ------------------------------------------------------------------ spec */
 
@@ -42,26 +47,57 @@ export const DESCRIPTIONS = {
  */
 export const H1 = {}
 
-/** url -> [{ find, replace }] exact, once-per-page text edits. */
+/**
+ * url -> [{ find, replace }] exact, once-per-page text edits.
+ *
+ * The bulk of these live in edits.json, written from the content audit and
+ * reviewed line by line: statewide "Pennsylvania" H1s become the Lehigh Valley
+ * the company serves; town-page H1s that were the brand name become "Roofing
+ * Contractor in <Town>, PA"; the insurance page stops promising to negotiate or
+ * maximise a claim; "guarantee", "decades", "leading", "#1" and "top" go where
+ * nothing on the site supports them; 34 sentences placing the company in Huron,
+ * Ohio are corrected or cut. Three proposals were rejected: repointing the
+ * Bethlehem tel: links (the number may be a live call-tracking line), changing
+ * a form option's value attribute (a handler may key on it -- the label alone
+ * is fixed), and a canonical edit that meta.mjs already makes.
+ */
 export const REPLACEMENTS = {
-  // A find-and-replace on the live site left a sentence naming a town in the
-  // wrong grammatical slot. The page is regional; say so.
-  '/services/new-roof-installation/': [
-    { find: 'In the Whitehall, In the Light Roofing is your go-to partner', replace: 'In the Lehigh Valley, In the Light Roofing is your go-to partner' },
-  ],
-  // The H1 is "Roof Inspections" with the sub-line in a span; with no space
-  // between them anything that reads the text sees "Roof InspectionsServices".
-  '/services/roof-inspections/': [
-    { find: 'Roof Inspections<span>Services in Pennsylvania</span>', replace: 'Roof Inspections <span>Services in Pennsylvania</span>' },
-  ],
   // The Easton page references a photograph that does not exist on the live
   // site either (resi-17.webp 404s). The sibling in the same set that the page
   // does not already show stands in for it -- a broken image is worse than a
   // different roof.
   '/service-area/easton/': [
     { find: 'src="/assets/2024/10/resi-17.webp"', replace: 'src="/assets/2024/10/resi-18.webp"' },
+    // The brand name in this sentence is wrapped in an <a>, so the edit starts after it.
+    { find: ' is proud to contribute to the beauty and resilience of homes in this dynamic city.',
+      replace: ' is proud to contribute to the beauty and resilience of homes in this dynamic city. If icicles are forming along your gutters this winter, read our guide to <a href="/ice-dam-prevention-in-easton/">ice dam prevention in Easton</a>.' },
+  ],
+  // The one verified Allentown-specific fact on the site is the address on
+  // /contact/; it is the one truthful differentiator this page can carry.
+  '/service-area/allentown/': [
+    { find: ' is honored to contribute to the preservation of Allentown’s historic architecture.',
+      replace: ' is honored to contribute to the preservation of Allentown’s historic architecture. Our office is at 871 N Fenwick St, Allentown, PA 18109 — call (484) 553-0213 or use the <a href="/contact/">contact page</a> to book a free estimate.' },
+  ],
+  // Third geography on one page: H1 said Pennsylvania, the description Lehigh
+  // Valley, the body Center Valley. The brand link that follows is kept.
+  '/services/roof-inspections/': [
+    { find: 'In Center Valley, <a href="https://g.co/kgs/upMJXvq"', replace: 'In Allentown and across the Lehigh Valley, <a href="https://g.co/kgs/upMJXvq"' },
+  ],
+  // Ohio comparisons whose sentences carry inline markup the audit's plain-text
+  // finds could not see.
+  '/storm-damage-repair-in-macungie/': [
+    { find: 'Just as roofing strategies differ between hail-prone areas like Huron and flood-prone regions in Ohio, <b>storm damage repair in Macungie</b>', replace: '<b>Storm damage repair in Macungie</b>' },
+  ],
+  '/common-summer-roofing-issues-allentown/': [
+    { find: '</a> in Huron, Ohio, and let us help you keep your roof in excellent condition.', replace: '</a> in Allentown, PA, and let us help you keep your roof in excellent condition.' },
   ],
 }
+
+const EDITS = existsSync(join(HERE, 'edits.json')) ? JSON.parse(readFileSync(join(HERE, 'edits.json'), 'utf8')) : { titles: {}, descriptions: {}, replacements: {}, ohio: {} }
+Object.assign(TITLES, EDITS.titles)
+Object.assign(DESCRIPTIONS, EDITS.descriptions)
+for (const [u, list] of Object.entries(EDITS.replacements)) REPLACEMENTS[u] = [...(REPLACEMENTS[u] || []), ...list]
+for (const [u, list] of Object.entries(EDITS.ohio)) REPLACEMENTS[u] = [...(REPLACEMENTS[u] || []), ...list]
 
 /** Site-wide exact replacements: [find, replace]. */
 export const GLOBAL_REPLACEMENTS = [
@@ -82,6 +118,10 @@ export const GLOBAL_REPLACEMENTS = [
   // The brand's own casing -- logo, footer, BBB listing, homepage title -- is
   // "The". Yoast's title suffix on 591 pages had "the".
   ['| In the Light Roofing', '| In The Light Roofing'],
+  // The estimate form's service dropdown, on every money page: the label is
+  // fixed, the value attribute a handler may key on is left alone.
+  ['>New Roof Installment</option>', '>New Roof Installation</option>'],
+  ['>New Roof Installtion</a>', '>New Roof Installation</a>'],
 ]
 
 /**
@@ -108,6 +148,18 @@ export const GLOBAL_REGEX_REPLACEMENTS = [
 export const DEMOTE_PASTED_H1 = new Set(['/summer-roof-inspection-checklist-lehigh-valley-2026/'])
 
 /* ---------------------------------------------------------------- engine */
+
+/** A regex source matching `find` with entity/whitespace variants of its characters. */
+function tolerant(find) {
+  const ENT = { '’': '(?:’|&#8217;|&rsquo;)', '‘': '(?:‘|&#8216;|&lsquo;)', '“': '(?:“|&#8220;|&ldquo;)', '”': '(?:”|&#8221;|&rdquo;)', '–': '(?:–|&#8211;|&ndash;)', '—': '(?:—|&#8212;|&mdash;)', '&': '(?:&amp;|&)', "'": "(?:'|&#039;|&#8217;)" }
+  let out = ''
+  for (const ch of find) {
+    if (/\s/.test(ch)) { if (!out.endsWith('\\s+')) out += '\\s+'; continue }
+    if (ENT[ch]) { out += ENT[ch]; continue }
+    out += ch.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')
+  }
+  return out
+}
 
 function setH1(html, inner) {
   // Only the first <h1>; the pasted-H1 posts are handled separately.
@@ -152,8 +204,19 @@ export async function transformDoc(doc, ctx) {
   }
 
   for (const { find, replace } of REPLACEMENTS[url] || []) {
-    const n = html.split(find).length - 1
-    if (n === 1) { html = html.split(find).join(replace); bump('replacements') } else miss(`find matched ${n}x: ${find.slice(0, 60)}`)
+    let n = html.split(find).length - 1
+    if (n === 1) { html = html.split(find).join(replace); bump('replacements'); continue }
+    if (n === 0) {
+      // The mirror's headings break lines inside the tag ("Roof Repair\n<span>")
+      // and WordPress stores curly quotes and ampersands as entities; a spec
+      // written from rendered text has a space and the characters. Match on
+      // any whitespace run and either form of each character, once.
+      const re = new RegExp(tolerant(find), 'g')
+      const hits = html.match(re) || []
+      if (hits.length === 1) { html = html.replace(re, () => replace); bump('replacements'); continue }
+      n = hits.length
+    }
+    miss(`find matched ${n}x: ${find.slice(0, 70)}`)
   }
 
   for (const [find, replace] of GLOBAL_REPLACEMENTS) {

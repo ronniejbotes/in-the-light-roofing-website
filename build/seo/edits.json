@@ -1,0 +1,612 @@
+{
+ "titles": {
+  "/": "Lehigh Valley Roofing Contractor | In The Light Roofing",
+  "/about-us/": "About Bryson Berard & In The Light Roofing, Allentown PA",
+  "/contact/": "Contact Us | In The Light Roofing, Allentown PA",
+  "/past-work/": "Reviews & Past Work | In The Light Roofing, Allentown PA",
+  "/careers/": "Roofing Jobs, Lehigh Valley PA | In The Light Roofing",
+  "/roof-types/": "Roof Types: Asphalt Shingle & EPDM | In The Light Roofing",
+  "/services/": "Our Roofing Services | In The Light Roofing, Allentown PA",
+  "/service-area/": "Roofing Service Areas | In The Light Roofing, Allentown PA",
+  "/services/asphalt-shingle-roofing/": "Asphalt Shingle Roofing, Allentown PA | In The Light Roofing",
+  "/services/epdm-rubber-roofing/": "EPDM Flat Roofing, Allentown PA | In The Light Roofing",
+  "/services/insurance-claim-facilitation/": "Roof Insurance Claim Help | In The Light Roofing, Allentown",
+  "/services/new-roof-installation/": "New Roof Installation in Allentown | In The Light Roofing",
+  "/services/roof-inspections/": "Roof Inspections in Allentown, PA | In The Light Roofing",
+  "/services/roof-repairs/": "Roof Repair in Allentown, PA | In The Light Roofing",
+  "/services/roof-repairs-campaign/": "Roof Repair in Allentown, PA | In The Light Roofing",
+  "/services/roof-replacement/": "Roof Replacement in Allentown, PA | In The Light Roofing",
+  "/services/storm-damage-repair/": "Storm Damage Roof Repair in Allentown | In The Light Roofing",
+  "/service-area/allentown/": "Roofing Contractor in Allentown, PA | In The Light Roofing",
+  "/service-area/roofers-bethlehem-pa/": "Roofers in Bethlehem, PA | In The Light Roofing",
+  "/service-area/center-valley-roofing-contractor/": "Roofing Contractor, Center Valley PA | In The Light Roofing",
+  "/service-area/easton/": "Roofing Contractor in Easton, PA | In The Light Roofing",
+  "/service-area/whitehall/": "Roofing Contractor in Whitehall, PA | In The Light Roofing",
+  "/service-area/macungie/": "Roofing Contractor in Macungie, PA | In The Light Roofing",
+  "/service-area/northampton/": "Roofing Contractor in Northampton, PA | In The Light Roofing",
+  "/service-area/catasauqua/": "Roofing Contractor in Catasauqua, PA | In The Light Roofing",
+  "/service-area/coplay/": "Roofing Contractor in Coplay, PA | In The Light Roofing",
+  "/service-area/slatington/": "Roofing Contractor in Slatington, PA | In The Light Roofing",
+  "/service-area/walnutport/": "Roofing Contractor in Walnutport, PA | In The Light Roofing",
+  "/service-area/lehigh-valley/": "Roofing in the Lehigh Valley, PA | In The Light Roofing"
+ },
+ "descriptions": {
+  "/": "Roof repair, replacement and storm damage repair for homes across the Lehigh Valley, from our base in Allentown, PA. Se habla español. Call (484) 553-0213.",
+  "/about-us/": "Meet Bryson Berard, owner of In The Light Roofing, and the team behind our roof repairs and replacements across the Lehigh Valley since 2017. (484) 553-0213.",
+  "/contact/": "In The Light Roofing: (484) 553-0213, info@inthelightroofing.com, 871 N Fenwick St, Allentown, PA 18109. Free roofing estimates across the Lehigh Valley.",
+  "/past-work/": "Read what Lehigh Valley homeowners say about In The Light Roofing's roof repairs and replacements, in their own words. Free estimates: call (484) 553-0213.",
+  "/careers/": "Roofing jobs at In The Light Roofing, Lehigh Valley PA: project manager, roof repair technician and sales roles in Bethlehem and Center Valley. Apply online.",
+  "/roof-types/": "In The Light Roofing installs two roof types in the Lehigh Valley: asphalt shingle for homes and EPDM rubber for flat commercial roofs. (484) 553-0213.",
+  "/services/": "Roof repair, replacement, new roof installation, inspections, storm damage repair and insurance claim help in Allentown and the Lehigh Valley. (484) 553-0213.",
+  "/service-area/": "In The Light Roofing serves Allentown, Bethlehem, Easton, Whitehall, Macungie, Northampton, Catasauqua, Coplay, Slatington and Walnutport, PA. (484) 553-0213.",
+  "/services/asphalt-shingle-roofing/": "Asphalt shingle roof installation, repair and replacement for homes in Allentown and the Lehigh Valley. Free estimates. In The Light Roofing: (484) 553-0213.",
+  "/services/epdm-rubber-roofing/": "Commercial flat roof installation, repair and maintenance in EPDM rubber for businesses in Allentown and the Lehigh Valley. Free estimate: (484) 553-0213.",
+  "/services/insurance-claim-facilitation/": "Storm-damaged roof in Allentown or the Lehigh Valley? In The Light Roofing documents the damage and helps you through the insurance claim. (484) 553-0213.",
+  "/services/new-roof-installation/": "New roof installation for new builds and full tear-offs in Allentown and the Lehigh Valley. Asphalt shingle roofs by In The Light Roofing. (484) 553-0213.",
+  "/services/roof-inspections/": "Roof inspections in Allentown and the Lehigh Valley: leaks, damaged shingles and storm damage found before they spread. In The Light Roofing: (484) 553-0213.",
+  "/services/roof-repairs/": "Roof repair and roof leak repair for homes in Allentown and across the Lehigh Valley. Asphalt shingle and EPDM roofs. Free estimate: call (484) 553-0213.",
+  "/services/roof-repairs-campaign/": "Roof repair and roof leak repair for homes in Allentown and across the Lehigh Valley. Asphalt shingle and EPDM roofs. Free estimate: call (484) 553-0213.",
+  "/services/roof-replacement/": "Full roof replacement for homes in Allentown and the Lehigh Valley. Asphalt shingle roofs, no cost to quote. In The Light Roofing: (484) 553-0213.",
+  "/services/storm-damage-repair/": "Storm damage roof repair in Allentown and the Lehigh Valley: missing shingles, leaks and fallen tree limbs, and help with the insurance claim. (484) 553-0213.",
+  "/service-area/allentown/": "In The Light Roofing: roofing contractor at 871 N Fenwick St, Allentown, PA. Roof repair, replacement, inspections and storm damage repair. (484) 553-0213.",
+  "/service-area/roofers-bethlehem-pa/": "Roofers serving Bethlehem, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Free estimate: (484) 553-0213.",
+  "/service-area/center-valley-roofing-contractor/": "Roofing contractor serving Center Valley, PA: roof repair, replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/easton/": "Roofing contractor serving Easton, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/whitehall/": "Roofing contractor serving Whitehall, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/macungie/": "Roofing contractor serving Macungie, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/northampton/": "Roofing contractor serving Northampton, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/catasauqua/": "Roofing contractor serving Catasauqua, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/coplay/": "Roofing contractor serving Coplay, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/slatington/": "Roofing contractor serving Slatington, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/walnutport/": "Roofing contractor serving Walnutport, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
+  "/service-area/lehigh-valley/": "Roofing across the Lehigh Valley, PA, from Allentown and Bethlehem to Easton and Macungie: repair, replacement, inspections and storm damage. (484) 553-0213."
+ },
+ "replacements": {
+  "/": [
+   {
+    "find": "Local roof repairs and replacements built to protect Pennsylvania homes for the long haul.",
+    "replace": "Local roof repairs and replacements built to protect Lehigh Valley homes for the long haul."
+   },
+   {
+    "find": "<span class=\"elementor-button-text\">Why Center Valley Trusts Us</span>",
+    "replace": "<span class=\"elementor-button-text\">Why Lehigh Valley Homeowners Trust Us</span>"
+   },
+   {
+    "find": "Get a Free Estimate From a Leading Roofing Company in PA",
+    "replace": "Get a Free Estimate From a Local Lehigh Valley Roofing Company"
+   },
+   {
+    "find": "Roofing Done Right in Pennsylvania | Lehigh Valley | Center Valley | Macungie | Bethlehem and more.",
+    "replace": "Roofing Done Right Across the Lehigh Valley: Allentown, Bethlehem, Easton, Macungie and More"
+   },
+   {
+    "find": "Hear directly from satisfied customers across Pennsylvania who trust In The Light Roofing",
+    "replace": "Hear directly from satisfied customers across the Lehigh Valley who trust In The Light Roofing"
+   },
+   {
+    "find": "Our team of skilled roofers brings decades of combined experience to every job.",
+    "replace": "Our team of skilled roofers brings hands-on experience to every job."
+   }
+  ],
+  "/about-us/": [
+   {
+    "find": "About <span>Us</span>",
+    "replace": "About <span>In The Light Roofing</span>"
+   },
+   {
+    "find": "Established in 2017 in the heart of Lehigh Valley, Bryson’s vision was to create a roofing company that transcended the norm.",
+    "replace": "Established in 2017 and based in Allentown, PA, Bryson’s vision was to create a roofing company that transcended the norm."
+   }
+  ],
+  "/contact/": [
+   {
+    "find": "Contact <span>Us</span>",
+    "replace": "Contact <span>In The Light Roofing, Allentown PA</span>"
+   }
+  ],
+  "/past-work/": [
+   {
+    "find": "Past<span> Work</span>",
+    "replace": "Customer Reviews<span> and Past Work</span>"
+   },
+   {
+    "find": "4.9 rating of 39 reviews",
+    "replace": "What Lehigh Valley homeowners say about us"
+   }
+  ],
+  "/careers/": [
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/roof-types/": [
+   {
+    "find": "<span class=\"eael-dch-title-text eael-dch-title-lead lead solid-color\">In the</span> <span class=\"eael-dch-title-text\">Light Roofing</span>",
+    "replace": "<span class=\"eael-dch-title-text eael-dch-title-lead lead solid-color\">Roof Types We Install:</span> <span class=\"eael-dch-title-text\">Asphalt Shingle and EPDM Rubber</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/services/": [
+   {
+    "find": "<span class=\"eael-dch-title-text eael-dch-title-lead lead solid-color\">In the</span> <span class=\"eael-dch-title-text\">Light Roofing</span>",
+    "replace": "<span class=\"eael-dch-title-text eael-dch-title-lead lead solid-color\">Roofing Services</span> <span class=\"eael-dch-title-text\">in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/service-area/": [
+   {
+    "find": "<span class=\"eael-dch-title-text eael-dch-title-lead lead solid-color\">In the</span> <span class=\"eael-dch-title-text\">Light Roofing</span>",
+    "replace": "<span class=\"eael-dch-title-text eael-dch-title-lead lead solid-color\">Where We Work:</span> <span class=\"eael-dch-title-text\">Roofing Service Areas Across the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/services/asphalt-shingle-roofing/": [
+   {
+    "find": "Asphalt Shingle Roofing\n<span>Services in Pennsylvania</span>",
+    "replace": "Asphalt Shingle Roofing\n<span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/services/epdm-rubber-roofing/": [
+   {
+    "find": "EPDM Rubber Roofing\n<span>Repair in Pennsylvania</span>",
+    "replace": "Commercial Flat Roofing with EPDM Rubber\n<span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "Durable and Weather-Resistant Roofing for Your Commercial Property",
+    "replace": "Flat Roofing for Your Commercial Property: Why EPDM Rubber?"
+   },
+   {
+    "find": "For commercial properties in the vibrant Lehigh Valley, In the Light Roofing offers durable and weather-resistant EPDM rubber roofing services.",
+    "replace": "For commercial buildings with flat or low-slope roofs in Allentown and the Lehigh Valley, In the Light Roofing installs, repairs and maintains EPDM rubber roofing."
+   },
+   {
+    "find": "In the Pennsylvania area, In the Light Roofing offers routine services to keep your commercial roof in optimal condition.",
+    "replace": "Across the Lehigh Valley, In the Light Roofing offers routine services to keep your commercial flat roof in optimal condition."
+   },
+   {
+    "find": "Our services guarantee your commercial property remains well-protected in all conditions.",
+    "replace": "Our services help keep your commercial property protected in all conditions."
+   }
+  ],
+  "/services/insurance-claim-facilitation/": [
+   {
+    "find": "Insurance Claim Facilitation\n<span>Insurance Claim Facilitation\n</span>",
+    "replace": "Help With Your Roof Insurance Claim\n<span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "We minimize stress by handling the paperwork, negotiations, and communication with your insurance company.",
+    "replace": "We minimize stress by handling the documentation and the communication with your insurance company."
+   },
+   {
+    "find": "Maximizing Claim Coverage",
+    "replace": "Clear Documentation of the Damage"
+   },
+   {
+    "find": "Having professionals handle your insurance claim increases the likelihood of maximizing coverage.",
+    "replace": "Thorough photos and written documentation of the damage give your insurer a clear picture of the repair that is needed."
+   },
+   {
+    "find": "In the Light Roofing's industry expertise ensures a comprehensive understanding of insurance policies and procedures, guaranteeing accurate and efficient facilitation",
+    "replace": "In the Light Roofing's experience with roof insurance claims means the paperwork is prepared accurately and moves without unnecessary delay"
+   },
+   {
+    "find": "Our streamlined processes and proactive approach result in faster claim resolution. In the Light, Roofing aims to expedite the insurance claim process for your convenience.",
+    "replace": "Our organized process helps keep your claim moving. In the Light Roofing aims to make the insurance claim process as smooth as possible for you."
+   }
+  ],
+  "/services/new-roof-installation/": [
+   {
+    "find": "New Roof Installation\n<span>Services in Pennsylvania</span>",
+    "replace": "New Roof Installation\n<span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "In the Whitehall, In the Light Roofing is your go-to partner for expert new roof installation services.",
+    "replace": "In Allentown and across the Lehigh Valley, In the Light Roofing is your go-to partner for expert new roof installation services."
+   }
+  ],
+  "/services/roof-inspections/": [
+   {
+    "find": "Roof Inspections<span>Services in Pennsylvania</span>",
+    "replace": "Roof Inspections <span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/services/roof-repairs/": [
+   {
+    "find": "Roof Repair\n<span>Services in Pennsylvania</span>",
+    "replace": "Roof Repair and Leak Repair\n<span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "comprehensive <a href=\"https://g.co/kgs/upMJXvq\" target=\"_blank\" rel=\"nofollow noopener external\">roof repair services</a>.",
+    "replace": "comprehensive roof repair services."
+   }
+  ],
+  "/services/roof-repairs-campaign/": [
+   {
+    "find": "Roof Repair\n<span>Services in Pennsylvania</span>",
+    "replace": "Roof Repair and Leak Repair\n<span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/services/roof-replacement/": [
+   {
+    "find": "Roof Replacement\n<span>Services in Pennsylvania</span>",
+    "replace": "Roof Replacement\n<span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/services/storm-damage-repair/": [
+   {
+    "find": "Storm Damage\n<span>Repair in Pennsylvania\n</span>",
+    "replace": "Storm Damage Roof Repair\n<span>in Allentown and the Lehigh Valley</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "In the Lehigh Valley, In the Light Roofing's rapid response ensures your home is protected from subsequent damage.",
+    "replace": "In the Lehigh Valley, In the Light Roofing's prompt repairs help protect your home from further damage."
+   },
+   {
+    "find": "When storms leave your roof in disarray, trust In the Light Roofing for swift and reliable storm damage repair.",
+    "replace": "When storms leave your roof in disarray, trust In the Light Roofing for swift and reliable storm damage repair. If the damage is covered by your homeowner's policy, we can also <a href=\"/services/insurance-claim-facilitation/\">help with your roof insurance claim</a>."
+   }
+  ],
+  "/service-area/allentown/": [
+   {
+    "find": "In the Light Roofing\n<span>Allentown</span>",
+    "replace": "Roofing Contractor\n<span>in Allentown, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Roofing Contractor Based in Allentown, Serving the Lehigh Valley</p>"
+   },
+   {
+    "find": "Premier Roofing Solution in Allentown, PA",
+    "replace": "Your Allentown Roofing Contractor for Repairs, Replacement and Inspections"
+   },
+   {
+    "find": "Welcome to In the Light Roofing, your premier roofing partner in the charming city of Allentown.",
+    "replace": "Welcome to In the Light Roofing, the roofing contractor based in Allentown, PA."
+   }
+  ],
+  "/service-area/roofers-bethlehem-pa/": [
+   {
+    "find": "Roofers Bethlehem PA <span>Homeowners Trust</span> for Roofing Solutions",
+    "replace": "Roofers in Bethlehem, PA <span>Homeowners Trust</span>"
+   }
+  ],
+  "/service-area/center-valley-roofing-contractor/": [
+   {
+    "find": "Expert Center Valley Roofing Contractor\n<span>for Top-Quality Home Services</span>",
+    "replace": "Center Valley Roofing Contractor\n<span>for Roof Repair, Replacement and Inspections</span>"
+   }
+  ],
+  "/service-area/easton/": [
+   {
+    "find": "In the Light Roofing\n<span>Easton</span>",
+    "replace": "Roofing Contractor\n<span>in Easton, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/service-area/whitehall/": [
+   {
+    "find": "In the Light Roofing\n<span>Whitehall</span>",
+    "replace": "Roofing Contractor\n<span>in Whitehall, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "In the Light Roofing is honored to contribute to the beauty and durability of homes in this vibrant part of Pennsylvania.",
+    "replace": "In the Light Roofing is honored to contribute to the beauty and durability of homes in this vibrant part of the Lehigh Valley. For Whitehall homeowners we have written two local guides: <a href=\"/roof-maintenance-in-whitehall/\">roof maintenance in Whitehall</a> and <a href=\"/roof-replacement-in-whitehall/\">when to schedule a roof replacement in Whitehall</a>."
+   }
+  ],
+  "/service-area/macungie/": [
+   {
+    "find": "In the Light Roofing\n<span>Macungie</span>",
+    "replace": "Roofing Contractor\n<span>in Macungie, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "In the Light Roofing is honored to contribute to preserving the beauty and structural integrity of homes in this welcoming town.",
+    "replace": "In the Light Roofing is honored to contribute to preserving the beauty and structural integrity of homes in this welcoming town. If a storm has left shingles in your yard, our guide to <a href=\"/storm-damage-repair-in-macungie/\">storm damage repair in Macungie</a> explains what to check first and when to call."
+   }
+  ],
+  "/service-area/northampton/": [
+   {
+    "find": "In the Light Roofing\n<span>Northampton</span>",
+    "replace": "Roofing Contractor\n<span>in Northampton, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/service-area/catasauqua/": [
+   {
+    "find": "In the Light Roofing\n<span>Serving catasauqua</span>",
+    "replace": "Roofing Contractor\n<span>in Catasauqua, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "In the Light Roofing is proud to contribute to the preservation of the town’s historic charm.",
+    "replace": "In the Light Roofing is proud to contribute to the preservation of the town’s historic charm. Before fall storm season, read our guide to <a href=\"/roof-inspection-in-catasauqua/\">roof inspections in Catasauqua</a>."
+   }
+  ],
+  "/service-area/coplay/": [
+   {
+    "find": "In the Light Roofing\n<span>Coplay</span>",
+    "replace": "Roofing Contractor\n<span>in Coplay, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/service-area/slatington/": [
+   {
+    "find": "In the Light Roofing\n<span>Slatington</span>",
+    "replace": "Roofing Contractor\n<span>in Slatington, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/service-area/walnutport/": [
+   {
+    "find": "In the Light Roofing\n<span>Walnutport</span>",
+    "replace": "Roofing Contractor\n<span>in Walnutport, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/service-area/lehigh-valley/": [
+   {
+    "find": "In the Light Roofing\n<span>Serving Lehigh Valley</span>",
+    "replace": "Roofing Across\n<span>the Lehigh Valley, PA</span>"
+   },
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "Trusted Roofing Partner in the Heart of Pennsylvania",
+    "replace": "Trusted Roofing Partner in the Heart of the Lehigh Valley"
+   },
+   {
+    "find": "Comprehensive Roofing Services in Allentown",
+    "replace": "Comprehensive Roofing Services Across the Lehigh Valley"
+   }
+  ]
+ },
+ "ohio": {
+  "/asphalt-shingles-or-epdm-rubber-roofing/": [
+   {
+    "find": "Unlike sudden monsoons in Ohio or hailstorms in Huron, Bethlehem’s roofing issues often come from back-to-back fall storms followed by quick freezes.",
+    "replace": "Bethlehem’s roofing issues often come from back-to-back fall storms followed by quick freezes."
+   }
+  ],
+  "/attic-condensation-in-philadelphia/": [
+   {
+    "find": "Philadelphia experiences frequent winter temperature swings, similar to how hailstorms affect Huron or sudden monsoons impact Ohio homes.",
+    "replace": "Philadelphia experiences frequent winter temperature swings."
+   }
+  ],
+  "/benefits-regular-roof-inspections-humid-weather/": [
+   {
+    "find": "Maintaining the integrity of your roof is crucial, especially in humid climates like Huron, Ohio.",
+    "replace": "Maintaining the integrity of your roof is crucial, especially in humid weather."
+   },
+   {
+    "find": "Choose a reputable roofing company like In The Light Roofing in Huron, Ohio, for professional assessments.",
+    "replace": "Choose a reputable roofing company like In The Light Roofing in Allentown, PA, for professional assessments."
+   },
+   {
+    "find": "At In The Light Roofing, we specialize in providing thorough inspections tailored to the humid climate of Huron, Ohio.",
+    "replace": "At In The Light Roofing, we provide thorough roof inspections for homes across Allentown and the Lehigh Valley."
+   }
+  ],
+  "/best-summer-roofing-materials-allentown/": [
+   {
+    "find": "In this article, In The Light Roofing, located in Huron, Ohio, will guide you through the best roofing materials that can withstand the summer heat while providing lasting benefits.",
+    "replace": "In this article, In The Light Roofing, based in Allentown, PA, will guide you through the best roofing materials that can withstand the summer heat while providing lasting benefits."
+   },
+   {
+    "find": "For expert advice and installation services, contact In The Light Roofing in Huron, Ohio, and ensure your home stays cool and protected all summer long.",
+    "replace": "For expert advice and installation services, contact In The Light Roofing in Allentown, PA, and ensure your home stays cool and protected all summer long."
+   }
+  ],
+  "/common-summer-roofing-issues-allentown/": [
+   {
+    "find": "In The Light Roofing in Huron, Ohio, offers comprehensive roofing services to ensure your roof remains in excellent condition throughout the summer.",
+    "replace": "In The Light Roofing in Allentown, PA, offers comprehensive roofing services to ensure your roof remains in excellent condition throughout the summer."
+   }
+  ],
+  "/delaying-roof-repairs-in-bethlehem/": [
+   {
+    "find": "Unlike hailstorms in Huron or sudden monsoons in Ohio, Bethlehem’s weather combines several stressors:",
+    "replace": "Bethlehem’s weather combines several stressors:"
+   }
+  ],
+  "/energy-efficient-roof-installations-pa/": [
+   {
+    "find": "In The Light Roofing in Huron, Ohio, is dedicated to providing high-quality roofing services that meet the unique needs of Pennsylvania homeowners.",
+    "replace": "In The Light Roofing in Allentown, PA, is dedicated to providing high-quality roofing services that meet the unique needs of Lehigh Valley homeowners."
+   }
+  ],
+  "/fall-roof-inspections-in-lehigh-valley/": [
+   {
+    "find": "Unlike hailstorms in Huron, OH, or unexpected monsoons in the Midwest, our area experiences fluctuating freeze-thaw cycles that put roofs under immense stress.",
+    "replace": "Our area experiences fluctuating freeze-thaw cycles that put roofs under immense stress."
+   }
+  ],
+  "/ice-dam-prevention-in-easton/": [
+   {
+    "find": "We get nor’easters up the Delaware Valley, polar chills sweeping from New York, and occasional oddities like hailstorms drifting in from Huron or monsoon-like bursts from Ohio systems.",
+    "replace": "We get nor’easters up the Delaware Valley and polar chills sweeping down from the north."
+   }
+  ],
+  "/ice-dams-in-allentown/": [
+   {
+    "find": "Just like hailstorms in Huron or sudden monsoons in Ohio stress roofs in different ways, Allentown’s freeze-thaw cycles demand localized solutions.",
+    "replace": "Allentown’s freeze-thaw cycles demand localized solutions."
+   }
+  ],
+  "/roof-humidity-preparation-allentown/": [
+   {
+    "find": "At In The Light Roofing in Huron, Ohio, we recommend bi-annual inspections to ensure your roof remains in optimal condition.",
+    "replace": "At In The Light Roofing in Allentown, PA, we recommend bi-annual inspections to ensure your roof remains in optimal condition."
+   },
+   {
+    "find": "In The Light Roofing offers comprehensive roofing services in Huron, Ohio, with a focus on high-quality workmanship and customer satisfaction.",
+    "replace": "In The Light Roofing offers comprehensive roofing services in Allentown and the Lehigh Valley, PA, with a focus on high-quality workmanship and customer satisfaction."
+   },
+   {
+    "find": "Trust In The Light Roofing for all your roofing needs in Huron, Ohio.",
+    "replace": "Trust In The Light Roofing for all your roofing needs in Allentown and the Lehigh Valley."
+   }
+  ],
+  "/roof-inspection-in-catasauqua/": [
+   {
+    "find": "Our crews know the unique challenges here: high winds that sweep across open fields, sudden downpours like those Ohio-style monsoons that can hit in fall, and even the occasional hailstorm from Huron that takes everyone by surprise.",
+    "replace": "Our crews know the unique challenges here: high winds that sweep across open fields and sudden downpours that can hit in fall."
+   }
+  ],
+  "/roof-maintenance-in-whitehall/": [
+   {
+    "find": "Our crews often compare this weather pattern to hailstorms in Huron or sudden monsoons in Ohio, unpredictable, fast-changing, and tough on materials.",
+    "replace": "This weather pattern is unpredictable, fast-changing, and tough on materials."
+   }
+  ],
+  "/roof-replacement-in-whitehall/": [
+   {
+    "find": "Hailstorms occasionally sweep down from Huron, and sudden cold snaps can hit like those monsoon-like rains Ohio sees in fall.",
+    "replace": "Sudden cold snaps can arrive with little warning in fall."
+   }
+  ],
+  "/roof-snow-load-in-lehigh-valley/": [
+   {
+    "find": "We often compare conditions here to hailstorms in Huron or sudden monsoons in Ohio, where extreme weather stresses roofs beyond normal expectations.",
+    "replace": ""
+   }
+  ],
+  "/storm-chaser-roofing-in-lehigh-valley/": [
+   {
+    "find": "High winds funneling along the Lehigh River, heavy rain systems drifting from Ohio, and even hailstorms like the ones that hit Huron create the perfect conditions for roof damage.",
+    "replace": "High winds funneling along the Lehigh River and heavy rain systems create the perfect conditions for roof damage."
+   },
+   {
+    "find": "Sudden monsoons like those Ohio systems push across our region, while winter brings freeze-thaw cycles that test every shingle.",
+    "replace": "Heavy summer storms push across our region, while winter brings freeze-thaw cycles that test every shingle."
+   }
+  ],
+  "/storm-damage-repair-in-allentown/": [
+   {
+    "find": "While homeowners in Ohio worry about sudden monsoons and folks in Huron brace for hailstorms, Allentown faces its own unique roofing challenges:",
+    "replace": "Allentown faces its own unique roofing challenges:"
+   }
+  ],
+  "/storm-damage-repair-in-macungie/": [
+   {
+    "find": "These conditions are similar in impact to hailstorms in Huron or sudden monsoons in Ohio.",
+    "replace": ""
+   }
+  ],
+  "/summer-roof-damage-pennsylvania/": [
+   {
+    "find": "In The Light Roofing, based in Huron, Ohio, offers expert services tailored to the specific needs of Pennsylvania homeowners.",
+    "replace": "In The Light Roofing, based in Allentown, PA, offers expert services tailored to the specific needs of Lehigh Valley homeowners."
+   }
+  ],
+  "/summer-roof-replacement-vs-repair/": [
+   {
+    "find": "Deciding whether to repair or replace your roof is particularly important during the summer in Huron, Ohio.",
+    "replace": "Deciding whether to repair or replace your roof is particularly important during the summer in Allentown and the Lehigh Valley."
+   },
+   {
+    "find": "Consulting with a professional roofing contractor in Huron, Ohio, such as In The Light Roofing, can provide a detailed estimate and help you make an informed decision.",
+    "replace": "Consulting with a professional roofing contractor in Allentown, PA, such as In The Light Roofing, can provide a detailed estimate and help you make an informed decision."
+   },
+   {
+    "find": "In The Light Roofing in Huron, Ohio, meets these criteria and offers expert services tailored to your needs.",
+    "replace": "In The Light Roofing in Allentown, PA, meets these criteria and offers expert services tailored to your needs."
+   },
+   {
+    "find": "Consulting with professionals, like those at In The Light Roofing in Huron, Ohio, can help you determine the most suitable option for your specific situation.",
+    "replace": "Consulting with professionals, like those at In The Light Roofing in Allentown, PA, can help you determine the most suitable option for your specific situation."
+   }
+  ],
+  "/summer-storm-roof-protection-allentown/": [
+   {
+    "find": "In The Light Roofing, based in Huron, Ohio, is dedicated to helping homeowners protect their roofs from the ravages of summer storms.",
+    "replace": "In The Light Roofing, based in Allentown, PA, is dedicated to helping Lehigh Valley homeowners protect their roofs from the ravages of summer storms."
+   }
+  ],
+  "/winter-roof-leak-in-allentown/": [
+   {
+    "find": "Just as sudden monsoons in Ohio can flood gutters overnight, Allentown’s winter mix can turn minor roof wear into active leaks after one storm.",
+    "replace": "Allentown’s winter mix can turn minor roof wear into active leaks after one storm."
+   }
+  ],
+  "/winter-roof-replacement-in-lehigh-valley/": [
+   {
+    "find": "These patterns resemble sudden monsoons in Ohio or hailstorms in Huron, weather events that stress roofs beyond normal expectations.",
+    "replace": ""
+   }
+  ]
+ }
+}
