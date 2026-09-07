@@ -186,8 +186,14 @@
    * ---------------------------------------------------------------------- */
   var CTA_HTML =
     '<h2 class="itlr-cta__title">Thinking about replacing your roof?</h2>' +
+    // ESTIMATE, not inspection. This said "a free, no-obligation inspection"
+    // and that was wrong: the site's own FAQ says "What's the difference
+    // between free estimates and paid roof inspections?" and "roof inspections
+    // may come with a fee". The estimate is the free thing. Advertising a free
+    // inspection on the same page that says inspections are charged for is a
+    // promise the client would have had to break at the kerb.
     '<p class="itlr-cta__body">The work above is ours. If your roof is showing its age, ' +
-    'book a free, no-obligation inspection &mdash; we will tell you honestly whether it ' +
+    'book a free, no-obligation estimate &mdash; we will tell you honestly whether it ' +
     'needs a repair or a full replacement, and what that would involve.</p>' +
     '<div class="itlr-cta__actions">' +
       '<a class="itlr-cta__btn itlr-cta__btn--primary" href="/contact/">Get your free estimate</a>' +
