@@ -1,0 +1,8 @@
+# STAGING COPY -- not the live site.
+#
+# This host serves a byte-faithful clone of https://inthelightroofing.com/. Left
+# crawlable it is a duplicate of the client's entire site on a second hostname,
+# so everything is disallowed here. The mirror's real robots.txt is restored by
+# publishing with PUBLISH_PUBLIC=1.
+User-agent: *
+Disallow: /

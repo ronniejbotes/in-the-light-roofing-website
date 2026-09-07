@@ -1,0 +1,88 @@
+/*
+ * Related-pages block, injected above the footer by build/seo/links.mjs.
+ *
+ * Sits on the site's light ground with the brand cyan for the accent, so it
+ * reads as part of the page rather than a bolt-on. Cards are links in their
+ * entirety -- a label and one line of text -- laid out three across on desktop
+ * and stacked on a phone.
+ */
+.itlr-related {
+  background: #f6f8fa;
+  border-top: 1px solid rgb(20 22 30 / .06);
+  padding: 56px 0 64px;
+}
+
+.itlr-related__inner {
+  width: min(1170px, 92vw);
+  margin: 0 auto;
+}
+
+.itlr-related__heading {
+  margin: 0 0 8px;
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--e-global-color-secondary, #14161E);
+}
+
+.itlr-related__intro {
+  margin: 0 0 24px;
+  max-width: 62ch;
+  color: rgb(20 22 30 / .68);
+  line-height: 1.6;
+}
+
+.itlr-related__list {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.itlr-related__link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid rgb(20 22 30 / .08);
+  border-left: 4px solid var(--e-global-color-primary, #00B6F1);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.itlr-related__link:hover,
+.itlr-related__link:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgb(20 22 30 / .10);
+  text-decoration: none;
+}
+
+.itlr-related__label {
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: var(--e-global-color-secondary, #14161E);
+}
+
+.itlr-related__text {
+  font-size: .92rem;
+  line-height: 1.5;
+  color: rgb(20 22 30 / .66);
+}
+
+@media (max-width: 767px) {
+  .itlr-related { padding: 40px 0 48px; }
+  .itlr-related__list { gap: 12px; }
+  .itlr-related__link { padding: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itlr-related__link { transition: none; }
+  .itlr-related__link:hover { transform: none; }
+}

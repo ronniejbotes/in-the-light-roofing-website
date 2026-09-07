@@ -1,0 +1,9 @@
+/*
+ * Mobile and tablet layout fixes.
+ *
+ * Injected by build/serve.mjs and baked in by build/publish.mjs after the
+ * theme's own stylesheets, so a rule here wins on order at equal specificity.
+ * Each fix names the page and the defect it corrects, and was measured on a
+ * 360/390/414px phone and a 768px tablet before and after. Nothing in here
+ * changes the desktop layout: every rule sits behind a max-width query.
+ */

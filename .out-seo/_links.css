@@ -1,0 +1,274 @@
+/*
+ * Related-pages block, injected above the footer by build/seo/links.mjs.
+ *
+ * Sits on the site's light ground with the brand cyan for the accent, so it
+ * reads as part of the page rather than a bolt-on. Cards are links in their
+ * entirety -- a label and one line of text -- laid out three across on desktop
+ * and stacked on a phone.
+ */
+.itlr-related {
+  background: #f6f8fa;
+  border-top: 1px solid rgb(20 22 30 / .06);
+  padding: 56px 0 64px;
+}
+
+.itlr-related__inner {
+  width: min(1170px, 92vw);
+  margin: 0 auto;
+}
+
+.itlr-related__heading {
+  margin: 0 0 8px;
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--e-global-color-secondary, #14161E);
+}
+
+.itlr-related__intro {
+  margin: 0 0 24px;
+  max-width: 62ch;
+  color: rgb(20 22 30 / .68);
+  line-height: 1.6;
+}
+
+.itlr-related__list {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.itlr-related__link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid rgb(20 22 30 / .08);
+  border-left: 4px solid var(--e-global-color-primary, #00B6F1);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.itlr-related__link:hover,
+.itlr-related__link:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgb(20 22 30 / .10);
+  text-decoration: none;
+}
+
+.itlr-related__label {
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: var(--e-global-color-secondary, #14161E);
+}
+
+.itlr-related__text {
+  font-size: .92rem;
+  line-height: 1.5;
+  color: rgb(20 22 30 / .66);
+}
+
+@media (max-width: 767px) {
+  .itlr-related { padding: 40px 0 48px; }
+  .itlr-related__list { gap: 12px; }
+  .itlr-related__link { padding: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itlr-related__link { transition: none; }
+  .itlr-related__link:hover { transform: none; }
+}
+
+/* The service, town and post templates carry a sticky estimate form in a right
+   column that follows the reader down the page and keeps going past the end
+   of the content. Both injected blocks therefore stay inside the left content
+   column on desktop -- measured at 1440: the form column starts at ~975px and
+   the content column ends at ~935px, so 780px inside the 1170px container. */
+@media (min-width: 1025px) {
+  .itlr-related__heading,
+  .itlr-related__list { max-width: 780px; }
+}
+
+/* ---------------------------------------------------------------------------
+ * Page-specific FAQ block, injected above the related links by build/seo/links.mjs.
+ * Question as a heading, answer as a paragraph -- the shape that reads well and
+ * that answer engines extract. No accordion: nothing is hidden behind a click.
+ * ------------------------------------------------------------------------- */
+.itlr-faq {
+  background: #fff;
+  border-top: 1px solid rgb(20 22 30 / .06);
+  padding: 56px 0 24px;
+}
+
+.itlr-faq__inner {
+  width: min(880px, 92vw);
+  margin: 0 auto;
+}
+
+.itlr-faq__heading {
+  margin: 0 0 22px;
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--e-global-color-secondary, #14161E);
+}
+
+.itlr-faq__item {
+  padding: 18px 0;
+  border-top: 1px solid rgb(20 22 30 / .08);
+}
+
+.itlr-faq__item:last-child { border-bottom: 1px solid rgb(20 22 30 / .08); }
+
+.itlr-faq__q {
+  margin: 0 0 8px;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  font-weight: 700;
+  color: var(--e-global-color-secondary, #14161E);
+}
+
+.itlr-faq__a {
+  margin: 0;
+  font-size: .98rem;
+  line-height: 1.65;
+  color: rgb(20 22 30 / .74);
+}
+
+.itlr-faq__a a {
+  color: var(--e-global-color-primary, #00B6F1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .itlr-faq { padding: 40px 0 16px; }
+  .itlr-faq__item { padding: 14px 0; }
+}
+
+/* Same sticky-form column as the related block (see above): on desktop the FAQ
+   sits in the left content column, aligned with the site's 1170px container.
+   Placed after the base FAQ rules so it wins on order. */
+@media (min-width: 1025px) {
+  .itlr-faq__inner { width: min(1170px, 92vw); }
+  .itlr-faq__heading,
+  .itlr-faq__item { max-width: 780px; }
+}
+
+/* ---------------------------------------------------------------------------
+ * Trust strip on service and town pages, injected by build/seo/links.mjs above
+ * the FAQ. Four facts in a row on desktop, two by two on a phone. Same column
+ * discipline as the other blocks: stays left of the sticky estimate form.
+ * ------------------------------------------------------------------------- */
+.itlr-trust {
+  background: var(--e-global-color-secondary, #14161E);
+  color: #fff;
+  padding: 44px 0;
+}
+
+.itlr-trust__inner {
+  width: min(1170px, 92vw);
+  margin: 0 auto;
+}
+
+.itlr-trust__heading {
+  margin: 0 0 22px;
+  font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+  line-height: 1.2;
+  font-weight: 700;
+  color: #fff;
+}
+
+.itlr-trust__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 18px 22px;
+}
+
+.itlr-trust__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 14px;
+  border-left: 3px solid var(--e-global-color-primary, #00B6F1);
+}
+
+.itlr-trust__k {
+  font-size: 1rem;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.itlr-trust__v {
+  font-size: .9rem;
+  line-height: 1.5;
+  color: rgb(255 255 255 / .74);
+}
+
+.itlr-trust__reviews {
+  margin: 22px 0 0;
+  font-size: .92rem;
+  color: rgb(255 255 255 / .74);
+}
+
+.itlr-trust__reviews a {
+  color: var(--e-global-color-primary, #00B6F1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (min-width: 1025px) {
+  .itlr-trust__heading,
+  .itlr-trust__list,
+  .itlr-trust__reviews { max-width: 780px; }
+}
+
+@media (max-width: 767px) {
+  .itlr-trust { padding: 34px 0; }
+  .itlr-trust__list { grid-template-columns: 1fr 1fr; gap: 16px; }
+}
+
+@media (max-width: 420px) {
+  .itlr-trust__list { grid-template-columns: 1fr; }
+}
+
+/* The footer's third contact line, added by build/seo/nap.mjs. Same widget
+   shape as the phone and email boxes, so the theme styles it; this only keeps
+   a long address from breaking mid-word in the narrow footer column. */
+.footer-address .elementor-icon-box-description a { overflow-wrap: anywhere; }
+
+/* Elementor styles the phone and email boxes by element id; the address box
+   added by build/seo/nap.mjs has no id of its own, so the same rules are
+   restated here for it (copied from .elementor-element-139c487, the email box),
+   plus the brand colour on the pin the other two icons get from the theme. */
+.footer-address { margin: 0 0 calc(var(--kit-widget-spacing, 0px) + 0px) 0; }
+.footer-address .elementor-icon-box-wrapper { align-items: center; text-align: start; gap: 15px; }
+.footer-address .elementor-icon { font-size: 22px; }
+.footer-address .elementor-icon svg path { fill: var(--e-global-color-primary, #00B6F1); }
+.footer-address .elementor-icon-box-title {
+  margin-block-end: 0; color: var(--e-global-color-text);
+  font-family: "Exo 2", Sans-serif; font-size: 12px; font-weight: 400; text-transform: uppercase; line-height: 20px; letter-spacing: 4px;
+}
+.footer-address .elementor-icon-box-description {
+  font-family: "Exo 2", Sans-serif; font-size: 18px; font-weight: 400; line-height: 20px; color: var(--e-global-color-text);
+}
+.footer-address .elementor-icon-box-description a { color: inherit; text-decoration: none; }
+.footer-address .elementor-icon-box-description a:hover { color: var(--e-global-color-primary, #00B6F1); }
+
+/* On a phone Elementor stacks the icon above the text and, for a widget with no
+   id-specific rule, centres both; the phone and email boxes are left-aligned by
+   their own rules. Specificity has to match Elementor's mobile rule to win. */
+@media (max-width: 767px) {
+  .elementor-widget-icon-box.footer-address .elementor-icon-box-wrapper { align-items: flex-start; text-align: start; }
+}

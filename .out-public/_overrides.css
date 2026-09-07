@@ -1,0 +1,606 @@
+/*
+ * Fixes layered over the mirrored WordPress markup.
+ *
+ * mirror/ stays a byte-faithful clone -- these are injected by build/serve.mjs
+ * instead of edited in, so the clone keeps its value as a record of what the
+ * live site actually serves. Everything here is plain CSS and is meant to be
+ * pasted into WordPress (Elementor -> Site Settings -> Custom CSS, or the
+ * theme's Additional CSS) when the same fix is made live.
+ */
+
+/* ---------------------------------------------------------------------------
+ * 1. Service grid: one icon size for all six cards.
+ *
+ * The six service cards use the same Elementor image-box markup, but the source
+ * artwork is not the same size: four icons are 60x60 and two -- roof replacement
+ * (ui-image-5320) and roof inspections (ui-image-5322) -- are 330x330. Nothing
+ * constrained them, so those two rendered at 330px, swallowing the photograph
+ * behind them and making their cards five times taller than the rest.
+ *
+ * Constraining the icon rather than patching the two files keeps every card the
+ * same height whatever artwork is dropped in later.
+ * ------------------------------------------------------------------------- */
+/* Scoped to the two offending images by their WordPress attachment ids, NOT to
+ * .elementor-image-box-wrapper generally -- the Service Area town cards use the
+ * same widget, and a blanket 60px rule shrinks all thirteen town photographs to
+ * thumbnails. Learned the hard way; do not widen this selector.
+ *
+ *   ui-image-5320  roof-replacement-icon.webp  (330x330 source)
+ *   ui-image-5322  roof-inspection-icon.webp   (330x330 source)
+ *
+ * The other four service icons are already 60x60 and are left untouched, so all
+ * six cards end up the same height.
+ */
+.elementor-image-box-img img.ui-image-5320,
+.elementor-image-box-img img.ui-image-5322 {
+  width: 60px !important;
+  height: 60px !important;
+  max-width: 60px !important;
+  object-fit: contain;
+  display: block;
+  margin-inline: auto;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. Past Work strip: a genuinely endless, full-bleed crawl.
+ *
+ * This no longer runs on Swiper. Elementor's carousel is loop-mode Swiper,
+ * which fakes an infinite loop by cloning slides and then silently teleporting
+ * the wrapper back to the start (loopFix). That teleport is the jump, and no
+ * combination of speed, freeMode or slidesPerGroup removes it -- it is how the
+ * mode works.
+ *
+ * So overrides.js destroys the Swiper instance and rebuilds the strip as a
+ * plain track holding N whole copies of the photographs, animated from 0 to
+ * -50% of its own width. Half the track is exactly the copies in the first
+ * half, so the frame at 100% is pixel-identical to the frame at 0% and the
+ * loop has no seam at all. It is also cheaper: one compositor-driven
+ * animation, no per-frame JavaScript.
+ *
+ * Pausing is then just animation-play-state, which stops on the exact frame
+ * under the pointer rather than having to interrupt a transition by hand.
+ * ------------------------------------------------------------------------- */
+.itlr-marquee {
+  --itlr-img-w: 299px;   /* 35% down from the 460px Elementor rendered */
+  --itlr-img-h: 307px;
+  --itlr-gap: 26px;
+
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  overflow: hidden;
+  /* Room for a hovered photograph to grow to 1.25 and to sit at an angle
+     without being clipped by the container it is scrolling inside. */
+  padding-block: 46px;
+  /* Fade both ends rather than cutting them. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+
+.itlr-marquee__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  /* No `gap`. Spacing goes on the items as margin-right so that every item
+     contributes exactly the same pitch -- a gap is dropped between the two
+     halves as well, which makes -50% land a few pixels off one whole copy and
+     puts the seam straight back. Duration is set from JS: distance / speed. */
+  animation-name: itlr-crawl;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+@keyframes itlr-crawl {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Hovering anywhere on the strip stops it dead. Nothing dims: the ask was to
+   stop the carousel, not to style the other photographs. */
+.itlr-marquee:hover .itlr-marquee__track,
+.itlr-marquee:focus-within .itlr-marquee__track {
+  animation-play-state: paused;
+}
+
+.itlr-marquee__item {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--itlr-img-w);
+  height: var(--itlr-img-h);
+  margin-right: var(--itlr-gap);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgb(0 0 0 / .38);
+  outline: 1px solid rgb(255 255 255 / .10);
+  outline-offset: -1px;
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1),
+              box-shadow .45s cubic-bezier(.22, 1, .36, 1);
+}
+
+.itlr-marquee__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Alternating tilt. The class is assigned in JS from the index within one copy
+   of the set, NOT with :nth-child -- there are seven photographs, so an odd
+   count means :nth-child(odd) would land on different photographs in each copy
+   and the tilt pattern would visibly change at the loop point. */
+.itlr-marquee__item--cw  { transform: rotate(2.5deg); }
+.itlr-marquee__item--ccw { transform: rotate(-2.5deg); }
+
+/* Hovered: straighten up and grow. z-index lifts it over its neighbours, which
+   otherwise clip the corners of the enlarged photograph. */
+.itlr-marquee__item:hover {
+  transform: rotate(0deg) scale(1.25);
+  z-index: 3;
+  box-shadow: 0 22px 50px rgb(0 0 0 / .55);
+  outline-color: rgb(255 255 255 / .24);
+}
+
+@media (max-width: 1024px) {
+  .itlr-marquee { --itlr-img-w: 250px; --itlr-img-h: 257px; --itlr-gap: 20px; padding-block: 38px; }
+}
+
+@media (max-width: 767px) {
+  .itlr-marquee { --itlr-img-w: 200px; --itlr-img-h: 206px; --itlr-gap: 16px; padding-block: 30px; }
+}
+
+/* Someone who has asked for less motion should not be handed an endless one.
+   The strip stays, and stays browsable -- it simply does not move. */
+@media (prefers-reduced-motion: reduce) {
+  .itlr-marquee__track { animation: none !important; }
+  .itlr-marquee__item:hover { transform: rotate(0deg); }
+}
+
+/* ---------------------------------------------------------------------------
+ * 2b. The estimate prompt under the Past Work strip.
+ *
+ * Injected by overrides.js. It sits directly beneath the photographs on purpose:
+ * the strip is the proof, and the ask belongs immediately after the proof rather
+ * than at the bottom of the page. Styled against the section's own dark
+ * background using the Elementor globals, so it re-themes with the site.
+ * ------------------------------------------------------------------------- */
+.itlr-cta {
+  position: relative;
+  z-index: 2;
+  max-width: 760px;
+  margin: 52px auto 8px;
+  padding: 40px 32px 44px;
+  text-align: center;
+  /* A self-contained panel, not bare text on the section.
+     The section below this one carries a bright cyan band that overlaps
+     upwards, so the prompt lands half on near-black and half on cyan. Bare
+     white text and a cyan button disappear across that seam. Giving it its own
+     dark surface makes it readable wherever the seam happens to fall, and at
+     any viewport -- the overlap moves with the layout. */
+  background: var(--e-global-color-secondary, #14161E);
+  border: 1px solid rgb(255 255 255 / .09);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / .38);
+}
+
+.itlr-cta__title {
+  margin: 0 0 14px;
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+  line-height: 1.2;
+  font-weight: 700;
+  color: #fff;
+}
+
+.itlr-cta__body {
+  margin: 0 auto 28px;
+  max-width: 56ch;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: rgb(255 255 255 / .82);
+}
+
+.itlr-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+}
+
+.itlr-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  text-decoration: none;
+  transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+
+.itlr-cta__btn--primary {
+  background: var(--e-global-color-primary, #00B6F1);
+  color: #fff;
+  box-shadow: 0 8px 24px rgb(0 182 241 / .32);
+}
+
+.itlr-cta__btn--secondary {
+  border: 2px solid rgb(255 255 255 / .35);
+  color: #fff;
+}
+
+.itlr-cta__btn:hover {
+  transform: translateY(-2px);
+}
+
+.itlr-cta__btn--primary:hover {
+  background: #00a2d8;
+  color: #fff;
+}
+
+.itlr-cta__btn--secondary:hover {
+  border-color: #fff;
+  background: rgb(255 255 255 / .08);
+}
+
+.itlr-cta__btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itlr-cta__btn:hover {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. Former employee: suppress his slides before the browser fetches them.
+ *
+ * The team carousel gives each crew member a slide with their portrait as a CSS
+ * background and a second portrait on hover. Three Elementor elements carry his
+ * pair -- 6d5023c on the homepage, 56194a8 and 8ac57c0 on /about-us/ -- and each
+ * was checked against the stylesheets to be sure it holds no other crew
+ * member's photograph.
+ *
+ * overrides.js removes these slides from the DOM so Swiper recounts, but that
+ * runs a few hundred milliseconds after load, by which time the browser has
+ * already fetched the background and shown his face. Nulling the image here
+ * means the request is never made: a computed background-image of none fetches
+ * nothing. Verified by watching the network for SEMI7879 and SEMI7885.
+ *
+ * :has() hides the whole slide immediately where supported; the JS removal is
+ * the fallback and the thing that keeps the carousel's slide count honest.
+ * ------------------------------------------------------------------------- */
+.elementor-element-56194a8,
+.elementor-element-6d5023c,
+.elementor-element-8ac57c0,
+.elementor-element-56194a8:hover,
+.elementor-element-6d5023c:hover,
+.elementor-element-8ac57c0:hover,
+.elementor-element-56194a8::before,
+.elementor-element-6d5023c::before,
+.elementor-element-8ac57c0::before,
+.elementor-element-56194a8:hover::before,
+.elementor-element-6d5023c:hover::before,
+.elementor-element-8ac57c0:hover::before {
+  background-image: none !important;
+}
+
+.swiper-slide:has(.elementor-element-56194a8),
+.swiper-slide:has(.elementor-element-6d5023c),
+.swiper-slide:has(.elementor-element-8ac57c0) {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * 4. Certification strip: one band instead of five white rectangles.
+ *
+ * Elementor sets `background: #fff` on each .swiper-slide of the badge
+ * carousel, so on a dark section the five logos arrive as five ragged white
+ * rectangles of differing widths -- they read as screenshots someone pasted in
+ * rather than as a trust bar.
+ *
+ * The white cannot simply be removed. The marks are transparent PNGs and most
+ * of them do read on dark, but BBB's "Start With Trust" strapline and Google's
+ * "Reviews / 5.0" line are dark grey and disappear entirely against the navy.
+ * Recolouring is not an option either: these are third-party brand marks, and
+ * Google's in particular may not be restyled.
+ *
+ * So the white stays and is made deliberate -- one rounded band behind the
+ * whole strip, with the logos scaled to a common height so the row reads as
+ * one object. Applies to all five pages carrying .image-slider.
+ * ------------------------------------------------------------------------- */
+.image-slider .elementor-image-carousel-wrapper {
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px 12px;
+  box-shadow: 0 12px 34px rgb(0 0 0 / .22);
+}
+
+/* The per-slide rectangles are what made the row look ragged. */
+.image-slider .swiper-slide {
+  background: transparent !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* A common optical height. The source files run from 44px to 65px tall, which
+   is why some marks looked twice the weight of their neighbours. */
+.image-slider .swiper-slide-inner,
+.image-slider figure.swiper-slide-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.image-slider .swiper-slide-image {
+  max-height: 46px;
+  width: auto !important;
+  max-width: 82%;
+  height: auto;
+  object-fit: contain;
+  margin-inline: auto;
+}
+
+/* The arrows sat over the band once it had a defined edge. */
+.image-slider .elementor-swiper-button,
+.image-slider .swiper-button-next,
+.image-slider .swiper-button-prev {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .image-slider .elementor-image-carousel-wrapper { border-radius: 14px; padding: 12px 8px; }
+  .image-slider .swiper-slide-image { max-height: 38px; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 5. /home/ hero: the lightning still, animated.
+ *
+ * The lightning is an <img> inside .banner-bg-img, not a CSS background -- the
+ * stylesheet rule that looks like it paints it is invalid (the url() carries a
+ * stray `fetchpriority(high)` inside the value, so the whole declaration is
+ * dropped). overrides.js wraps that img and lays a looping video over it.
+ *
+ * The img stays in place underneath rather than being removed: it holds the
+ * layout box the video is sized against, and it is what remains visible if
+ * autoplay is refused, which mobile browsers do on Low Power Mode.
+ * ------------------------------------------------------------------------- */
+.itlr-hero-videowrap {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+.itlr-hero-videowrap > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.itlr-hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  /* Fades up once the first frame is decoded, so a slow connection shows the
+     still rather than a black rectangle. */
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+.itlr-hero-video[data-ready="1"] { opacity: 1; }
+
+/* Someone who asked for less motion keeps the still image; overrides.js never
+   builds the video at all, so this is only belt and braces. */
+@media (prefers-reduced-motion: reduce) {
+  .itlr-hero-video { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 6. Service-area town cards: lift and clear on hover.
+ *
+ * Thirteen cards in one .service-areas section, on six pages (/, /home/,
+ * /services/, /service-area/, /roof-types/ and the duplicate home design), all
+ * carrying the hand-written .city-box class -- so one rule covers every copy.
+ *
+ * The "tint" over each photograph is not an overlay. There is no ::before, no
+ * background and no filter anywhere in the card; the images themselves are
+ * dark, with channel means around 19/23/28 and a blue lean. So it cannot be
+ * removed by deleting a layer -- hovering brightens the photograph back up
+ * instead, which is the same result and touches no markup.
+ *
+ * The whole wrapper scales, not just the image, so the town name grows with the
+ * photograph rather than staying pinned at its original size.
+ * ------------------------------------------------------------------------- */
+.service-areas .city-box {
+  /* Already position:relative from Elementor; the z-index needs a stacking
+     context to raise against, and the transition has to live on the resting
+     state or the card snaps back instantly when the pointer leaves. */
+  transition: z-index 0s linear .01s;
+}
+
+.service-areas .city-box .elementor-image-box-wrapper {
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1),
+              filter .45s ease,
+              box-shadow .45s ease;
+  will-change: transform;
+}
+
+.service-areas .city-box img {
+  transition: filter .45s ease;
+}
+
+/* Gated on a real pointer: on a touch screen :hover latches after a tap and
+   leaves one card stuck at 1.5 until you tap elsewhere. */
+@media (hover: hover) {
+  .service-areas .city-box:hover,
+  .service-areas .city-box:focus-within {
+    z-index: 20;
+  }
+
+  .service-areas .city-box:hover .elementor-image-box-wrapper,
+  .service-areas .city-box:focus-within .elementor-image-box-wrapper {
+    transform: scale(1.5);
+    box-shadow: 0 26px 60px rgb(0 0 0 / .55);
+  }
+
+  /* Lifting the baked-in darkness. Brightness alone goes grey and washed out,
+     so a little saturation and contrast come with it. */
+  .service-areas .city-box:hover img,
+  .service-areas .city-box:focus-within img {
+    filter: brightness(1.45) saturate(1.12) contrast(1.04);
+  }
+}
+
+/* Keyboard users get the same reveal without the section jumping around. */
+.service-areas .city-box a:focus-visible {
+  outline: 3px solid var(--e-global-color-primary, #00B6F1);
+  outline-offset: 3px;
+}
+
+/* Reduced motion keeps the reveal -- it is information, not decoration -- and
+   drops the movement, which is the part that was objected to. */
+@media (prefers-reduced-motion: reduce) {
+  .service-areas .city-box:hover .elementor-image-box-wrapper,
+  .service-areas .city-box:focus-within .elementor-image-box-wrapper {
+    transform: none;
+  }
+  .service-areas .city-box .elementor-image-box-wrapper,
+  .service-areas .city-box img { transition: filter .2s ease; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 7. The lightning video on the CSS-background banner (every page but /home/).
+ *
+ * On /home/ the artwork is an <img>, so the video sits inside a wrapper and
+ * inherits its box. Everywhere else it is a background-image on the banner
+ * section itself, so the video is inserted as that section's first child and
+ * has to be layered by hand: above the section's own background, below the
+ * decorative overlay and below the content.
+ *
+ * The z-index bumps are scoped to sections that actually received a video, so
+ * no other Elementor section's stacking is touched.
+ * ------------------------------------------------------------------------- */
+[data-itlr-herovid="1"] > .itlr-hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+[data-itlr-herovid="1"] > .itlr-hero-video[data-ready="1"] { opacity: 1; }
+
+/* Elementor's decorative overlay and the content both have to stay on top. */
+[data-itlr-herovid="1"] > .elementor-background-overlay { z-index: 1; }
+
+[data-itlr-herovid="1"] > .elementor-container,
+[data-itlr-herovid="1"] > .e-con-inner,
+[data-itlr-herovid="1"] > .elementor-column-gap-default {
+  position: relative;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-itlr-herovid="1"] > .itlr-hero-video { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 8. /past-work/ gallery: a placeholder while an item is still loading.
+ *
+ * Elementor's own lazyload leaves items with no background at all, which is a
+ * hole in the grid rather than a loading state. overrides.js loads them
+ * properly; this just means the half-second before it does looks deliberate.
+ * ------------------------------------------------------------------------- */
+.e-gallery-image[data-thumbnail] {
+  background-color: rgb(255 255 255 / .06);
+  background-size: cover;
+  background-position: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * 9. The map: footer column, and the contact page.
+ *
+ * The footer row is a four-column flex container capped at Elementor's 1170px,
+ * and the four columns already fill it exactly (351+234+234+351). So the map
+ * cannot simply be dropped in -- the row is widened to take the space that was
+ * sitting empty either side of the footer, and the columns give up a little
+ * width to make room. They are flex: 0 1 auto, so they shrink rather than
+ * overflow.
+ *
+ * Below 1200px there is no spare width to take, so the map stops being a column
+ * and becomes a full-width band under the four.
+ * ------------------------------------------------------------------------- */
+.itlr-footer-map {
+  display: block;
+  min-width: 0;
+}
+
+.itlr-footer-map .itlr-map-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  border: 0;
+  border-radius: 14px;
+  /* The embed is a bright daylight map on a near-white footer; a hairline stops
+     it floating. */
+  box-shadow: 0 6px 20px rgb(0 0 0 / .12);
+}
+
+@media (min-width: 1200px) {
+  /* Take back the page margin the footer was leaving empty, without letting the
+     row outgrow the viewport.
+     Both the row and every boxed ancestor up to the footer section: a flex row
+     cannot grow past its parent, and Elementor caps that parent at 1170px, so
+     releasing only the row squeezed the four columns instead of widening
+     anything. !important because Elementor's own cap is a three-class selector
+     and this is one attribute. */
+  [data-itlr-map="1"],
+  [data-itlr-mapwide="1"] {
+    max-width: min(1560px, calc(100vw - 60px)) !important;
+    width: auto !important;
+  }
+
+  .itlr-footer-map {
+    flex: 0 0 clamp(260px, 22%, 380px);
+    margin-left: clamp(20px, 2.4vw, 46px);
+    /* Same height as the columns beside it, whatever they come to. */
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 1199px) {
+  /* Below this there is no spare page margin to take, so the map stops being a
+     column. The row has to be allowed to wrap or a 100% basis just gets shrunk
+     back into the line by flex. */
+  [data-itlr-map="1"] { flex-wrap: wrap; }
+
+  .itlr-footer-map {
+    flex: 1 0 100%;
+    width: 100%;
+    margin-top: 34px;
+  }
+  .itlr-footer-map .itlr-map-frame { height: 260px; min-height: 0; }
+}
+
+/* The contact page's own map, repointed at the pinned embed by overrides.js.
+   Only the corners are touched -- its size is Elementor's. */
+.itlr-map-frame--page {
+  border: 0;
+  border-radius: 14px;
+}

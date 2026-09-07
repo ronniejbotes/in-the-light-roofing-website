@@ -1,0 +1,150 @@
+/*
+ * 3D testimonial marquee — a port of the shadcn/Tailwind "3d-testimonials"
+ * component to plain CSS, because this project has no React, no Tailwind, no
+ * TypeScript and no shadcn. See overrides/README.md for why it was ported
+ * rather than installed.
+ *
+ * The geometry is the same as the original: a perspective container, columns
+ * scrolling vertically in alternating directions, edge gradients masking the
+ * ends, and pause-on-hover.
+ */
+
+.itlr-reviews {
+  --itlr-gap: 1rem;
+  --itlr-duration: 46s;
+  --itlr-card: 300px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--itlr-gap);
+  height: 520px;
+  overflow: hidden;
+  perspective: 900px;
+  margin-top: 8px;
+}
+
+/* The tilt. The original used perspective:300px with a heavy rotateZ, which at
+   this card size threw the far column off the canvas; the angles are softened
+   so all four columns stay in frame and the text stays readable. */
+.itlr-reviews__stage {
+  display: flex;
+  flex-direction: row;
+  gap: var(--itlr-gap);
+  transform: translateX(-40px) translateZ(-70px) rotateX(12deg) rotateY(-8deg) rotateZ(8deg);
+  transform-style: preserve-3d;
+}
+
+.itlr-reviews__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--itlr-gap);
+  flex-shrink: 0;
+  width: var(--itlr-card);
+  animation: itlr-marquee-y var(--itlr-duration) linear infinite;
+}
+
+.itlr-reviews__col--reverse { animation-direction: reverse; }
+
+.itlr-reviews:hover .itlr-reviews__col { animation-play-state: paused; }
+
+@keyframes itlr-marquee-y {
+  from { transform: translateY(0); }
+  to   { transform: translateY(calc(-50% - (var(--itlr-gap) / 2))); }
+}
+
+/* ---- card ---------------------------------------------------------------- */
+
+.itlr-review {
+  background: #fff;
+  border: 1px solid rgba(20, 22, 30, .10);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(20, 22, 30, .08);
+  padding: 18px;
+  text-align: left;
+}
+
+.itlr-review__head { display: flex; align-items: center; gap: 10px; }
+
+/* Initials, not a photograph. Google review avatars are not ours to copy, and
+   inventing a face for a real named customer is not on. */
+.itlr-review__avatar {
+  width: 38px; height: 38px; flex: 0 0 38px;
+  border-radius: 50%;
+  background: #00B6F1;
+  color: #fff;
+  font: 600 14px/38px system-ui, -apple-system, "Segoe UI", sans-serif;
+  text-align: center;
+  letter-spacing: .02em;
+}
+
+.itlr-review__name {
+  font: 600 14px/1.25 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #14161E;
+  margin: 0;
+}
+
+.itlr-review__date {
+  font: 500 12px/1.3 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+
+.itlr-review__stars { color: #F5A623; font-size: 13px; letter-spacing: 1px; margin-top: 10px; }
+
+/* The full review is in the DOM; this clamps it visually, which is what the
+   Trustindex widget it replaces already did. Nothing is rewritten or shortened
+   in the markup, so a reader or a crawler still gets the whole thing. */
+.itlr-review__body {
+  margin: 8px 0 0;
+  font: 400 13px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #374151;
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---- edge masking -------------------------------------------------------- */
+
+.itlr-reviews__fade {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+}
+.itlr-reviews__fade--t { inset: 0 0 auto 0; height: 22%; background: linear-gradient(to bottom, #f5f5f5, transparent); }
+.itlr-reviews__fade--b { inset: auto 0 0 0; height: 22%; background: linear-gradient(to top, #f5f5f5, transparent); }
+.itlr-reviews__fade--l { inset: 0 auto 0 0; width: 14%; background: linear-gradient(to right, #f5f5f5, transparent); }
+.itlr-reviews__fade--r { inset: 0 0 0 auto; width: 14%; background: linear-gradient(to left, #f5f5f5, transparent); }
+
+/* ---- footer link --------------------------------------------------------- */
+
+.itlr-reviews-foot {
+  text-align: center;
+  margin-top: 18px;
+  font: 500 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.itlr-reviews-foot a { color: #0e7fa8; text-decoration: underline; }
+
+/* ---- responsive ---------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .itlr-reviews { height: 460px; }
+  .itlr-reviews__col:nth-child(n+4) { display: none; }
+  .itlr-reviews__stage { transform: translateZ(-40px) rotateX(8deg) rotateY(-5deg) rotateZ(5deg); }
+}
+
+@media (max-width: 700px) {
+  .itlr-reviews { height: 420px; --itlr-card: 260px; }
+  .itlr-reviews__col:nth-child(n+3) { display: none; }
+  .itlr-reviews__stage { transform: none; }
+}
+
+/* A perpetual animation is exactly what this setting is for. Columns become a
+   normal scrollable stack instead. */
+@media (prefers-reduced-motion: reduce) {
+  .itlr-reviews { height: auto; max-height: 560px; overflow-y: auto; perspective: none; }
+  .itlr-reviews__stage { transform: none; }
+  .itlr-reviews__col { animation: none; }
+  .itlr-reviews__fade { display: none; }
+}

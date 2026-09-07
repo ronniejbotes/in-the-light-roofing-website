@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /_static/
+
+Sitemap: https://inthelightroofing.com/sitemap_index.xml

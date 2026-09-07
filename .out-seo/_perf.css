@@ -1,0 +1,8 @@
+/*
+ * Performance-motivated styling: space reserved for content that JavaScript
+ * builds after load, so the page does not jump when it arrives.
+ *
+ * Injected by build/serve.mjs and baked in by build/publish.mjs. Every rule
+ * names the page and the layout shift it prevents, with the measurement that
+ * justified it. Nothing here changes what the finished page looks like.
+ */
