@@ -48,7 +48,18 @@
     return out
   }
 
-  /** Read the five steps out of the Elementor columns. */
+  /**
+   * Read the five steps out of the Elementor columns.
+   *
+   * The numbered element is required, not optional. The careers page reuses the
+   * `our-process` class and the `process-col` columns for its culture section --
+   * Team Mindset, Growth-Focused, Purpose in Every Project, Integrity-Led
+   * Values, Locally Rooted -- which are five values, not five steps. Matching on
+   * the class alone hijacked that section and captioned "Locally Rooted" as
+   * "Step 5 of 5" over a picture of a half-shingled roof. The numbers are what
+   * actually distinguishes the process: every genuine one carries five
+   * `.process-num` elements, the culture section carries none.
+   */
   function readSteps(sec) {
     var cols = sec.querySelectorAll('.process-col')
     var steps = []
@@ -56,9 +67,9 @@
       var num = cols[i].querySelector('.process-num')
       var title = cols[i].querySelector('.elementor-icon-box-title')
       var desc = cols[i].querySelector('.elementor-icon-box-description')
-      if (!title || !desc) continue
+      if (!num || !title || !desc) continue
       steps.push({
-        num: num ? num.textContent.trim() : ('0' + (i + 1)),
+        num: num.textContent.trim(),
         title: title.textContent.trim(),
         desc: desc.textContent.trim(),
       })
@@ -266,10 +277,29 @@
   }
 
   function init() {
-    var sec = document.querySelector('.our-process')
-    if (!sec || sec.getAttribute('data-itlr-proc') === 'done') return false
-    var steps = readSteps(sec)
-    if (steps.length < 3) return false
+    // Every section wearing the class, not just the first: a page may carry a
+    // lookalike ahead of the real one, and taking querySelector's first hit
+    // would then give up without ever reaching the process itself.
+    var secs = document.querySelectorAll('.our-process')
+    var sec = null
+    var steps = null
+    for (var s = 0; s < secs.length; s++) {
+      if (secs[s].getAttribute('data-itlr-proc')) continue
+      var found = readSteps(secs[s])
+      if (found.length < 3) {
+        // Not the process. Mark it so the retry timer stops re-reading it --
+        // but only once its columns are actually in the DOM, so a section that
+        // is merely still rendering gets another look on the next tick.
+        if (secs[s].querySelectorAll('.process-col').length >= 3) {
+          secs[s].setAttribute('data-itlr-proc', 'skip')
+        }
+        continue
+      }
+      sec = secs[s]
+      steps = found
+      break
+    }
+    if (!sec) return false
     sec.setAttribute('data-itlr-proc', 'done')
 
     var root = build(sec, steps)

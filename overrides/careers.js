@@ -99,7 +99,24 @@
       if (href && href !== '#' && href.indexOf('/careers') !== 0 && /^\//.test(href)) { apply = href; break }
     }
 
-    return { section: sec, role: role, where: where, full: full, quals: quals, apply: apply }
+    // What to hide is not always what to read from. Three of the four listings
+    // put their heading straight into a top-level section; the fourth nests it
+    // in an inner one, so the nearest-section rule above hid the inner block
+    // and left the top-level section standing -- empty, but still drawing its
+    // own padding as a gap between Our Culture and How to Apply. Hide the
+    // outermost section that holds this role and no other.
+    var hide = sec
+    var top = h.closest('.elementor-top-section')
+    if (top) {
+      var others = 0
+      var hs = top.querySelectorAll('h2, h3')
+      for (var x = 0; x < hs.length; x++) {
+        if (hs[x] !== h && JOB_RE.test(hs[x].textContent)) others++
+      }
+      if (!others) hide = top
+    }
+
+    return { section: sec, hide: hide, role: role, where: where, full: full, quals: quals, apply: apply }
   }
 
   function buildCard(job, fullTime) {
@@ -169,12 +186,56 @@
     // The grid goes where the first listing was, and the long stacked listings
     // are hidden -- their content now lives on the role's own page, which is
     // where the card sends you.
-    jobs[0].section.parentNode.insertBefore(grid, jobs[0].section)
+    var first = jobs[0].hide || jobs[0].section
+    first.parentNode.insertBefore(grid, first)
     for (var s = 0; s < jobs.length; s++) {
-      jobs[s].section.style.display = 'none'
-      jobs[s].section.setAttribute('aria-hidden', 'true')
+      var box = jobs[s].hide || jobs[s].section
+      box.style.display = 'none'
+      box.setAttribute('aria-hidden', 'true')
     }
+    liftJobsToTop(grid)
     return true
+  }
+
+  /**
+   * Move the roles to the top of the page.
+   *
+   * Someone on a careers page is there for the jobs, and as built the page opens
+   * with two paragraphs of introduction and a culture section before the first
+   * role appears. The "Open Positions" section carries the heading and the line
+   * naming the towns, so it travels with the grid; both land directly under the
+   * page title, and the introduction and culture follow.
+   *
+   * Nothing is deleted and nothing is rewritten -- the same sections in a
+   * different order.
+   */
+  function liftJobsToTop(grid) {
+    var h1 = document.querySelector('h1')
+    var titleSec = h1 && h1.closest ? h1.closest('.elementor-top-section') : null
+    if (!titleSec || !titleSec.parentNode) return
+
+    var openSec = null
+    var hs = document.querySelectorAll('h1, h2, h3')
+    for (var i = 0; i < hs.length; i++) {
+      if (!/open positions/i.test(hs[i].textContent)) continue
+      openSec = hs[i].closest ? hs[i].closest('.elementor-top-section') : null
+      break
+    }
+
+    var parent = titleSec.parentNode
+    var anchor = titleSec.nextSibling
+    if (openSec && openSec.parentNode === parent && openSec !== titleSec) {
+      parent.insertBefore(openSec, anchor)
+      // Inside the section, not after it. That section is a dark band sized for
+      // the listings that used to follow it, so leaving the cards outside left
+      // a stretch of empty dark above them and put the cards on bare white.
+      // Appended as a direct child of the section rather than into its
+      // container, which is a flex row the grid would have joined as one item.
+      openSec.appendChild(grid)
+      grid.setAttribute('data-in-section', 'true')
+    } else if (grid.parentNode === parent) {
+      parent.insertBefore(grid, anchor)
+    }
   }
 
   /* -------------------------------------------------------------------------

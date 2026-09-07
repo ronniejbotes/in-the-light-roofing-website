@@ -22,6 +22,10 @@
   align-items: stretch;
 }
 
+/* Sitting inside the Open Positions band, the section's own 100px of bottom
+   padding already gives the spacing, and the grid's margin doubled it. */
+.itlr-jobs[data-in-section="true"] { margin-bottom: 0; }
+
 .itlr-job {
   position: relative;
   display: flex;
