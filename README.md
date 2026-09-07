@@ -16,11 +16,21 @@ through a real browser, and what does not work (forms need PHP).
 npm run dev             # serve the clone at http://127.0.0.1:4322
 npm run check:mirror    # load every page, report broken assets and JS errors
 npm run verify:mirror   # pixel-diff a sample against the live site
-npm run publish:mirror  # bake mirror/ + overrides/ into publish/ for a real host
+npm run deploy          # build + push the `deploy` branch -> then hit Redeploy
+npm run publish:mirror  # just build publish/ locally, without pushing
 npm run serve:publish   # serve publish/ with injection OFF, at :4323
 ```
 
-**Deploying this is `npm run publish:mirror`, not `npm run build`.** The fixes in
+### Deploying
+
+`npm run deploy` builds the site and pushes it to the **`deploy` branch**, whose
+root is the finished site. Hostinger's Deployments panel is pointed at that
+branch, so the only step left is Redeploy. `main` stays as it is -- mirror/ plus
+the fixes in overrides/, combined only at publish time.
+
+Never edit the `deploy` branch by hand: the next `npm run deploy` overwrites it.
+
+**Deploying is `npm run deploy`, not `npm run build`.** The fixes in
 `overrides/` are injected per-request by `build/serve.mjs`, so until they are
 baked in they exist only while the dev server is running. `npm run build` builds
 the *other* codebase below into `dist/` and contains none of them. Uploading
