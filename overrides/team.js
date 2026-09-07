@@ -40,6 +40,19 @@
    * man who no longer works here back on the homepage. */
   var NEVER_USE = /SEMI7879|SEMI7885/i
 
+  /* The owner's portrait.
+   *
+   * At rest the pile shows one face, and it should be the man who owns the
+   * company rather than whichever slide Elementor happens to emit first.
+   *
+   * Identified rather than guessed. SEMI7900 is the same man as
+   * owner-headshot.png, which the founder section on the homepage and About Us
+   * captions "Bryson Berard, Owner": same glasses, same beard, same black Nike
+   * jacket with the striped collar and cuffs, same shoot. That caption is the
+   * only place on the whole site where a name and a face are tied together --
+   * see CREW_NAMES above for why none of the others can be. */
+  var OWNER = /SEMI7900/i
+
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   }
@@ -85,6 +98,29 @@
       }
     }
     return out
+  }
+
+  /**
+   * Put the owner at the front of the pile.
+   *
+   * A swap, not a rotation: he takes the front and whoever held it takes his
+   * old place, so the other three portraits keep the positions they had. The
+   * fan is shuffled on every hover anyway (see scatter), so this only decides
+   * the resting card -- which is the one that matters, because it is the single
+   * face anyone sees before they interact with the section at all.
+   *
+   * If the portrait is ever renamed or replaced, nothing here breaks: the list
+   * simply keeps the order it was read in.
+   */
+  function ownerFirst(list) {
+    for (var i = 1; i < list.length; i++) {
+      if (!OWNER.test(list[i])) continue
+      var swap = list[0]
+      list[0] = list[i]
+      list[i] = swap
+      break
+    }
+    return list
   }
 
   function build(widget, portraits) {
@@ -265,7 +301,7 @@
     var widget = sw && (sw.closest('[data-widget_type]') || sw.closest('.elementor-widget'))
     if (!widget) return false
 
-    var portraits = readPortraits(sec)
+    var portraits = ownerFirst(readPortraits(sec))
     // Below three and this is not the crew carousel, or the backgrounds have
     // not resolved yet. Either way, leave Elementor's carousel alone.
     if (portraits.length < 3) return false
