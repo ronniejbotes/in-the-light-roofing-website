@@ -134,6 +134,8 @@ ${PUBLIC ? '  # Published as production: no noindex header.' : `  # STAGING. Thi
   AddType image/webp .webp
   AddType image/avif .avif
   AddType font/woff2 .woff2
+  AddType video/mp4 .mp4
+  AddType video/webm .webm
 </IfModule>
 `
 }

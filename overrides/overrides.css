@@ -295,3 +295,113 @@
 .swiper-slide:has(.elementor-element-8ac57c0) {
   display: none !important;
 }
+
+/* ---------------------------------------------------------------------------
+ * 4. Certification strip: one band instead of five white rectangles.
+ *
+ * Elementor sets `background: #fff` on each .swiper-slide of the badge
+ * carousel, so on a dark section the five logos arrive as five ragged white
+ * rectangles of differing widths -- they read as screenshots someone pasted in
+ * rather than as a trust bar.
+ *
+ * The white cannot simply be removed. The marks are transparent PNGs and most
+ * of them do read on dark, but BBB's "Start With Trust" strapline and Google's
+ * "Reviews / 5.0" line are dark grey and disappear entirely against the navy.
+ * Recolouring is not an option either: these are third-party brand marks, and
+ * Google's in particular may not be restyled.
+ *
+ * So the white stays and is made deliberate -- one rounded band behind the
+ * whole strip, with the logos scaled to a common height so the row reads as
+ * one object. Applies to all five pages carrying .image-slider.
+ * ------------------------------------------------------------------------- */
+.image-slider .elementor-image-carousel-wrapper {
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px 12px;
+  box-shadow: 0 12px 34px rgb(0 0 0 / .22);
+}
+
+/* The per-slide rectangles are what made the row look ragged. */
+.image-slider .swiper-slide {
+  background: transparent !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* A common optical height. The source files run from 44px to 65px tall, which
+   is why some marks looked twice the weight of their neighbours. */
+.image-slider .swiper-slide-inner,
+.image-slider figure.swiper-slide-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.image-slider .swiper-slide-image {
+  max-height: 46px;
+  width: auto !important;
+  max-width: 82%;
+  height: auto;
+  object-fit: contain;
+  margin-inline: auto;
+}
+
+/* The arrows sat over the band once it had a defined edge. */
+.image-slider .elementor-swiper-button,
+.image-slider .swiper-button-next,
+.image-slider .swiper-button-prev {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .image-slider .elementor-image-carousel-wrapper { border-radius: 14px; padding: 12px 8px; }
+  .image-slider .swiper-slide-image { max-height: 38px; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 5. /home/ hero: the lightning still, animated.
+ *
+ * The lightning is an <img> inside .banner-bg-img, not a CSS background -- the
+ * stylesheet rule that looks like it paints it is invalid (the url() carries a
+ * stray `fetchpriority(high)` inside the value, so the whole declaration is
+ * dropped). overrides.js wraps that img and lays a looping video over it.
+ *
+ * The img stays in place underneath rather than being removed: it holds the
+ * layout box the video is sized against, and it is what remains visible if
+ * autoplay is refused, which mobile browsers do on Low Power Mode.
+ * ------------------------------------------------------------------------- */
+.itlr-hero-videowrap {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+.itlr-hero-videowrap > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.itlr-hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  /* Fades up once the first frame is decoded, so a slow connection shows the
+     still rather than a black rectangle. */
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+.itlr-hero-video[data-ready="1"] { opacity: 1; }
+
+/* Someone who asked for less motion keeps the still image; overrides.js never
+   builds the video at all, so this is only belt and braces. */
+@media (prefers-reduced-motion: reduce) {
+  .itlr-hero-video { display: none; }
+}

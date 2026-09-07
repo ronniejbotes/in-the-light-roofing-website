@@ -291,9 +291,86 @@
     return true
   }
 
+  /* -------------------------------------------------------------------------
+   * /home/ hero: play the lightning instead of showing a still of it.
+   *
+   * The lightning is an <img> in .banner-bg-img, not a CSS background. (The
+   * stylesheet rule that appears to paint it is invalid -- its url() has a
+   * stray `fetchpriority(high)` inside the value, so browsers drop the whole
+   * declaration. Worth knowing before hunting for a background to replace.)
+   *
+   * The img is kept and wrapped rather than replaced. It holds the layout box
+   * the video is sized against, and it is what stays visible if autoplay is
+   * refused -- which happens on iOS Low Power Mode and on Data Saver, and is
+   * why the video is never the only thing there.
+   *
+   * The clip itself is a ping-pong: 4 seconds forward then the same 4 seconds
+   * backward, so the last frame is the one before the first and it loops with
+   * no visible seam. That also halved what had to be generated.
+   * ---------------------------------------------------------------------- */
+  var HERO_VIDEO = '/_assets/hero-lightning'
+
+  function heroLightningVideo() {
+    var host = document.querySelector('.banner-bg-img')
+    if (!host || host.getAttribute('data-itlr-herovid') === '1') return false
+
+    var img = host.querySelector('img')
+    if (!img || !/bnr-bg/.test(img.currentSrc || img.src || '')) return false
+
+    host.setAttribute('data-itlr-herovid', '1')
+
+    // Honour the OS setting: a full-width looping background is exactly the
+    // kind of motion this preference exists to turn off.
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true
+
+    var wrap = document.createElement('span')
+    wrap.className = 'itlr-hero-videowrap'
+    img.parentNode.insertBefore(wrap, img)
+    wrap.appendChild(img)
+
+    var v = document.createElement('video')
+    v.className = 'itlr-hero-video'
+    // Both the properties and the attributes: Safari decides whether a video
+    // may autoplay from the attributes present in the markup, not from the
+    // properties set afterwards.
+    v.autoplay = true
+    v.muted = true
+    v.loop = true
+    v.playsInline = true
+    v.setAttribute('autoplay', '')
+    v.setAttribute('muted', '')
+    v.setAttribute('loop', '')
+    v.setAttribute('playsinline', '')
+    v.setAttribute('preload', 'auto')
+    v.setAttribute('aria-hidden', 'true')
+    v.setAttribute('tabindex', '-1')
+    v.poster = img.currentSrc || img.src
+
+    v.innerHTML = '<source src="' + HERO_VIDEO + '.webm" type="video/webm">'
+      + '<source src="' + HERO_VIDEO + '.mp4" type="video/mp4">'
+
+    // Only fade it in once there is a frame to show, so a slow connection sees
+    // the still rather than a black rectangle over the headline.
+    v.addEventListener('loadeddata', function () { v.setAttribute('data-ready', '1') })
+    v.addEventListener('error', function () { v.parentNode && v.parentNode.removeChild(v) })
+
+    wrap.appendChild(v)
+
+    var play = v.play()
+    if (play && play.catch) {
+      play.catch(function () {
+        // Autoplay refused. The still underneath is already correct, so take
+        // the video back out rather than leaving a paused first frame.
+        v.removeAttribute('data-ready')
+      })
+    }
+    return true
+  }
+
   function init() {
     removeFormerStaffSlides()
     founderAboveTeamCarousel()
+    heroLightningVideo()
     var el = findPastWorkCarousel()
     if (!el) return false
     var ok = buildMarquee(el)
