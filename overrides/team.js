@@ -53,6 +53,28 @@
    * see CREW_NAMES above for why none of the others can be. */
   var OWNER = /SEMI7900/i
 
+  /* Right-sized copies of the portraits.
+   *
+   * The originals are 1366x2048 and 93-211 KB each; a card here shows them at
+   * about 180 px wide. tools/make-derivatives.mjs writes a 420 px WebP of each
+   * of the five current portraits to overrides/assets/derived/team/ (served
+   * at /_assets/derived/team/<yyyy>-<mm>-<name>-420.webp), and the publish
+   * pass points the carousel's CSS at the same files so the originals are
+   * never fetched. This mapping covers the dev server, where the CSS is not
+   * rewritten, and any portrait the pass missed. Only these five have a
+   * derivative; anything else -- and anything matching NEVER_USE -- keeps
+   * the URL it came with, and a derivative that fails to load falls back to
+   * the original (see build()). */
+  var TEAM_DERIVED = ['SEMI7900', 'SEMI7949', 'SEMI7953', 'SEMI8001', 'SEMI8023']
+  var DERIVED_WIDTH = 420
+
+  function derivative(url) {
+    if (NEVER_USE.test(url)) return null
+    var m = String(url).match(/\/assets\/(\d{4})\/(\d{2})\/(SEMI\d+)\.(?:jpe?g|png)(?:\.webp)?(?:[?#].*)?$/i)
+    if (!m || TEAM_DERIVED.indexOf(m[3].toUpperCase()) === -1) return null
+    return '/_assets/derived/team/' + m[1] + '-' + m[2] + '-' + m[3].toUpperCase() + '-' + DERIVED_WIDTH + '.webp'
+  }
+
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   }
@@ -127,10 +149,13 @@
     var cards = ''
     for (var i = 0; i < portraits.length; i++) {
       var name = CREW_NAMES[i] ? String(CREW_NAMES[i]).trim() : ''
+      var small = derivative(portraits[i])
       cards += '<button type="button" class="itlr-team__card" data-i="' + i + '"'
         + ' aria-label="' + (name ? esc(name) : 'Crew member ' + (i + 1)) + '">'
         + '<span class="itlr-team__photo">'
-        + '<img src="' + esc(portraits[i]) + '" alt="' + (name ? esc(name) + ', In The Light Roofing' : '') + '"'
+        + '<img src="' + esc(small || portraits[i]) + '"'
+        + (small ? ' data-itlr-original="' + esc(portraits[i]) + '"' : '')
+        + ' alt="' + (name ? esc(name) + ', In The Light Roofing' : '') + '"'
         + ' loading="lazy" decoding="async"></span>'
         + (name ? '<span class="itlr-team__name">' + esc(name) + '</span>' : '')
         + '</button>'
@@ -150,6 +175,18 @@
     widget.parentNode.insertBefore(root, widget)
     widget.style.display = 'none'
     widget.setAttribute('aria-hidden', 'true')
+
+    // A derivative that is missing (not generated yet, or renamed) must not
+    // leave a broken card: fall back to the original, once.
+    var imgs = root.querySelectorAll('img[data-itlr-original]')
+    for (var k = 0; k < imgs.length; k++) {
+      imgs[k].addEventListener('error', function () {
+        var orig = this.getAttribute('data-itlr-original')
+        if (!orig) return
+        this.removeAttribute('data-itlr-original')
+        this.src = orig
+      })
+    }
     return root
   }
 

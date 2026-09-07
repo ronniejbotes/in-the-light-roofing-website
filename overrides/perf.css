@@ -1,0 +1,120 @@
+/*
+ * Performance-motivated styling: space reserved for content that JavaScript
+ * builds after load, so the page does not jump when it arrives.
+ *
+ * Injected by build/serve.mjs and baked in by build/publish.mjs. Every rule
+ * names the page and the layout shift it prevents, with the measurement that
+ * justified it. Nothing here changes what the finished page looks like.
+ */
+
+/* ---------------------------------------------------------------------------
+ * 1. /past-work/ gallery -- CLS 0.40 mobile / 0.07 desktop (audit fix 5a)
+ *
+ * Elementor Pro's gallery ships its container empty and 1 px tall; its script
+ * then adds `e-gallery-grid e-gallery--animated`, sets --columns/--rows/--hgap
+ * and --container-aspect-ratio inline, and the container's height comes from
+ * `.e-gallery-grid.e-gallery--animated { padding-bottom: var(--container-
+ * aspect-ratio) }`. Until that runs (1.7 s desktop, ~18 s on the throttled
+ * mobile profile) everything below the gallery -- the Related Posts block,
+ * the footer -- sits 1300-3400 px too high and is pushed down when it does.
+ *
+ * The same height is reserved here from the same numbers the script uses:
+ * 14 items at 3:2, and per breakpoint the column count and gap the widget's
+ * data-settings carry (columns 3 / tablet 2 / mobile 1, gap 15 px, laptop
+ * and tablet and mobile gap 10 px). For c columns and r rows the container
+ * is r * (2/3) * (width - (c-1)*gap)/c + (r-1)*gap tall, which in CSS is a
+ * percentage of the width plus a constant:
+ *
+ *      >= 1366   3 cols, 5 rows, gap 15   111.1111% + 26.6667px   (1170 px -> 1327, measured 1327)
+ *   1024-1365    3 cols, 5 rows, gap 10   111.1111% + 17.7778px   (1170 px -> 1318, measured 1318)
+ *    767-1023    2 cols, 7 rows, gap 10   233.3333% + 36.6667px   ( 690 px -> 1647, measured 1647)
+ *      <= 766    1 col, 14 rows, gap 10   933.3333% + 130px       ( 351 px -> 3406, measured 3406)
+ *
+ * The breakpoints are where the script itself changes column count, found by
+ * measuring 766/767, 1023/1024 and 1365/1366 -- one pixel below each of
+ * Elementor's values, because the gallery script compares with `<`.
+ *
+ * The hand-over. This gallery is not the "animated" variant: its height comes
+ * from the CSS grid the script switches on (`.e-gallery-grid { display: grid;
+ * grid-template-columns: repeat(var(--columns), 1fr) }`) with each item's
+ * image sized by `padding-bottom: var(--aspect-ratio)`. So the grid is only
+ * as tall as the finished gallery once BOTH the class and the inline
+ * variables are there -- between the two there is a frame where the grid
+ * exists but its items are 0 px tall. Keyed on the class alone this
+ * reservation let go in that frame and measured as two shifts of 0.36
+ * (collapse, then regrow) instead of the one it replaced; keyed on the
+ * `--animated` class it never let go at all and doubled the height. Keyed on
+ * "grid AND variables set" it stops matching in the same frame the grid gets
+ * its size, whichever order the script does them in. If the gallery's
+ * settings ever change in Elementor the finished layout is still the
+ * script's; only the reservation would be off by a little.
+ * ------------------------------------------------------------------------- */
+.elementor-element-2333fde .elementor-gallery__container:not(.e-gallery-grid[style*="--aspect-ratio"]) {
+  padding-bottom: calc(111.1111% + 26.6667px);
+}
+@media (max-width: 1365px) {
+  .elementor-element-2333fde .elementor-gallery__container:not(.e-gallery-grid[style*="--aspect-ratio"]) {
+    padding-bottom: calc(111.1111% + 17.7778px);
+  }
+}
+@media (max-width: 1023px) {
+  .elementor-element-2333fde .elementor-gallery__container:not(.e-gallery-grid[style*="--aspect-ratio"]) {
+    padding-bottom: calc(233.3333% + 36.6667px);
+  }
+}
+@media (max-width: 766px) {
+  .elementor-element-2333fde .elementor-gallery__container:not(.e-gallery-grid[style*="--aspect-ratio"]) {
+    padding-bottom: calc(933.3333% + 130px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. The "Get a No Cost Roof Replacement Estimate" form -- CLS 0.10 on
+ *    mobile for every blog post (audit fix 5c, the one it could not pin down)
+ *
+ * Forminator ships the form with style="display:none" and shows it once its
+ * script has initialised, ~350 ms after load. The widget that holds it is
+ * 0 px tall until then and 286-312 px after. On desktop the form is a side
+ * column and nothing moves; on phones and tablets the post template puts
+ * that column ABOVE the article body (`elementor-reverse-mobile`), so the
+ * whole article drops by the form's height when it appears -- measured
+ * 289 px at 390 wide, 0.098 of the viewport.
+ *
+ * Reserved with min-height, measured after Forminator has drawn the form:
+ * 312 px at 1440, 304 at 767, 289 at 390, 286 at 320. The widget is the same
+ * template on all 426 pages. Without JavaScript the form never appears and
+ * this leaves a blank block under its heading -- the layout holds, which is
+ * the point.
+ * ------------------------------------------------------------------------- */
+.elementor-widget-html.sticky-form {
+  min-height: 312px;
+}
+@media (max-width: 1024px) {
+  .elementor-widget-html.sticky-form { min-height: 304px; }
+}
+@media (max-width: 480px) {
+  .elementor-widget-html.sticky-form { min-height: 289px; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. The homepage hero's estimate form (form 8072) -- CLS 0.10 mobile /
+ *    0.05 desktop on / once the hero is visible at first paint
+ *
+ * Same mechanism as 2, in the hero's right-hand column (`.bnr-form` without
+ * `.sticky-form`; the widget holds a <br> placeholder and is 30 px tall until
+ * Forminator shows the form). Before fix C the whole column carried
+ * `elementor-invisible`, so this reveal happened out of sight and was never
+ * counted; with the hero painting at first paint it is. Measured after
+ * Forminator: 137 px at 1366-1920, 171-177 px at 768-1024, 268-281 px at
+ * 320-480. The lower value of each range is reserved, so at worst a few
+ * pixels still move and nothing is ever left blank.
+ * ------------------------------------------------------------------------- */
+.elementor-widget-html.bnr-form:not(.sticky-form) {
+  min-height: 136px;
+}
+@media (max-width: 1024px) {
+  .elementor-widget-html.bnr-form:not(.sticky-form) { min-height: 171px; }
+}
+@media (max-width: 767px) {
+  .elementor-widget-html.bnr-form:not(.sticky-form) { min-height: 268px; }
+}

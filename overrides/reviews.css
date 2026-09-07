@@ -15,7 +15,14 @@
   --itlr-card: 300px;
   position: relative;
   display: flex;
-  align-items: center;
+  /* flex-start, not center. The keyframe below scrolls each column by exactly
+     one copy of the nine cards, which is seamless only if the 520px window
+     looks at the START of the strip: then the end frame shows the second copy
+     where the first copy was. Centred, the window looked at the middle of a
+     ~4400px strip and one copy later was ~215px past its end -- a blank strip
+     at the foot of each column for the last part of every cycle, then a jump
+     (measured: stage offset -2055px in a 420px window at 390 wide). */
+  align-items: flex-start;
   justify-content: center;
   gap: var(--itlr-gap);
   height: 520px;
@@ -26,12 +33,16 @@
 
 /* The tilt. The original used perspective:300px with a heavy rotateZ, which at
    this card size threw the far column off the canvas; the angles are softened
-   so all four columns stay in frame and the text stays readable. */
+   so all four columns stay in frame and the text stays readable.
+   transform-origin is the centre of the visible window (half the .itlr-reviews
+   height), which is the point the stage rotated about when it was centred --
+   so the tilt looks exactly as it did; only the strip's start position moved. */
 .itlr-reviews__stage {
   display: flex;
   flex-direction: row;
   gap: var(--itlr-gap);
   transform: translateX(-40px) translateZ(-70px) rotateX(12deg) rotateY(-8deg) rotateZ(8deg);
+  transform-origin: 50% 260px;
   transform-style: preserve-3d;
 }
 
@@ -131,13 +142,13 @@
 @media (max-width: 1024px) {
   .itlr-reviews { height: 460px; }
   .itlr-reviews__col:nth-child(n+4) { display: none; }
-  .itlr-reviews__stage { transform: translateZ(-40px) rotateX(8deg) rotateY(-5deg) rotateZ(5deg); }
+  .itlr-reviews__stage { transform: translateZ(-40px) rotateX(8deg) rotateY(-5deg) rotateZ(5deg); transform-origin: 50% 230px; }
 }
 
 @media (max-width: 700px) {
   .itlr-reviews { height: 420px; --itlr-card: 260px; }
   .itlr-reviews__col:nth-child(n+3) { display: none; }
-  .itlr-reviews__stage { transform: none; }
+  .itlr-reviews__stage { transform: none; transform-origin: 50% 210px; }
 }
 
 /* A perpetual animation is exactly what this setting is for. Columns become a

@@ -71,7 +71,23 @@ const REVIEWS = [
 ;(function () {
   'use strict'
 
-  var COLUMNS = 4
+  /*
+   * How many columns to build. reviews.css shows four above 1024 px, three
+   * down to 700 px and two below that (`.itlr-reviews__col:nth-child(n+3)
+   * { display: none }`), but the DOM used to carry all four regardless: 72
+   * cards for nine reviews, half of them invisible on a phone (~300 DOM nodes
+   * and two animated columns doing nothing). Now only the columns that will
+   * show are built, and the block is rebuilt if the viewport crosses one of
+   * those two breakpoints. The queries mirror reviews.css exactly.
+   */
+  var MQ_NARROW = window.matchMedia ? window.matchMedia('(max-width: 700px)') : null
+  var MQ_MID = window.matchMedia ? window.matchMedia('(max-width: 1024px)') : null
+
+  function columnsFor() {
+    if (MQ_NARROW && MQ_NARROW.matches) return 2
+    if (MQ_MID && MQ_MID.matches) return 3
+    return 4
+  }
 
   function initials(name) {
     var parts = String(name).trim().split(/\s+/).filter(Boolean)
@@ -116,20 +132,27 @@ const REVIEWS = [
     return el
   }
 
-  function build() {
+  function build(columns) {
     var wrap = document.createElement('div')
     wrap.className = 'itlr-reviews'
+    wrap.setAttribute('data-columns', String(columns))
 
     var stage = document.createElement('div')
     stage.className = 'itlr-reviews__stage'
 
-    for (var c = 0; c < COLUMNS; c++) {
+    for (var c = 0; c < columns; c++) {
       var col = document.createElement('div')
       col.className = 'itlr-reviews__col' + (c % 2 ? ' itlr-reviews__col--reverse' : '')
+      // Every column carries the same nine reviews in a different order, so
+      // a screen reader gets them once, from the first column; the others
+      // are the same words again and are hidden from assistive technology.
+      if (c > 0) col.setAttribute('aria-hidden', 'true')
       // Offset each column so they do not read as four copies of one list.
       var rotated = REVIEWS.slice(c * 2).concat(REVIEWS.slice(0, c * 2))
-      // Twice through: the keyframe travels exactly half the track, so the loop
-      // is seamless without cloning nodes at runtime.
+      // Twice through, and no more: the keyframe travels exactly half the
+      // track, so the second copy is what makes the loop seamless (the last
+      // frame is pixel-identical to the first) and a third would only add
+      // nodes. The second copy is a clone for the eye, not for a reader.
       for (var pass = 0; pass < 2; pass++) {
         for (var i = 0; i < rotated.length; i++) {
           var n = card(rotated[i])
@@ -191,13 +214,25 @@ const REVIEWS = [
     var stale = h.querySelectorAll('.ti-widget, [class*="ti-widget"]')
     for (var i = 0; i < stale.length; i++) stale[i].remove()
 
-    if (h.querySelector('.itlr-reviews') && h.querySelector('.itlr-reviews-foot')) return true
+    var columns = columnsFor()
+    var existing = h.querySelector('.itlr-reviews')
+    if (existing && h.querySelector('.itlr-reviews-foot') && existing.getAttribute('data-columns') === String(columns)) return true
 
     var old = h.querySelectorAll('.itlr-reviews, .itlr-reviews-foot')
     for (var j = 0; j < old.length; j++) old[j].remove()
 
-    h.appendChild(build())
+    h.appendChild(build(columns))
     return true
+  }
+
+  // Crossing 700 px or 1024 px changes how many columns show; rebuild then.
+  function onBreakpoint() { mount() }
+  if (MQ_NARROW && MQ_NARROW.addEventListener) {
+    MQ_NARROW.addEventListener('change', onBreakpoint)
+    MQ_MID.addEventListener('change', onBreakpoint)
+  } else if (MQ_NARROW && MQ_NARROW.addListener) {
+    MQ_NARROW.addListener(onBreakpoint)
+    MQ_MID.addListener(onBreakpoint)
   }
 
   var tries = 0
