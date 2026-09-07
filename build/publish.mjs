@@ -35,6 +35,7 @@
 import { readFile, writeFile, mkdir, cp, rm, readdir, stat } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { declutter, rewritePaths } from './declutter.mjs'
+import { seo } from './seo/index.mjs'
 import { existsSync } from 'node:fs'
 import { join, resolve, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -208,6 +209,15 @@ async function main() {
     ? { movedDirs: [], rewritten: 0, htmlCleaned: 0, skipped: true }
     : await declutter(OUT)
 
+  // 3c. The SEO pass: schema, canonicals, indexability, titles and descriptions,
+  // alt text, internal links, sitemap and the live robots.txt. After declutter
+  // so it sees the renamed /assets/ paths, and before the tag injection so the
+  // pages it reads are still the mirror's own markup. See build/seo/index.mjs.
+  // SEO=off publishes without it -- the untouched-mirror baseline.
+  const seoReport = process.env.SEO === 'off'
+    ? { modules: [], pages: 0, skipped: true }
+    : await seo(OUT, { public: PUBLIC })
+
   // 4. Inject into every HTML document.
   //
   // Not every .html here is a document: WordPress serves its feeds at
@@ -266,6 +276,13 @@ async function main() {
   console.log(`  de-WordPressed: ${clean.movedDirs.length} dirs moved, `
     + `${clean.rewritten} files rewritten, ${clean.htmlCleaned} pages cleaned`)
   if (clean.wpContentLeftovers) console.warn('  ! wp-content not empty:', clean.wpContentLeftovers)
+  console.log(seoReport.skipped
+    ? '  SEO pass: skipped (SEO=off)'
+    : `  SEO pass: ${seoReport.modules.length ? seoReport.modules.join(', ') : 'no modules'} over ${seoReport.pages} pages`)
+  for (const [mod, rep] of Object.entries(seoReport.report || {})) {
+    const line = Object.entries(rep).map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`).join('  ')
+    if (line) console.log(`    ${mod}: ${line}`)
+  }
   console.log(PUBLIC
     ? '  robots.txt: the mirror\'s own (PUBLISH_PUBLIC=1)'
     : '  robots.txt: STAGING, disallow all + X-Robots-Tag noindex')

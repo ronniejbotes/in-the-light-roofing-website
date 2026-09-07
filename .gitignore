@@ -25,3 +25,7 @@ scratchpad/
 
 # Built by build/publish.mjs; regenerate rather than commit (264MB).
 publish/
+
+# Scratch builds and preview logs from the SEO work
+.out-*/
+.serve-*.log
