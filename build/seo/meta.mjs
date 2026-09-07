@@ -124,6 +124,9 @@ function organizationNode() {
     '@id': ORG_ID,
     name: BUSINESS.name,
     alternateName: BUSINESS.alternateName,
+    // As registered: the BBB profile reads "In The Light Roofing, LLC" at this
+    // address and number, and the Facebook page slug is InthelightcontractingLLC.
+    legalName: 'In The Light Roofing, LLC',
     url: `${SITE}/`,
     logo: { '@id': LOGO_ID },
     image: { '@id': LOGO_ID },

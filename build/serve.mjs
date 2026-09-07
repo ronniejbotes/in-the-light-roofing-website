@@ -102,6 +102,8 @@ createServer(async (req, res) => {
     '/_team.js': 'team.js',
     '/_careers.css': 'careers.css',
     '/_careers.js': 'careers.js',
+    '/_links.css': 'links.css',
+    '/_mobile.css': 'mobile.css',
   }
   // OVERRIDES=off means "serve exactly what is in the directory". Previewing
   // publish/ that way, this shortcut used to hand back the source override
@@ -165,6 +167,8 @@ createServer(async (req, res) => {
         + '<link rel="stylesheet" href="/_process.css">'
         + '<link rel="stylesheet" href="/_team.css">'
         + '<link rel="stylesheet" href="/_careers.css">'
+        + '<link rel="stylesheet" href="/_links.css">'
+        + '<link rel="stylesheet" href="/_mobile.css">'
         + '<script src="/_overrides.js" defer></script>'
         + '<script src="/_reviews.js" defer></script>'
         + '<script src="/_process.js" defer></script>'

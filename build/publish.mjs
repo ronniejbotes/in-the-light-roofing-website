@@ -60,6 +60,8 @@ const OVERRIDES = {
   '_team.js': 'team.js',
   '_careers.css': 'careers.css',
   '_careers.js': 'careers.js',
+  '_links.css': 'links.css',
+  '_mobile.css': 'mobile.css',
 }
 
 /** Short content hash, so a changed file gets a URL no cache has seen. */
@@ -75,8 +77,9 @@ async function buildTags() {
   for (const [url, file] of Object.entries(OVERRIDES)) v[url] = await stamp(file)
   const css = (u) => `<link rel="stylesheet" href="/${u}?v=${v[u]}">`
   const js = (u) => `<script src="/${u}?v=${v[u]}" defer></script>`
+  // mobile.css last: its fixes must win on order over every stylesheet above.
   return css('_overrides.css') + css('_reviews.css') + css('_process.css') + css('_team.css')
-    + css('_careers.css')
+    + css('_careers.css') + css('_links.css') + css('_mobile.css')
     + js('_overrides.js') + js('_reviews.js') + js('_process.js') + js('_team.js')
     + js('_careers.js')
 }
