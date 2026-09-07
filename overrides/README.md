@@ -18,14 +18,57 @@ CSS, JS into a footer snippet (Elementor → Custom Code, or a snippets plugin).
 
 | File | What it does |
 |---|---|
-| `overrides.css` / `overrides.js` | Service-grid icon sizing; Past Work carousel as a full-width continuous crawl |
+| `overrides.css` / `overrides.js` | Service-grid icon sizing; Past Work carousel as a full-width continuous crawl, with rounded cards, hover-to-hold and an estimate prompt beneath it |
 | `reviews.css` / `reviews.js` | 3D testimonial marquee replacing the Trustindex widget |
 | `reviews.json` | The nine Google reviews, captured verbatim |
 
-## Why the testimonial component was ported, not installed
+## The Past Work strip
 
-The component supplied was React + shadcn/ui + Tailwind + TypeScript. This
-project is none of those:
+A seamless, full-bleed crawl of real job photographs. **It no longer runs on
+Swiper.** Elementor's carousel is loop-mode Swiper, which fakes an infinite loop
+by cloning slides and then teleporting the wrapper back to the start
+(`loopFix`). That teleport is the jump, and it is not tunable away — it is how
+the mode works. So `buildMarquee()` destroys the Swiper instance and rebuilds
+the strip as a plain track.
+
+- **Seamless.** The track holds N whole copies of the seven photographs and is
+  animated from `0` to `-50%` of its own width. Half the track is exactly the
+  copies in the first half, so the last frame is pixel-identical to the first.
+  Measured over a full period: 106 px/s, no speed spike at the loop point.
+- **No `gap`.** Spacing is `margin-right` on each item so every item contributes
+  the same pitch. A `gap` is also dropped *between the two halves*, which makes
+  `-50%` land a few pixels off one whole copy and puts the seam straight back.
+- **Copy count is measured, not assumed.** It grows in pairs until one half is
+  wider than the viewport, or a gap opens at the right edge on a wide screen.
+  1440px gets 2 copies; 2560px gets 4.
+- **Speed.** `PX_PER_SEC` in `overrides.js`, currently 106. It was 163 when the
+  photographs were 460px wide; they are now 299px (35% smaller), so holding 163
+  would have pushed each one past the eye 35% sooner. 106 keeps the time a
+  photograph spends on screen unchanged. Set it back to 163 for a constant
+  travel speed instead.
+- **Tilt.** Alternating ±2.5°, straightening to 0° and growing to 1.25 on hover.
+  The class is assigned in JS from the index within one copy, **not** with
+  `:nth-child` — there are seven photographs, an odd number, so `:nth-child`
+  would land on different photographs in each copy and the tilt pattern would
+  visibly change at the loop point.
+- **Hover stops it,** via `animation-play-state`, which halts on the exact frame
+  under the pointer. Nothing dims.
+
+## The estimate prompt
+
+Injected after the carousel widget, so it sits back inside the 1170px column
+while the strip stays full-bleed. It is a dark card rather than bare text
+because the section below overlaps upward with a bright cyan band, and the seam
+moves with the viewport.
+
+Being injected, it is a conversion element and not an indexable one. If it earns
+its keep, move it into Elementor as real markup.
+
+## Why the marquee components were ported, not installed
+
+Both supplied components — the testimonial marquee and the animated hero
+marquee the Past Work treatment came from — were React + shadcn/ui + Tailwind +
+TypeScript. This project is none of those:
 
 - no `react` or `react-dom` — the only dependencies are `playwright-core`,
   `sharp` and `vite`

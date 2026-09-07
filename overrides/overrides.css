@@ -42,39 +42,218 @@
 }
 
 /* ---------------------------------------------------------------------------
- * 2. Past Work carousel: full-bleed, continuously scrolling.
+ * 2. Past Work strip: a genuinely endless, full-bleed crawl.
  *
- * It sat inside the 1170px container and advanced a slide at a time. Now it
- * spans the viewport and moves at a constant rate. The width break-out uses the
- * margin trick rather than position:fixed so it still behaves in the document
- * flow and does not introduce a horizontal scrollbar.
+ * This no longer runs on Swiper. Elementor's carousel is loop-mode Swiper,
+ * which fakes an infinite loop by cloning slides and then silently teleporting
+ * the wrapper back to the start (loopFix). That teleport is the jump, and no
+ * combination of speed, freeMode or slidesPerGroup removes it -- it is how the
+ * mode works.
+ *
+ * So overrides.js destroys the Swiper instance and rebuilds the strip as a
+ * plain track holding N whole copies of the photographs, animated from 0 to
+ * -50% of its own width. Half the track is exactly the copies in the first
+ * half, so the frame at 100% is pixel-identical to the frame at 0% and the
+ * loop has no seam at all. It is also cheaper: one compositor-driven
+ * animation, no per-frame JavaScript.
+ *
+ * Pausing is then just animation-play-state, which stops on the exact frame
+ * under the pointer rather than having to interrupt a transition by hand.
  * ------------------------------------------------------------------------- */
-.itlr-marquee-carousel {
+.itlr-marquee {
+  --itlr-img-w: 299px;   /* 35% down from the 460px Elementor rendered */
+  --itlr-img-h: 307px;
+  --itlr-gap: 26px;
+
   width: 100vw !important;
   max-width: 100vw !important;
   margin-left: calc(50% - 50vw) !important;
   margin-right: calc(50% - 50vw) !important;
   overflow: hidden;
+  /* Room for a hovered photograph to grow to 1.25 and to sit at an angle
+     without being clipped by the container it is scrolling inside. */
+  padding-block: 46px;
+  /* Fade both ends rather than cutting them. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
 }
 
-/* Constant speed: Swiper sets a transition per slide, and the default easing
-   makes a continuous loop visibly pulse at each boundary. */
-.itlr-marquee-carousel .swiper-wrapper {
-  transition-timing-function: linear !important;
+.itlr-marquee__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  /* No `gap`. Spacing goes on the items as margin-right so that every item
+     contributes exactly the same pitch -- a gap is dropped between the two
+     halves as well, which makes -50% land a few pixels off one whole copy and
+     puts the seam straight back. Duration is set from JS: distance / speed. */
+  animation-name: itlr-crawl;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
 }
 
-/* The arrows are meaningless once it never stops, and they cover the images. */
-.itlr-marquee-carousel .elementor-swiper-button,
-.itlr-marquee-carousel .swiper-button-next,
-.itlr-marquee-carousel .swiper-button-prev,
-.itlr-marquee-carousel .swiper-pagination {
-  display: none !important;
+@keyframes itlr-crawl {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
 }
 
-/* Someone who has asked for less motion should not be handed an endless one. */
+/* Hovering anywhere on the strip stops it dead. Nothing dims: the ask was to
+   stop the carousel, not to style the other photographs. */
+.itlr-marquee:hover .itlr-marquee__track,
+.itlr-marquee:focus-within .itlr-marquee__track {
+  animation-play-state: paused;
+}
+
+.itlr-marquee__item {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--itlr-img-w);
+  height: var(--itlr-img-h);
+  margin-right: var(--itlr-gap);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgb(0 0 0 / .38);
+  outline: 1px solid rgb(255 255 255 / .10);
+  outline-offset: -1px;
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1),
+              box-shadow .45s cubic-bezier(.22, 1, .36, 1);
+}
+
+.itlr-marquee__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Alternating tilt. The class is assigned in JS from the index within one copy
+   of the set, NOT with :nth-child -- there are seven photographs, so an odd
+   count means :nth-child(odd) would land on different photographs in each copy
+   and the tilt pattern would visibly change at the loop point. */
+.itlr-marquee__item--cw  { transform: rotate(2.5deg); }
+.itlr-marquee__item--ccw { transform: rotate(-2.5deg); }
+
+/* Hovered: straighten up and grow. z-index lifts it over its neighbours, which
+   otherwise clip the corners of the enlarged photograph. */
+.itlr-marquee__item:hover {
+  transform: rotate(0deg) scale(1.25);
+  z-index: 3;
+  box-shadow: 0 22px 50px rgb(0 0 0 / .55);
+  outline-color: rgb(255 255 255 / .24);
+}
+
+@media (max-width: 1024px) {
+  .itlr-marquee { --itlr-img-w: 250px; --itlr-img-h: 257px; --itlr-gap: 20px; padding-block: 38px; }
+}
+
+@media (max-width: 767px) {
+  .itlr-marquee { --itlr-img-w: 200px; --itlr-img-h: 206px; --itlr-gap: 16px; padding-block: 30px; }
+}
+
+/* Someone who has asked for less motion should not be handed an endless one.
+   The strip stays, and stays browsable -- it simply does not move. */
 @media (prefers-reduced-motion: reduce) {
-  .itlr-marquee-carousel .swiper-wrapper {
-    transition-duration: 0s !important;
+  .itlr-marquee__track { animation: none !important; }
+  .itlr-marquee__item:hover { transform: rotate(0deg); }
+}
+
+/* ---------------------------------------------------------------------------
+ * 2b. The estimate prompt under the Past Work strip.
+ *
+ * Injected by overrides.js. It sits directly beneath the photographs on purpose:
+ * the strip is the proof, and the ask belongs immediately after the proof rather
+ * than at the bottom of the page. Styled against the section's own dark
+ * background using the Elementor globals, so it re-themes with the site.
+ * ------------------------------------------------------------------------- */
+.itlr-cta {
+  position: relative;
+  z-index: 2;
+  max-width: 760px;
+  margin: 52px auto 8px;
+  padding: 40px 32px 44px;
+  text-align: center;
+  /* A self-contained panel, not bare text on the section.
+     The section below this one carries a bright cyan band that overlaps
+     upwards, so the prompt lands half on near-black and half on cyan. Bare
+     white text and a cyan button disappear across that seam. Giving it its own
+     dark surface makes it readable wherever the seam happens to fall, and at
+     any viewport -- the overlap moves with the layout. */
+  background: var(--e-global-color-secondary, #14161E);
+  border: 1px solid rgb(255 255 255 / .09);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / .38);
+}
+
+.itlr-cta__title {
+  margin: 0 0 14px;
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+  line-height: 1.2;
+  font-weight: 700;
+  color: #fff;
+}
+
+.itlr-cta__body {
+  margin: 0 auto 28px;
+  max-width: 56ch;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: rgb(255 255 255 / .82);
+}
+
+.itlr-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+}
+
+.itlr-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  text-decoration: none;
+  transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+
+.itlr-cta__btn--primary {
+  background: var(--e-global-color-primary, #00B6F1);
+  color: #fff;
+  box-shadow: 0 8px 24px rgb(0 182 241 / .32);
+}
+
+.itlr-cta__btn--secondary {
+  border: 2px solid rgb(255 255 255 / .35);
+  color: #fff;
+}
+
+.itlr-cta__btn:hover {
+  transform: translateY(-2px);
+}
+
+.itlr-cta__btn--primary:hover {
+  background: #00a2d8;
+  color: #fff;
+}
+
+.itlr-cta__btn--secondary:hover {
+  border-color: #fff;
+  background: rgb(255 255 255 / .08);
+}
+
+.itlr-cta__btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itlr-cta__btn:hover {
+    transform: none;
   }
 }
 
