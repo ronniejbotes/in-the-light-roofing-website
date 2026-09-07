@@ -1,0 +1,188 @@
+/*
+ * "Contact Our Roofing Team" -- the crew carousel rebuilt as a photo stack.
+ *
+ * Injected by build/serve.mjs; team.js builds the markup from the portraits
+ * Elementor already renders, so mirror/ stays a byte-faithful clone. To move it
+ * to WordPress: this file into Elementor -> Site Settings -> Custom CSS and
+ * team.js into a footer snippet.
+ *
+ * Only the carousel widget is replaced. The section's <h2> sits outside it and
+ * is left exactly where it was -- it is the section's real heading and the one
+ * thing here a search engine cares about.
+ *
+ * Ported from a React/shadcn/Tailwind component; this project is none of those.
+ * See README.md for why the design gets ported and the stack does not.
+ */
+
+.itlr-team {
+  position: relative;
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+ * The stage. Cards are absolutely placed inside it and JS writes their
+ * transforms, so it needs a stable height of its own or it would collapse.
+ * ------------------------------------------------------------------------- */
+.itlr-team__stage {
+  position: relative;
+  height: 460px;
+  margin-inline: auto;
+  /* Cards lift and scale on hover; give them somewhere to go. */
+  overflow: visible;
+}
+
+/* Selector is doubled up on purpose. These cards are <button> elements, and the
+   theme styles bare buttons with a dark fill and 15px/30px padding at a
+   specificity that beats a single class -- the first build came out dark-framed
+   with the wrong padding because of it. Being explicit here is what makes the
+   card look the way it is meant to rather than the way the theme left it.
+
+   Deliberately dark rather than the white card of the original design: these
+   portraits are shot against a pale studio backdrop, so a white frame lets the
+   photograph bleed into the card and lose its edge. Navy is the site's own
+   secondary colour and gives the light photographs something to sit against. */
+.itlr-team .itlr-team__card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 264px;
+  margin: -132px 0 0 -100px;   /* centre on the stage before transforms apply */
+  padding: 10px;
+  appearance: none;
+  border: 0;
+  border-radius: 14px;
+  background: var(--e-global-color-secondary, #14161E);
+  box-shadow: 0 14px 34px rgb(0 0 0 / .28);
+  cursor: pointer;
+  transition: transform .55s cubic-bezier(.22, 1, .36, 1),
+              box-shadow .35s ease,
+              opacity .35s ease;
+  will-change: transform;
+}
+
+.itlr-team__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e9edf2;
+}
+
+.itlr-team__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The portraits are shot black-and-white already; this only guards against a
+     colour replacement being dropped in later and breaking the set. */
+  filter: grayscale(1);
+  transition: filter .35s ease;
+}
+
+.itlr-team__card:hover .itlr-team__photo img { filter: grayscale(0); }
+
+/* The caption row only exists when a name was supplied. See team.js -- the
+   repo holds no crew names, and inventing one for a real person is not a thing
+   this codebase does. Supply CREW_NAMES and the row appears. */
+.itlr-team__name {
+  display: block;
+  padding-top: 9px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+}
+
+.itlr-team .itlr-team__card:has(.itlr-team__name) { height: 296px; margin-top: -148px; }
+.itlr-team .itlr-team__card:has(.itlr-team__name) .itlr-team__photo { height: 244px; }
+
+/* Spread state: the group is being pointed at, so every card straightens and
+   the one under the pointer comes forward. */
+.itlr-team[data-spread="true"] .itlr-team__card:hover,
+.itlr-team[data-spread="true"] .itlr-team__card:focus-visible {
+  box-shadow: 0 24px 55px rgb(0 0 0 / .38);
+}
+
+.itlr-team__card:focus-visible {
+  outline: 3px solid var(--e-global-color-primary, #00B6F1);
+  outline-offset: 4px;
+}
+
+/* The chosen card is spun as it returns to the top of the pile. */
+@keyframes itlr-team-flip {
+  from { transform: var(--itlr-t) rotateY(0deg); }
+  to   { transform: var(--itlr-t) rotateY(360deg); }
+}
+
+.itlr-team__card[data-picked="true"] {
+  animation: itlr-team-flip .7s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ---------------------------------------------------------------------------
+ * No call to action of its own. The section already ends with an Elementor
+   "Contact Us Now" button, and the carousel this replaces put the same link on
+   every slide; adding another would be the third of the same thing in one
+   section. Only the affordance hint lives here.
+ * ------------------------------------------------------------------------- */
+.itlr-team__actions {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.itlr-team__hint {
+  margin: 0;
+  font-size: .78rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgb(20 22 30 / .45);
+}
+
+/* ---------------------------------------------------------------------------
+ * Touch, small screens, and anyone who asked for less motion.
+ *
+ * A pile that only opens on hover is unusable without a pointer, so it becomes
+ * an ordinary row of portraits. JS also skips wiring the spread here, so no
+ * transforms are written and these rules are not fighting inline styles.
+ * ------------------------------------------------------------------------- */
+@media (max-width: 900px), (prefers-reduced-motion: reduce), (hover: none) {
+  .itlr-team__stage {
+    height: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    max-width: 900px;
+  }
+
+  /* Doubled to match the desktop rule above. A media query does not raise
+     specificity, so a single .itlr-team__card here would lose to
+     `.itlr-team .itlr-team__card` and the cards would stay absolutely
+     positioned at 200x264 with the grid doing nothing. */
+  .itlr-team .itlr-team__card {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 8px;
+    transform: none !important;
+    animation: none !important;
+    cursor: default;
+  }
+
+  .itlr-team .itlr-team__card:has(.itlr-team__name) { height: auto; margin: 0; }
+
+  .itlr-team__photo,
+  .itlr-team .itlr-team__card:has(.itlr-team__name) .itlr-team__photo {
+    height: auto;
+    aspect-ratio: 3 / 4;
+  }
+
+  .itlr-team__photo img { filter: grayscale(1); }
+
+  .itlr-team__hint { display: none; }
+}

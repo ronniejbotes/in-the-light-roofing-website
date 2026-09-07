@@ -1,0 +1,349 @@
+/*
+ * The 5-step process section, rebuilt as a scroll-driven stage.
+ *
+ * Injected by build/serve.mjs; process.js builds the markup from the step text
+ * Elementor already renders, so mirror/ stays a byte-faithful clone. To move
+ * this to WordPress: this file into Elementor -> Site Settings -> Custom CSS,
+ * process.js into a footer snippet, and the five images into the media library
+ * with the paths in process.js repointed at them.
+ *
+ * WHY A FIXED LAYER RATHER THAN position:sticky
+ * ---------------------------------------------
+ * The obvious build is a sticky stage over a tall section. It does not work
+ * here: the theme sets `overflow: hidden auto` on <body>, which makes the body
+ * a scroll container, and a sticky descendant then resolves against a scrollport
+ * that never scrolls. Probed on the real page -- the element scrolls straight
+ * past instead of pinning.
+ *
+ * So the stage is `position: fixed` and the scroll distance comes from a stack
+ * of empty spacers underneath it. The spacers are what the observer watches;
+ * the layer itself never moves. Same technique the reference implementation
+ * uses, and it sidesteps the body-overflow problem entirely.
+ *
+ * z-index sits under 99, which is the site's fixed header -- the stage must
+ * pass beneath it, not over it.
+ */
+
+.itlr-proc {
+  position: relative;
+  /* The stage paints its own background, so the section's artwork behind it is
+     never stretched over the several viewports of scroll the track adds. */
+}
+
+/* ---------------------------------------------------------------------------
+ * The scroll runway. Empty by design: there is nothing to read here, it exists
+ * only to give the observer something to cross. The tail lets the fifth card
+ * hold before the stage releases, instead of fading out mid-step.
+ * ------------------------------------------------------------------------- */
+.itlr-proc__track { position: relative; }
+/* Lead-in, so the first step's centre-line window falls entirely inside the
+   stretch where the stage is on screen. Without it card 01 gets a quarter of
+   the dwell the other four get, because its window opens before the runway has
+   covered the viewport. */
+.itlr-proc__intro { height: 70vh; }
+.itlr-proc__step { height: 78vh; }
+.itlr-proc__tail { height: 90vh; }
+
+/* Each card carries a copy of its render for the narrow layout further down.
+   On the wide layout the reel is the one that shows, so these stay out of it --
+   they are absolutely positioned and would otherwise cover the copy. */
+.itlr-proc__card .itlr-proc__shot { display: none; }
+
+/* ---------------------------------------------------------------------------
+ * The stage.
+ * ------------------------------------------------------------------------- */
+.itlr-proc__layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .38s ease, visibility 0s linear .38s;
+  background:
+    radial-gradient(120% 90% at 78% 22%, rgba(0, 182, 241, .20) 0%, rgba(0, 182, 241, 0) 58%),
+    radial-gradient(80% 70% at 12% 85%, rgba(0, 182, 241, .10) 0%, rgba(0, 182, 241, 0) 60%),
+    var(--e-global-color-secondary, #14161E);
+  /* The header is fixed at 112px; keep the stage's content clear of it. */
+  padding: 112px 0 0;
+}
+
+.itlr-proc__layer[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .38s ease, visibility 0s;
+}
+
+.itlr-proc__inner {
+  width: min(1240px, 92vw);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 5vw;
+}
+
+/* ---------------------------------------------------------------------------
+ * Copy column. All five cards occupy the same slot; one is lit at a time.
+ * A fixed min-height stops the column resizing as cards of different lengths
+ * swap in, which would nudge the artwork beside it.
+ * ------------------------------------------------------------------------- */
+.itlr-proc__cards {
+  position: relative;
+  min-height: 400px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.itlr-proc__card {
+  position: absolute;
+  /* Full-height and centred rather than top-anchored: the descriptions differ
+     in length, and top-anchoring left the copy riding high against the
+     artwork beside it. */
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .45s ease;
+}
+
+.itlr-proc__kicker {
+  margin: 0 0 22px;
+  font-size: .72rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / .5);
+}
+
+.itlr-proc__card[data-active="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.itlr-proc__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.itlr-proc__num {
+  font-size: clamp(2.6rem, 3.4vw, 3.6rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--e-global-color-primary, #00B6F1);
+  /* Tabular figures: 01 -> 05 must not jitter as they swap in place. */
+  font-variant-numeric: tabular-nums;
+}
+
+.itlr-proc__step-of {
+  font-size: .7rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / .45);
+  padding-left: 14px;
+  border-left: 2px solid rgb(0 182 241 / .55);
+}
+
+.itlr-proc__title {
+  margin: 0 0 14px;
+  font-size: clamp(1.7rem, 2.6vw, 2.6rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -.015em;
+  color: #fff;
+}
+
+/* Per-character rise. The stagger is done with transition-delay off a --i
+   custom property rather than one animation per span, so there is no
+   per-character JavaScript and no keyframe bookkeeping. Outgoing characters
+   leave upward, which is what makes it read as a reel rather than a dissolve. */
+.itlr-proc__ch {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity .4s ease, transform .4s cubic-bezier(.4, 0, 1, 1);
+}
+
+.itlr-proc__card[data-active="true"] .itlr-proc__ch {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .5s ease calc(var(--i) * 12ms),
+              transform .7s cubic-bezier(.16, 1, .3, 1) calc(var(--i) * 12ms);
+}
+
+.itlr-proc__desc {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: rgb(255 255 255 / .76);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .4s ease, transform .4s ease;
+}
+
+.itlr-proc__card[data-active="true"] .itlr-proc__desc {
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s ease .26s, transform .5s ease .26s;
+}
+
+/* ---------------------------------------------------------------------------
+ * Artwork reel.
+ *
+ * The five renders are stacked and placed from a single continuous progress
+ * value u, with k = i - u per image. That is the reference implementation's
+ * carousel maths reduced to CSS 3D: neighbours sit behind and to the side,
+ * the active one comes forward, and everything past the second neighbour is
+ * dropped from the compositor entirely.
+ * ------------------------------------------------------------------------- */
+.itlr-proc__stack {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+}
+
+.itlr-proc__shot {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 30px 70px rgb(0 0 0 / .5);
+  outline: 1px solid rgb(255 255 255 / .08);
+  outline-offset: -1px;
+  will-change: transform, opacity;
+}
+
+.itlr-proc__shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------------------------------------------------------------------------
+ * Progress rail. Segments fill rather than grow -- a width transition on five
+ * bars reads as five separate animations; a colour swap reads as one thing
+ * advancing.
+ * ------------------------------------------------------------------------- */
+.itlr-proc__rail {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(24px, 5vh, 54px);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+}
+
+.itlr-proc__railitem {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 10px 0 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.itlr-proc__railbar {
+  display: block;
+  width: 54px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / .22);
+  transition: background .3s ease;
+}
+
+.itlr-proc__railitem[data-active="true"] .itlr-proc__railbar,
+.itlr-proc__railitem[data-done="true"] .itlr-proc__railbar {
+  background: var(--e-global-color-primary, #00B6F1);
+}
+
+.itlr-proc__raillabel {
+  font-size: .62rem;
+  letter-spacing: .2em;
+  color: rgb(255 255 255 / .38);
+  font-variant-numeric: tabular-nums;
+  transition: color .3s ease;
+}
+
+.itlr-proc__railitem[data-active="true"] .itlr-proc__raillabel { color: #fff; }
+.itlr-proc__railitem:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+
+/* ---------------------------------------------------------------------------
+ * Tablet, phone, and anyone who asked for less motion.
+ *
+ * No fixed stage and no runway: the same markup lays out as an ordinary
+ * stacked list, each step with its artwork above it. A scroll-jacked stage is
+ * the wrong answer on a phone -- someone checking a roofer at the kerb wants to
+ * read the five steps, not scrub through them.
+ * ------------------------------------------------------------------------- */
+@media (max-width: 1024px), (prefers-reduced-motion: reduce) {
+  .itlr-proc__track { display: none; }
+
+  .itlr-proc__layer {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    display: block;
+    padding: 0;
+    background: none;
+  }
+
+  .itlr-proc__inner {
+    display: block;
+    width: min(680px, 92vw);
+  }
+
+  .itlr-proc__rail { display: none; }
+
+  .itlr-proc__cards { min-height: 0; }
+
+  .itlr-proc__card {
+    position: relative;
+    inset: auto;
+    opacity: 1;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 42px;
+    padding: 22px 22px 26px;
+    border-radius: 20px;
+    background: var(--e-global-color-secondary, #14161E);
+    border: 1px solid rgb(255 255 255 / .09);
+  }
+
+  .itlr-proc__kicker { display: none; }
+
+  .itlr-proc__card .itlr-proc__ch,
+  .itlr-proc__card .itlr-proc__desc {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  /* One artwork per card, moved in by JS and shown above the copy. */
+  .itlr-proc__stack { display: none; }
+
+  .itlr-proc__card .itlr-proc__shot {
+    display: block;
+    position: relative;
+    inset: auto;
+    order: -1;
+    aspect-ratio: 4 / 3;
+    margin-bottom: 20px;
+    box-shadow: none;
+  }
+}
