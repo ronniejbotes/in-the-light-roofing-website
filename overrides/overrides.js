@@ -310,29 +310,80 @@
    * ---------------------------------------------------------------------- */
   var HERO_VIDEO = '/_assets/hero-lightning'
 
-  function heroLightningVideo() {
-    var host = document.querySelector('.banner-bg-img')
-    if (!host || host.getAttribute('data-itlr-herovid') === '1') return false
+  /* -------------------------------------------------------------------------
+   * /past-work/: make the gallery actually show its photographs.
+   *
+   * Elementor's gallery ships with `e-gallery--lazyload`: the items carry no
+   * <img> at all, only a data-thumbnail, and its own script is supposed to set
+   * each one as a background as it scrolls into view. On the mirror that script
+   * only ever gets through some of them -- measured 8 of 14 after scrolling the
+   * whole page, and fewer than that on the deployed copy, which is why the page
+   * showed three photographs and a lot of blue.
+   *
+   * The URLs are all right there in data-thumbnail, so rather than repair
+   * Elementor's loader this replaces it: one observer, a generous margin, and
+   * every item gets its background. Still lazy -- 14 photographs is 2.5MB and
+   * loading them all up front would be its own bug -- but no longer optional.
+   * ---------------------------------------------------------------------- */
+  function fixGalleryLazyLoad() {
+    var items = document.querySelectorAll('.e-gallery-image[data-thumbnail]')
+    if (!items.length) return false
 
-    var img = host.querySelector('img')
-    if (!img || !/bnr-bg/.test(img.currentSrc || img.src || '')) return false
+    var pending = []
+    for (var i = 0; i < items.length; i++) {
+      var el = items[i]
+      if (el.getAttribute('data-itlr-lazy') === '1') continue
+      el.setAttribute('data-itlr-lazy', '1')
+      // Elementor may have got to this one already; leave it be.
+      if (el.style.backgroundImage && el.style.backgroundImage !== 'none') continue
+      pending.push(el)
+    }
+    if (!pending.length) return true
 
-    host.setAttribute('data-itlr-herovid', '1')
+    function load(el) {
+      var u = el.getAttribute('data-thumbnail')
+      if (!u) return
+      el.style.backgroundImage = 'url("' + u.replace(/"/g, '%22') + '")'
+      el.classList.add('e-gallery-image-loaded')
+    }
 
-    // Honour the OS setting: a full-width looping background is exactly the
-    // kind of motion this preference exists to turn off.
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true
+    if (!('IntersectionObserver' in window)) {
+      for (var j = 0; j < pending.length; j++) load(pending[j])
+      return true
+    }
 
-    var wrap = document.createElement('span')
-    wrap.className = 'itlr-hero-videowrap'
-    img.parentNode.insertBefore(wrap, img)
-    wrap.appendChild(img)
+    var io = new IntersectionObserver(function (entries) {
+      for (var k = 0; k < entries.length; k++) {
+        if (!entries[k].isIntersecting) continue
+        load(entries[k].target)
+        io.unobserve(entries[k].target)
+      }
+    }, { rootMargin: '800px 0px' })
 
+    for (var m = 0; m < pending.length; m++) io.observe(pending[m])
+    return true
+  }
+
+  /* -------------------------------------------------------------------------
+   * The lightning video, on every page that shows the lightning.
+   *
+   * There are two variants of the same artwork and they need different
+   * handling, which is why matching only the first one missed 200-odd pages:
+   *
+   *   /home/         an <img> of 2024/05/bnr-bg.webp inside .banner-bg-img
+   *   everywhere else  a CSS background-image of 2024/03/bnr-bg.jpg.webp on the
+   *                    banner section itself
+   *
+   * The second is found by reading computed styles rather than by listing
+   * pages: Elementor gives the banner section a different generated id on
+   * nearly every page, so any hard-coded list would be wrong the moment a page
+   * is re-saved. Scanning is limited to top-level sections, not every node.
+   * ---------------------------------------------------------------------- */
+  function makeLightningVideo(posterUrl) {
     var v = document.createElement('video')
     v.className = 'itlr-hero-video'
-    // Both the properties and the attributes: Safari decides whether a video
-    // may autoplay from the attributes present in the markup, not from the
-    // properties set afterwards.
+    // Properties and attributes both: Safari decides whether a video may
+    // autoplay from the attributes in the markup, not from properties set after.
     v.autoplay = true
     v.muted = true
     v.loop = true
@@ -344,33 +395,92 @@
     v.setAttribute('preload', 'auto')
     v.setAttribute('aria-hidden', 'true')
     v.setAttribute('tabindex', '-1')
-    v.poster = img.currentSrc || img.src
-
+    if (posterUrl) v.poster = posterUrl
     v.innerHTML = '<source src="' + HERO_VIDEO + '.webm" type="video/webm">'
       + '<source src="' + HERO_VIDEO + '.mp4" type="video/mp4">'
-
-    // Only fade it in once there is a frame to show, so a slow connection sees
-    // the still rather than a black rectangle over the headline.
     v.addEventListener('loadeddata', function () { v.setAttribute('data-ready', '1') })
     v.addEventListener('error', function () { v.parentNode && v.parentNode.removeChild(v) })
+    return v
+  }
 
-    wrap.appendChild(v)
-
-    var play = v.play()
-    if (play && play.catch) {
-      play.catch(function () {
-        // Autoplay refused. The still underneath is already correct, so take
-        // the video back out rather than leaving a paused first frame.
+  function playOrRemove(v) {
+    var p = v.play()
+    if (p && p.catch) {
+      p.catch(function () {
+        // Autoplay refused -- iOS Low Power Mode, Data Saver. What is behind it
+        // is the original artwork, so drop the video rather than leave a paused
+        // first frame sitting there.
         v.removeAttribute('data-ready')
       })
     }
+  }
+
+  function reducedMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  }
+
+  /** Variant 1: the <img> on /home/. */
+  function heroLightningImage() {
+    var host = document.querySelector('.banner-bg-img')
+    if (!host || host.getAttribute('data-itlr-herovid') === '1') return false
+    var img = host.querySelector('img')
+    if (!img || !/bnr-bg/.test(img.currentSrc || img.src || '')) return false
+
+    host.setAttribute('data-itlr-herovid', '1')
+    if (reducedMotion()) return true
+
+    // The img is kept and wrapped, not replaced: it holds the box the video is
+    // sized against, and it is what remains if autoplay is refused.
+    var wrap = document.createElement('span')
+    wrap.className = 'itlr-hero-videowrap'
+    img.parentNode.insertBefore(wrap, img)
+    wrap.appendChild(img)
+
+    var v = makeLightningVideo(img.currentSrc || img.src)
+    wrap.appendChild(v)
+    playOrRemove(v)
     return true
+  }
+
+  /** Variant 2: the CSS background on every other page's banner section. */
+  function heroLightningBackgrounds() {
+    var cands = document.querySelectorAll('.elementor-top-section, section.elementor-section, .e-con-parent')
+    var found = false
+    for (var i = 0; i < cands.length; i++) {
+      var el = cands[i]
+      if (el.getAttribute('data-itlr-herovid') === '1') continue
+      var cs = window.getComputedStyle(el)
+      if (!/bnr-bg/.test(cs.backgroundImage || '')) continue
+
+      el.setAttribute('data-itlr-herovid', '1')
+      found = true
+      if (reducedMotion()) continue
+
+      // The video is absolutely placed, so the section needs to be a
+      // positioning context. Elementor usually sets this already.
+      if (cs.position === 'static') el.style.position = 'relative'
+
+      var poster = (cs.backgroundImage.match(/url\(["']?(.*?)["']?\)/) || [])[1] || ''
+      var v = makeLightningVideo(poster)
+      // First child, so it paints over the section's own background but under
+      // the overlay and the content -- both of which the stylesheet lifts.
+      el.insertBefore(v, el.firstChild)
+      playOrRemove(v)
+    }
+    return found
+  }
+
+  function heroLightningVideo() {
+    var a = heroLightningImage()
+    var b = heroLightningBackgrounds()
+    return a || b
   }
 
   function init() {
     removeFormerStaffSlides()
     founderAboveTeamCarousel()
     heroLightningVideo()
+    fixGalleryLazyLoad()
     var el = findPastWorkCarousel()
     if (!el) return false
     var ok = buildMarquee(el)
