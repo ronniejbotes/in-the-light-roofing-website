@@ -5,3 +5,8 @@
 # its line endings would rewrite those bytes on checkout, so the working copy
 # would no longer match what was captured. Store and check it out verbatim.
 mirror/** -text
+
+# Artwork the overrides ship with. Binary: `* text=auto` guesses correctly on
+# webp today, but saying so explicitly costs nothing and a mis-detected image
+# is corrupted on checkout, not merely reformatted.
+overrides/assets/** -text

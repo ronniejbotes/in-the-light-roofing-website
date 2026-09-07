@@ -20,6 +20,8 @@ CSS, JS into a footer snippet (Elementor → Custom Code, or a snippets plugin).
 |---|---|
 | `overrides.css` / `overrides.js` | Service-grid icon sizing; Past Work carousel as a full-width continuous crawl, with rounded cards, hover-to-hold and an estimate prompt beneath it |
 | `reviews.css` / `reviews.js` | 3D testimonial marquee replacing the Trustindex widget |
+| `process.css` / `process.js` | The 5-step process section as a scroll-driven stage |
+| `assets/` | The five step renders (generated; see below) |
 | `reviews.json` | The nine Google reviews, captured verbatim |
 
 ## The Past Work strip
@@ -63,6 +65,62 @@ moves with the viewport.
 
 Being injected, it is a conversion element and not an indexable one. If it earns
 its keep, move it into Elementor as real markup.
+
+## The 5-step process stage
+
+One step on screen at a time as you scroll, with a render per step. Built from
+the same text Elementor already renders — `process.js` reads the five headings
+and sentences out of `.process-col` rather than hard-coding them, so editing the
+step copy in Elementor still drives this.
+
+**Why a fixed layer and not `position: sticky`.** The obvious build is a sticky
+stage over a tall section. It does not work on this site: the theme sets
+`overflow: hidden auto` on `<body>`, which makes the body a scroll container, and
+a sticky descendant then resolves against a scrollport that never scrolls.
+Probed on the real page before building — the element scrolls straight past
+instead of pinning. So the stage is `position: fixed` and the scroll distance
+comes from a stack of empty spacers beneath it, which is also what the reference
+implementation does.
+
+- **Which step is current** comes from one `IntersectionObserver` over the
+  spacers with `rootMargin: '-50% 0px -50% 0px'`. That collapses the viewport to
+  its centre line, so exactly one spacer can be intersecting — and because it is
+  a margin rather than a threshold, it rewinds correctly on the way back up.
+- **A lead-in spacer** sits before the five. Without it the first step's
+  centre-line window opens before the runway has covered the viewport, and card
+  01 gets roughly a quarter of the dwell the other four get.
+- **The artwork reel** is driven by a continuous progress value `u`, smoothed
+  frame-rate-independently and magnetised toward the nearest step so each render
+  sits still for most of its runway. Per image, `k = i - u` drives a CSS 3D
+  transform; anything past the second neighbour is dropped from the compositor.
+  This is the reference's WebGL carousel maths with no WebGL.
+- **The rAF loop only runs near the section**, gated by a second observer. A
+  marketing homepage should not hold a frame loop open for the whole visit.
+- **`z-index: 40`** — under the site's fixed header at 99, so the stage passes
+  beneath it.
+
+**Degradation.** Under 1025px, and for anyone with `prefers-reduced-motion`, the
+same markup lays out as an ordinary stacked list with each render above its
+step — no fixed stage, no runway, no scroll-jacking. Someone checking a roofer at
+the kerb wants to read five steps, not scrub through them. With **JavaScript
+off, Elementor's original grid is untouched**: the replacement is inserted first
+and the original hidden only once it is in the document, so a failure anywhere
+above leaves the section exactly as it was. Verified at 390/768/1440/1920, under
+reduced motion, and with JS disabled.
+
+## The step artwork
+
+The five images in `assets/` were generated (Higgsfield, GPT Image 2), then
+converted to webp — 173KB for all five.
+
+They are deliberately **isometric illustrations rather than photographs**. The
+site already carries real photographs of the actual crew and their actual jobs;
+a synthetic photograph of "a roofer on a roof" sitting among them would read as
+a claim about this company's work and its people. An obvious illustration of a
+phone call, a calendar or a pallet of shingles claims nothing that isn't true.
+
+To move them to WordPress: upload to the media library and repoint `SHOTS` at
+the top of `process.js`.
 
 ## Why the marquee components were ported, not installed
 

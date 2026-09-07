@@ -95,6 +95,8 @@ createServer(async (req, res) => {
     '/_overrides.js': 'overrides.js',
     '/_reviews.css': 'reviews.css',
     '/_reviews.js': 'reviews.js',
+    '/_process.css': 'process.css',
+    '/_process.js': 'process.js',
   }
   if (OVERRIDE_FILES[url]) {
     const f = join(ROOT, 'overrides', OVERRIDE_FILES[url])
@@ -104,6 +106,24 @@ createServer(async (req, res) => {
         'Cache-Control': 'no-store',
       })
       return res.end(await readFile(f))
+    }
+  }
+
+  // Images the overrides bring with them. Same reasoning as the files above:
+  // they are not part of the captured site, so they live outside mirror/.
+  // Confined to overrides/assets the same way the mirror is confined -- the URL
+  // is already percent-decoded here, so a "/_assets/..%2f..%2fpackage.json"
+  // arrives as plain "..", and only resolving and comparing catches it.
+  if (url.startsWith('/_assets/')) {
+    const dir = resolve(join(ROOT, 'overrides', 'assets'))
+    const p = resolve(join(dir, url.slice('/_assets/'.length)))
+    const rel = relative(dir, p)
+    if (rel !== '' && !rel.startsWith('..') && !isAbsolute(rel) && existsSync(p)) {
+      res.writeHead(200, {
+        'Content-Type': TYPES[extname(p)] || 'application/octet-stream',
+        'Cache-Control': 'no-store',
+      })
+      return res.end(await readFile(p))
     }
   }
 
@@ -131,8 +151,10 @@ createServer(async (req, res) => {
     if (type.startsWith('text/html') && process.env.OVERRIDES !== 'off') {
       const tags = '<link rel="stylesheet" href="/_overrides.css">'
         + '<link rel="stylesheet" href="/_reviews.css">'
+        + '<link rel="stylesheet" href="/_process.css">'
         + '<script src="/_overrides.js" defer></script>'
         + '<script src="/_reviews.js" defer></script>'
+        + '<script src="/_process.js" defer></script>'
       const html = body.toString('utf8')
       const i = html.lastIndexOf('</head>')
       out = Buffer.from(i === -1 ? html + tags : html.slice(0, i) + tags + html.slice(i), 'utf8')
