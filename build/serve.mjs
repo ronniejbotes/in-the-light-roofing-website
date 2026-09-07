@@ -103,7 +103,13 @@ createServer(async (req, res) => {
     '/_careers.css': 'careers.css',
     '/_careers.js': 'careers.js',
   }
-  if (OVERRIDE_FILES[url]) {
+  // OVERRIDES=off means "serve exactly what is in the directory". Previewing
+  // publish/ that way, this shortcut used to hand back the source override
+  // files while the pages around them were the decluttered copies -- so a rule
+  // written against `wp-image-5320` never matched the `ui-image-5320` in the
+  // baked markup, and the preview showed a broken service grid the real deploy
+  // would not have had. The baked files win when they are what is being served.
+  if (OVERRIDE_FILES[url] && process.env.OVERRIDES !== 'off') {
     const f = join(ROOT, 'overrides', OVERRIDE_FILES[url])
     if (existsSync(f)) {
       res.writeHead(200, {
@@ -119,7 +125,7 @@ createServer(async (req, res) => {
   // Confined to overrides/assets the same way the mirror is confined -- the URL
   // is already percent-decoded here, so a "/_assets/..%2f..%2fpackage.json"
   // arrives as plain "..", and only resolving and comparing catches it.
-  if (url.startsWith('/_assets/')) {
+  if (url.startsWith('/_assets/') && process.env.OVERRIDES !== 'off') {
     const dir = resolve(join(ROOT, 'overrides', 'assets'))
     const p = resolve(join(dir, url.slice('/_assets/'.length)))
     const rel = relative(dir, p)

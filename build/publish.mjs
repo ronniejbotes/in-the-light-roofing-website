@@ -34,6 +34,7 @@
  */
 import { readFile, writeFile, mkdir, cp, rm, readdir, stat } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
+import { declutter, rewritePaths } from './declutter.mjs'
 import { existsSync } from 'node:fs'
 import { join, resolve, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -195,6 +196,18 @@ async function main() {
     assetCount = (await readdir(assets)).length
   }
 
+  // 3b. Strip the WordPress fingerprints.
+  //
+  // After the overrides are copied, deliberately: overrides.css targets
+  // `img.wp-image-5320`, and the class rename has to reach that rule as well as
+  // the markup or the service-grid icon sizing silently stops applying. Running
+  // it here keeps both sides of every rename in step.
+  // DECLUTTER=off publishes the mirror's own WordPress markup untouched. Kept
+  // as the comparison baseline and the way back if a rename ever misfires.
+  const clean = process.env.DECLUTTER === 'off'
+    ? { movedDirs: [], rewritten: 0, htmlCleaned: 0, skipped: true }
+    : await declutter(OUT)
+
   // 4. Inject into every HTML document.
   //
   // Not every .html here is a document: WordPress serves its feeds at
@@ -215,7 +228,12 @@ async function main() {
 
   // 5. Host config, and the two static answers it points at.
   const redirFile = join(MIRROR, '_redirects')
-  const rules = existsSync(redirFile) ? redirectsToApache(await readFile(redirFile, 'utf8')) : []
+  // Through the same path mapping as everything else: _redirects still names
+  // /wp-content/, and the .htaccess is written after the declutter pass, so
+  // without this one rule would 301 into a directory that no longer exists.
+  const rules = existsSync(redirFile)
+    ? redirectsToApache(rewritePaths(await readFile(redirFile, 'utf8')))
+    : []
   await writeFile(join(OUT, '.htaccess'), htaccess(rules), 'utf8')
   await mkdir(join(OUT, '_static'), { recursive: true })
   await writeFile(join(OUT, '_static', 'guest.vary.json'), '{"reload":"no"}', 'utf8')
@@ -245,6 +263,9 @@ async function main() {
   console.log(`  ${injected} HTML pages injected  (${skippedXml} feeds left alone)`)
   console.log(`  ${wrote} override files, ${assetCount} assets`)
   console.log(`  ${rules.length} redirects written to .htaccess`)
+  console.log(`  de-WordPressed: ${clean.movedDirs.length} dirs moved, `
+    + `${clean.rewritten} files rewritten, ${clean.htmlCleaned} pages cleaned`)
+  if (clean.wpContentLeftovers) console.warn('  ! wp-content not empty:', clean.wpContentLeftovers)
   console.log(PUBLIC
     ? '  robots.txt: the mirror\'s own (PUBLISH_PUBLIC=1)'
     : '  robots.txt: STAGING, disallow all + X-Robots-Tag noindex')
