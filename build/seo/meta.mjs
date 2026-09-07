@@ -46,6 +46,8 @@
  * each one customer quote titled with the customer's name. All stay live and
  * crawlable; none belongs in a search result.
  */
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import {
   SITE, absolutize, getYoastGraph, replaceJsonLd, addJsonLd, getCanonical, setCanonical, setIndexable,
   getMeta, setMeta, replaceAll,
@@ -126,6 +128,11 @@ const WRONG_URL = { '/services/asphalt-shingle-roofing/': `${SITE}/asphalt-shing
 /* Utility pages nobody should land on from a search result. /thank-you/ is the
    form confirmation. */
 const NOINDEX = new Set(['/thank-you/'])
+
+/* The share image for pages whose own is missing or absent: the crew under the
+   flag, from the homepage. 1365x2048; the platforms crop, and a real photograph
+   of this company beats a logo card. */
+const OG_FALLBACK = '/assets/2026/03/SEMI8066.jpg.webp'
 
 /* The one real hub among the archive-shaped pages. */
 const HUBS = new Set(['/blog/'])
@@ -230,11 +237,54 @@ export async function transformDoc(doc, ctx) {
     ;[out, n] = replaceAll(html, WRONG_URL[url].replace(/\//g, '\\/'), right.replace(/\//g, '\\/')); html = out; bump('wrongUrlFixed', n)
   }
 
-  /* 1. Social images and URLs back to absolute. */
+  /* 1. Social images and URLs back to absolute -- and pointing at a file that
+     exists. LiteSpeed converted the uploads to .webp and served those in place
+     of the originals, so 102 of the 197 distinct og:image files Yoast named are
+     not on disk; 100 of them have the .webp sibling. A share card with a broken
+     image is worse than none. */
   for (const key of ['og:image', 'og:image:secure_url', 'twitter:image', 'og:url']) {
-    const v = getMeta(html, key)
-    if (v && v.startsWith('/') && !v.startsWith('//')) { html = setMeta(html, key, absolutize(v)); bump('absolutizedMeta') }
+    let v = getMeta(html, key)
+    if (!v) continue
+    if (v.startsWith(SITE)) v = v.slice(SITE.length)
+    if (v.startsWith('/') && !v.startsWith('//') && key !== 'og:url') {
+      const onDisk = (p) => existsSync(join(ctx.OUT, p.split('?')[0].replace(/^\//, '')))
+      if (!onDisk(v) && onDisk(`${v}.webp`)) { v = `${v}.webp`; bump('ogImageToWebp') }
+      else if (!onDisk(v)) { (rep.ogImageMissing ||= []).push(`${url} ${v}`) }
+    }
+    const abs = absolutize(v)
+    if (abs !== getMeta(html, key)) { html = setMeta(html, key, abs); bump('absolutizedMeta') }
   }
+  /* A share image that exists, on every indexable page. Two files Yoast named
+     exist nowhere (the homepage's snappit-new.jpg and one Center Valley photo),
+     and 174 pages had no og:image at all. The fallback is the team photograph
+     the homepage already shows -- real people, this company, on this site. */
+  {
+    const cur = getMeta(html, 'og:image')
+    const onDisk = (p) => existsSync(join(ctx.OUT, p.replace(SITE, '').split('?')[0].replace(/^\//, '')))
+    const indexable = !/noindex/i.test(getMeta(html, 'robots')) && !DUPLICATE_OF[url] && !NOINDEX.has(url)
+    if ((cur && !onDisk(cur)) || (!cur && indexable && doc.kind !== 'archive' && doc.kind !== 'testimonial')) {
+      const fallback = onDisk(OG_FALLBACK) ? OG_FALLBACK : null
+      if (fallback) {
+        html = setMeta(html, 'og:image', absolutize(fallback))
+        if (getMeta(html, 'og:image:secure_url')) html = setMeta(html, 'og:image:secure_url', absolutize(fallback))
+        if (getMeta(html, 'twitter:image')) html = setMeta(html, 'twitter:image', absolutize(fallback))
+        for (const k of ['og:image:width', 'og:image:height', 'og:image:type']) html = html.replace(new RegExp(`<meta\\b[^>]*\\b(?:name|property)=["']${k}["'][^>]*>\\s*`, 'gi'), '')
+        bump(cur ? 'ogImageReplaced' : 'ogImageAdded')
+      }
+    }
+  }
+  if (getMeta(html, 'og:image')) {
+    const img = getMeta(html, 'og:image')
+    if (/\.webp$/i.test(img) && getMeta(html, 'og:image:type') !== 'image/webp') html = setMeta(html, 'og:image:type', 'image/webp')
+    const dims = ctx.dims[img.replace(SITE, '')]
+    if (dims && !getMeta(html, 'og:image:width')) { html = setMeta(html, 'og:image:width', String(dims[0])); html = setMeta(html, 'og:image:height', String(dims[1])) }
+    // Yoast emits no twitter:card here; without it the large-image card is not used.
+    if (!getMeta(html, 'twitter:card')) { html = setMeta(html, 'twitter:card', 'summary_large_image'); bump('twitterCards') }
+  }
+
+  /* Head tags that only made sense on WordPress: the XFN profile link, and
+     rel=prev/next on pages that are out of the index anyway. */
+  html = html.replace(/<link\b[^>]*rel=["']profile["'][^>]*>\s*/gi, '')
 
   /* 2. The graph. */
   const y = getYoastGraph(html)
@@ -265,6 +315,14 @@ export async function transformDoc(doc, ctx) {
     }
 
     if (url === '/' && webpage && !webpage.about) webpage.about = { '@id': ORG_ID }
+    // The About and Contact pages are about the business too, and schema.org has
+    // a type for each.
+    if (webpage && (url === '/about-us/' || url === '/contact/')) {
+      if (!webpage.about) webpage.about = { '@id': ORG_ID }
+      const extra = url === '/about-us/' ? 'AboutPage' : 'ContactPage'
+      const t = [].concat(webpage['@type'])
+      if (!t.includes(extra)) webpage['@type'] = [...t, extra]
+    }
 
     // Posts: the company publishes them, and "Admin" is not an author anyone
     // can look up. The Person node it pointed at had an avatar URL that
@@ -314,6 +372,9 @@ export async function transformDoc(doc, ctx) {
       html = setIndexable(html, false)
       bump(NOINDEX.has(url) ? 'utilityNoindexed' : doc.kind === 'archive' ? 'archivesNoindexed' : 'testimonialsNoindexed')
     }
+  }
+  if (/noindex/i.test(getMeta(html, 'robots'))) {
+    html = html.replace(/<link\b[^>]*rel=["'](?:prev|next)["'][^>]*>\s*/gi, () => { bump('prevNextRemoved'); return '' })
   }
 
   if (DESCRIPTIONS[url] && !getMeta(html, 'description')) {

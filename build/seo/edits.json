@@ -28,7 +28,7 @@
   "/service-area/coplay/": "Roofing Contractor in Coplay, PA | In The Light Roofing",
   "/service-area/slatington/": "Roofing Contractor in Slatington, PA | In The Light Roofing",
   "/service-area/walnutport/": "Roofing Contractor in Walnutport, PA | In The Light Roofing",
-  "/service-area/lehigh-valley/": "Roofing in the Lehigh Valley, PA | In The Light Roofing"
+  "/service-area/lehigh-valley/": "Lehigh Valley Roofing Company | In The Light Roofing"
  },
  "descriptions": {
   "/": "Roof repair, replacement and storm damage repair for homes across the Lehigh Valley, from our base in Allentown, PA. Se habla español. Call (484) 553-0213.",
@@ -59,7 +59,7 @@
   "/service-area/coplay/": "Roofing contractor serving Coplay, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
   "/service-area/slatington/": "Roofing contractor serving Slatington, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
   "/service-area/walnutport/": "Roofing contractor serving Walnutport, PA: roof repair, roof replacement, inspections and storm damage repair from In The Light Roofing. Call (484) 553-0213.",
-  "/service-area/lehigh-valley/": "Roofing across the Lehigh Valley, PA, from Allentown and Bethlehem to Easton and Macungie: repair, replacement, inspections and storm damage. (484) 553-0213."
+  "/service-area/lehigh-valley/": "Roofing company serving the Lehigh Valley, PA, from Allentown: roof repair, replacement, installation, inspections and storm damage repair. (484) 553-0213."
  },
  "replacements": {
   "/": [
@@ -314,6 +314,14 @@
    {
     "find": "Roofers Bethlehem PA <span>Homeowners Trust</span> for Roofing Solutions",
     "replace": "Roofers in Bethlehem, PA <span>Homeowners Trust</span>"
+   },
+   {
+    "find": "Yes. We are one of the top roofing companies in Bethlehem, PA. Businesses trust us for commercial projects, like EPDM rubber roofing installations and maintenance.",
+    "replace": "Yes. Businesses in Bethlehem, PA trust us for commercial projects, like EPDM rubber roofing installations and maintenance."
+   },
+   {
+    "find": "As trusted roofers in Bethlehem, PA, we guarantee satisfaction. We do this through clear communication and skilled work.",
+    "replace": "As roofers in Bethlehem, PA, we prioritize clear communication and skilled work."
    }
   ],
   "/service-area/center-valley-roofing-contractor/": [
@@ -430,6 +438,30 @@
    {
     "find": "Comprehensive Roofing Services in Allentown",
     "replace": "Comprehensive Roofing Services Across the Lehigh Valley"
+   }
+  ],
+  "/project-manager-bethlehem-center-valley/": [
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/roof-repair-technician-bethlehem-center-valley/": [
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/outside-sales-representative-bethlehem-center-valley/": [
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   }
+  ],
+  "/inside-sales-representative-bethlehem-center-valley/": [
+   {
+    "find": "<p>Trusted Center Valley Roofing Company</p>",
+    "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
    }
   ]
  },

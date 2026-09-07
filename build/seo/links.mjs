@@ -28,7 +28,25 @@
 import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { listDocs, escapeHtml, escapeAttr, insertBeforeBodyEnd, getTitle } from './lib.mjs'
+import { listDocs, escapeHtml, escapeAttr, insertBeforeBodyEnd, getTitle, addJsonLd, SITE } from './lib.mjs'
+
+/**
+ * The trust strip on service and town pages: four facts the site already
+ * states, each with its source. Competitors carry a "why choose us" block on
+ * every money page; ours had the facts on the homepage and footer only.
+ * Nothing gated: no warranty terms, no certification, no availability.
+ */
+const TRUST = [
+  { k: 'Locally owned since 2017', v: 'Bryson Berard opened In The Light Roofing in 2017 and still runs it.', src: 'footer and About copy' },
+  { k: 'Based in Allentown', v: 'Our office is at 871 N Fenwick St, Allentown, PA 18109, serving the whole Lehigh Valley.', src: '/contact/' },
+  { k: 'No-cost project estimates', v: 'Estimates are free. A written outline of the work before you commit to anything.', src: 'site-wide FAQ and the estimate button' },
+  { k: 'Hablamos español', v: 'Call or email and we will arrange your estimate in Spanish.', src: 'hero and footer' },
+]
+const TRUST_REVIEWS = [
+  { label: 'Google', url: 'https://g.co/kgs/upMJXvq' },
+  { label: 'Facebook', url: 'https://www.facebook.com/InthelightcontractingLLC/reviews' },
+  { label: 'BBB', url: 'https://www.bbb.org/us/pa/allentown/profile/roofing-contractors/in-the-light-roofing-llc-0241-236020858' },
+]
 
 /* ------------------------------------------------------------------ data */
 
@@ -210,6 +228,30 @@ function relatedBlock(spec) {
     + `<ul class="itlr-related__list">${items}</ul></div></section>`
 }
 
+function trustBlock() {
+  const items = TRUST.map((t) => `<li class="itlr-trust__item"><strong class="itlr-trust__k">${escapeHtml(t.k)}</strong><span class="itlr-trust__v">${escapeHtml(t.v)}</span></li>`).join('')
+  const reviews = TRUST_REVIEWS.map((r) => `<a href="${escapeAttr(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.label)}</a>`).join(', ')
+  return `<section class="itlr-trust" aria-labelledby="itlr-trust-h"><div class="itlr-trust__inner">`
+    + `<h2 class="itlr-trust__heading" id="itlr-trust-h">Why homeowners across the Lehigh Valley call us</h2>`
+    + `<ul class="itlr-trust__list">${items}</ul>`
+    + `<p class="itlr-trust__reviews">Read our reviews on ${reviews}.</p></div></section>`
+}
+
+/** FAQPage JSON-LD for an injected FAQ block -- text identical to what is on the page. */
+function faqSchema(url, spec) {
+  const strip = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${SITE}${url}#faq`,
+    mainEntity: spec.items.map((it) => ({
+      '@type': 'Question',
+      name: it.q,
+      acceptedAnswer: { '@type': 'Answer', text: strip(it.a) },
+    })),
+  }
+}
+
 function faqBlock(spec) {
   // Answers may carry a few <a> tags of our own; everything else is escaped text.
   const items = spec.items.map((it) =>
@@ -225,12 +267,71 @@ function insertBeforeFooter(html, markup) {
   return html.slice(0, i) + markup + '\n' + html.slice(i)
 }
 
+/**
+ * The three hubs -- /services/, /service-area/, /roof-types/ -- shared one body
+ * (the services copy) and one H1 (the brand name). The H1s are fixed by the
+ * content pass; this gives each hub a body of its own, directly under the hero:
+ * a short truthful paragraph and the pages it routes to. The related block at
+ * the foot is then skipped on these three, so the list is not shown twice.
+ */
+const HUBS = {
+  '/services/': {
+    heading: 'Every roofing service we offer',
+    intro: 'From our office in Allentown, In The Light Roofing repairs, replaces, installs and inspects roofs across the Lehigh Valley, and helps homeowners through the insurance claim after storm damage. Choose a service to see what it involves.',
+    links: () => Object.keys(SERVICES).map((u) => svcLink(u)),
+  },
+  '/service-area/': {
+    heading: 'Towns we serve across the Lehigh Valley',
+    intro: 'Based at 871 N Fenwick St in Allentown, we work across the Lehigh Valley. These are the towns with a page of their own; if yours is not listed, call (484) 553-0213 and ask.',
+    links: () => Object.keys(TOWNS).map(townLink),
+  },
+  '/roof-types/': {
+    heading: 'The two roof systems we install',
+    intro: 'Asphalt shingle for pitched residential roofs, and EPDM rubber membrane for flat and low-slope commercial roofs.',
+    links: () => [svcLink('/services/asphalt-shingle-roofing/'), svcLink('/services/epdm-rubber-roofing/')],
+  },
+}
+
+function hubBlock(spec) {
+  const items = spec.links().map((l) =>
+    `<li class="itlr-related__item"><a class="itlr-related__link" href="${escapeAttr(l.url)}">`
+    + `<span class="itlr-related__label">${escapeHtml(l.label)}</span>`
+    + (l.text ? `<span class="itlr-related__text">${escapeHtml(l.text)}</span>` : '')
+    + '</a></li>').join('')
+  return `<section class="itlr-related itlr-hub" aria-labelledby="itlr-hub-h"><div class="itlr-related__inner">`
+    + `<h2 class="itlr-related__heading" id="itlr-hub-h">${escapeHtml(spec.heading)}</h2>`
+    + `<p class="itlr-related__intro">${escapeHtml(spec.intro)}</p>`
+    + `<ul class="itlr-related__list">${items}</ul></div></section>`
+}
+
+/** Insert markup after the hero: before the second top-level Elementor section. */
+function insertAfterHero(html, markup) {
+  const re = /<section\b[^>]*class="[^"]*elementor-top-section[^"]*"/g
+  let m, n = 0
+  while ((m = re.exec(html))) { if (++n === 2) return html.slice(0, m.index) + markup + '\n' + html.slice(m.index) }
+  return null
+}
+
 export async function transformDoc(doc, ctx) {
   const rep = ctx.report.links
   let markup = ''
 
+  if (HUBS[doc.url]) {
+    const out = insertAfterHero(doc.html, hubBlock(HUBS[doc.url]))
+    if (out) { doc.html = out; rep.hubBlocks = (rep.hubBlocks || 0) + 1 } else (rep.missingTargets ||= []).push(`${doc.url} hub: no second section`)
+  }
+
+  if (SERVICES[doc.url] || TOWNS[doc.url]) {
+    markup += trustBlock()
+    rep.trustBlocks = (rep.trustBlocks || 0) + 1
+  }
+
   const faq = FAQS[doc.url]
   if (faq) {
+    // Google retired the FAQ rich result in 2026; this is not a rich-result
+    // play. It is valid schema for the answers that are visibly on the page,
+    // and other consumers still read it.
+    doc.html = addJsonLd(doc.html, faqSchema(doc.url, faq), 'itlr-faq-schema')
     // Every link inside an answer must resolve.
     for (const it of faq.items) for (const m of it.a.matchAll(/href="([^"]+)"/g)) {
       const rel = m[1].replace(/^\//, '').replace(/\/$/, '')
@@ -241,7 +342,7 @@ export async function transformDoc(doc, ctx) {
     rep.faqItems = (rep.faqItems || 0) + faq.items.length
   }
 
-  const spec = relatedFor(doc.url)
+  const spec = HUBS[doc.url] ? null : relatedFor(doc.url)
   if (spec) {
     const ok = []
     for (const l of spec.links) {

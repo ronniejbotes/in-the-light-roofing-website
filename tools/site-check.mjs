@@ -116,12 +116,16 @@ for (const d of docs) {
   // Canonical
   if (isIndexable && !canonHref) fail('canonical', `no canonical on ${url}`)
 
-  // Social images must be absolute.
+  // Social images must be absolute, and must exist.
   for (const k of ['og:image', 'twitter:image']) {
     const v = meta(html, k)
-    if (v && !/^https?:\/\//i.test(v)) { relativeOg++; fail('og', `${k} is not absolute on ${url}: ${v}`) }
+    if (!v) continue
+    if (!/^https?:\/\//i.test(v)) { relativeOg++; fail('og', `${k} is not absolute on ${url}: ${v}`) }
+    else if (v.startsWith(SITE) && !exists(v.slice(SITE.length))) fail('og', `${k} file missing on ${url}: ${v}`)
   }
   if (isIndexable && !meta(html, 'og:title')) warn('og', `no og:title on ${url}`)
+  if (isIndexable && meta(html, 'og:image') && !meta(html, 'twitter:card')) warn('og', `og:image without twitter:card on ${url}`)
+  for (const m of html.matchAll(/<meta\b[^>]*content=["'](\/assets\/[^"']*)["'][^>]*>/gi)) fail('og', `relative path in a meta tag on ${url}: ${m[1]}`)
 
   // JSON-LD
   for (const m of html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {

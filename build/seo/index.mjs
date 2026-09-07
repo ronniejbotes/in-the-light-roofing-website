@@ -30,7 +30,7 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 /* Order matters: content edits first (titles/H1s), then meta/schema that read
    the final title, then alt/perf attributes, then links, then the sitemap
    which needs every page's final indexability. */
-const MODULES = ['content', 'meta', 'alt', 'perf', 'links', 'sitemap']
+const MODULES = ['content', 'meta', 'alt', 'perf', 'nap', 'links', 'sitemap']
 
 export async function seo(OUT, opts = {}) {
   const ctx = {

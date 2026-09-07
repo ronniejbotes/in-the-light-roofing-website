@@ -34,6 +34,16 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 /** Images this far into the document keep their eager default. */
 export const EAGER_FIRST_N = 3
 
+/**
+ * Rewrites keyed on the alt text itself, for the same wrong alt repeated
+ * everywhere. The eight service icons in the "Service Areas" strip were
+ * exported from the Bethlehem page and carry "… Bethlehem Icon" on all 34
+ * pages they appear on, including Allentown's. An icon has no town.
+ */
+const ALT_REWRITES = [
+  [/^(.+?) Bethlehem Icon$/i, '$1 icon'],
+]
+
 let ALT = {}
 
 export async function before(ctx) {
@@ -81,6 +91,10 @@ export async function transformDoc(doc, ctx) {
       // No alt attribute at all is worse than an empty one: screen readers
       // fall back to reading the filename aloud.
       out = setAttr(out, 'alt', ''); bump('altEmptied')
+    } else {
+      for (const [re, to] of ALT_REWRITES) {
+        if (re.test(alt)) { out = setAttr(out, 'alt', alt.replace(re, to)); bump('altRewritten'); break }
+      }
     }
 
     // width/height

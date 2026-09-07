@@ -123,6 +123,16 @@ export const GLOBAL_REPLACEMENTS = [
   // fixed, the value attribute a handler may key on is left alone.
   ['>New Roof Installment</option>', '>New Roof Installation</option>'],
   ['>New Roof Installtion</a>', '>New Roof Installation</a>'],
+  // Nine click-to-call links carry the display format inside the URI. Valid
+  // dialers cope, but the E.164 form is what every other tel: link here uses.
+  ['href="tel:(484) 553-0213"', 'href="tel:+14845530213"'],
+  // One post states an availability the site nowhere else claims and the owner
+  // has not confirmed. The repair claim stands; the hours claim goes.
+  ['we offer 24/7 emergency services and expert <b>Storm Damage Repair</b> throughout Allentown', 'we offer expert <b>Storm Damage Repair</b> throughout Allentown'],
+  // The boilerplate FAQ's first answer lost its full stop on 21 pages; the
+  // Coplay variant has a space before a comma.
+  ['scope and costs</div>', 'scope and costs.</div>'],
+  ['commercial roofing , particularly', 'commercial roofing, particularly'],
 ]
 
 /**
@@ -139,6 +149,15 @@ export const REMOVE_LIST_ITEMS_LINKING_TO = ['/thank-you/']
  */
 export const GLOBAL_REGEX_REPLACEMENTS = [
   { re: /<a href="#"((?:(?!<\/a>)[\s\S])*?<span class="elementor-icon-list-text">Quakertown<\/span>)/g, to: '<a href="/service-area/"$1' },
+  // CleanTalk's anti-spam plugin replaced the email address with a masked
+  // string that its own JavaScript decodes on click -- JavaScript that never
+  // ran on this host, leaving "in**@***************ng.com" as a dead link on
+  // eleven pages. The address is public on every footer.
+  { re: /<a href="mailto:in\*\*@\*+ng\.com"[^>]*>[\s\S]*?<\/a>/g, to: '<a href="mailto:info@inthelightroofing.com">info@inthelightroofing.com</a>' },
+  // Three service pages wrapped their own service phrase in a link OUT to the
+  // company's Instagram -- the page's key phrase sending the reader away. The
+  // words stay; the link goes.
+  { re: /<a href="https:\/\/www\.instagram\.com\/inthelightroofing\/" target="_blank" rel="nofollow noopener external">(storm damage repair services|roof replacement|roofing)<\/a>/g, to: '$1' },
 ]
 
 /**
