@@ -56,6 +56,8 @@ const OVERRIDES = {
   '_process.js': 'process.js',
   '_team.css': 'team.css',
   '_team.js': 'team.js',
+  '_careers.css': 'careers.css',
+  '_careers.js': 'careers.js',
 }
 
 /** Short content hash, so a changed file gets a URL no cache has seen. */
@@ -72,7 +74,9 @@ async function buildTags() {
   const css = (u) => `<link rel="stylesheet" href="/${u}?v=${v[u]}">`
   const js = (u) => `<script src="/${u}?v=${v[u]}" defer></script>`
   return css('_overrides.css') + css('_reviews.css') + css('_process.css') + css('_team.css')
+    + css('_careers.css')
     + js('_overrides.js') + js('_reviews.js') + js('_process.js') + js('_team.js')
+    + js('_careers.js')
 }
 
 /** Every file under dir, recursively. */

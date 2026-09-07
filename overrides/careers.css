@@ -1,0 +1,231 @@
+/*
+ * Careers: the open roles as cards.
+ *
+ * Injected by build/serve.mjs; careers.js builds the markup from the listings
+ * already on the page. To move this to WordPress: this file into Elementor ->
+ * Site Settings -> Custom CSS and careers.js into a footer snippet.
+ *
+ * Modelled on the reference card: a coloured banner, a badge breaking the
+ * banner's lower edge, title and subtitle, a divided row of facts, and one
+ * full-width action. The reference showed a rating, a duration and an hourly
+ * rate; none of those exist for these roles, so the row carries the three
+ * things the page actually states -- location, hours and experience -- and
+ * shows only the ones it finds.
+ */
+
+.itlr-jobs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+  gap: 26px;
+  width: min(1170px, 92vw);
+  margin: 8px auto 48px;
+  align-items: stretch;
+}
+
+.itlr-job {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid rgb(20 22 30 / .08);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgb(20 22 30 / .07);
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s ease;
+}
+
+@media (hover: hover) {
+  .itlr-job:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 50px rgb(20 22 30 / .16);
+  }
+}
+
+/* The banner. A flat brand wash with a soft radial so it does not read as a
+   solid rectangle, plus the site's diagonal motif. */
+.itlr-job__banner {
+  height: 104px;
+  background:
+    radial-gradient(120% 140% at 22% 0%, rgb(255 255 255 / .28) 0%, rgb(255 255 255 / 0) 55%),
+    linear-gradient(135deg, var(--e-global-color-primary, #00B6F1) 0%, #0086c7 100%);
+  position: relative;
+}
+
+.itlr-job__banner::after {
+  /* The same slanted band the site uses on its dark sections. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 58%, rgb(255 255 255 / .13) 58%, rgb(255 255 255 / .13) 72%, transparent 72%);
+}
+
+/* The badge straddles the banner's lower edge, as the avatar does in the
+   reference. Centred, because these roles have no photograph to anchor it. */
+.itlr-job__badge {
+  position: absolute;
+  top: 104px;
+  left: 50%;
+  width: 66px;
+  height: 66px;
+  margin: -33px 0 0 -33px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--e-global-color-primary, #00B6F1);
+  border: 1px solid rgb(20 22 30 / .08);
+  box-shadow: 0 6px 18px rgb(20 22 30 / .14);
+  z-index: 2;
+}
+
+.itlr-job__badge svg { width: 30px; height: 30px; }
+
+.itlr-job__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding: 44px 22px 22px;
+  text-align: center;
+}
+
+.itlr-job__title {
+  margin: 0 0 4px;
+  font-size: 1.16rem;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--e-global-color-secondary, #14161E);
+}
+
+.itlr-job__where {
+  margin: 0 0 18px;
+  font-size: .9rem;
+  color: rgb(20 22 30 / .58);
+}
+
+/* The divided fact row. Cells are equal so the three read as one strip, and
+   the dividers sit between rather than around. */
+.itlr-job__stats {
+  display: flex;
+  border: 1px solid rgb(20 22 30 / .1);
+  border-radius: 12px;
+  padding: 12px 6px;
+  margin-bottom: 18px;
+}
+
+.itlr-job__stat {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 6px;
+}
+
+.itlr-job__stat + .itlr-job__stat { border-left: 1px solid rgb(20 22 30 / .1); }
+
+.itlr-job__statv {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--e-global-color-secondary, #14161E);
+  /* "Bethlehem / Center Valley" is long for a third of a card. */
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+.itlr-job__statk {
+  font-size: .66rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgb(20 22 30 / .48);
+}
+
+.itlr-job__quals {
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.itlr-job__quals li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 7px;
+  font-size: .87rem;
+  line-height: 1.5;
+  color: rgb(20 22 30 / .72);
+}
+
+.itlr-job__quals li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: .55em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--e-global-color-primary, #00B6F1);
+}
+
+/* Pinned to the bottom, so the buttons line up across cards whose listings are
+   different lengths. */
+.itlr-job__cta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--e-global-color-secondary, #14161E);
+  color: #fff;
+  font-weight: 700;
+  font-size: .95rem;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color .25s ease, gap .25s ease;
+}
+
+.itlr-job__cta svg { width: 17px; height: 17px; }
+.itlr-job__cta:hover { background: #000; color: #fff; gap: 14px; }
+.itlr-job__cta:focus-visible {
+  outline: 3px solid var(--e-global-color-primary, #00B6F1);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itlr-job, .itlr-job__cta { transition: none; }
+  .itlr-job:hover { transform: none; }
+}
+
+/* ---------------------------------------------------------------------------
+ * Seven top-level nav items where there were six.
+ *
+ * Lifting Careers out of the About Us dropdown pushed the menu past its column
+ * and it wrapped, dropping Service Area and Contact onto a second line.
+ *
+ * The column cannot be widened: it is one half of a two-column header row and
+ * the other half holds the phone number and the estimate button. Widening it
+ * was tried and it pushed the button into three and four lines. Letting the row
+ * overflow with flex-wrap: nowrap was tried too, and the menu simply ran over
+ * the phone number at every width.
+ *
+ * So the items have to fit the 569-726px the column actually has, which at
+ * seven items means 12px text and 5px of padding a side. Measured across
+ * 1920 / 1440 / 1280 / 1100: one line at each, with the tightest fit at 1280
+ * where the column is only 569px wide. Smaller than the theme's 16px, and that
+ * is the cost of the seventh item -- shortening a label such as "Service Area"
+ * would buy the size back, but renaming navigation is the client's call.
+ *
+ * The font-size needs this much specificity: the theme sets
+ * `.heads-menu nav.elementor-nav-menu--main ul li a { font-size: 16px !important }`,
+ * so !important alone loses on specificity. Padding does not need it.
+ * ------------------------------------------------------------------------- */
+@media (min-width: 1025px) {
+  .heads-menu nav.elementor-nav-menu--main ul li a.elementor-item,
+  nav.elementor-nav-menu--main ul li a.elementor-item {
+    font-size: 12px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    letter-spacing: .01em;
+  }
+}
