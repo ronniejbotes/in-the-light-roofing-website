@@ -71,6 +71,8 @@ export async function seo(OUT, opts = {}) {
       kind: doc.kind || 'page',
       // the page's own dateModified, for the sitemap when Yoast had no lastmod
       lastmod: doc.lastmod || null,
+      // set by content.mjs when the page's visible content was edited
+      edited: doc.edited || null,
       title: getTitle(doc.html),
       description: getMeta(doc.html, 'description'),
       canonical: getCanonical(doc.html),

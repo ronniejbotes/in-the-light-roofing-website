@@ -64,7 +64,11 @@ export async function after(ctx) {
     if (p.canonical && p.canonical !== `${SITE}${url}`) continue
     // /blog/ is the one archive-shaped page that stays; it is a page, not a category.
     const kind = FILES[p.kind] && p.kind !== 'archive' ? p.kind : 'page'
-    groups[kind].push({ url, lastmod: prev.get(url) || p.lastmod || null })
+    // A page whose visible content this build edited is reported as modified
+    // on the day of the edit, if that is later than what WordPress recorded.
+    const recorded = prev.get(url) || p.lastmod || null
+    const lastmod = p.edited && (!recorded || p.edited > recorded.slice(0, 10)) ? `${p.edited}T00:00:00+00:00` : recorded
+    groups[kind].push({ url, lastmod })
   }
 
   const children = []

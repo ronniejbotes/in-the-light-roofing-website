@@ -93,6 +93,7 @@ export const REPLACEMENTS = {
   ],
 }
 
+// edits.json also carries `date`, the day its edits were made.
 const EDITS = existsSync(join(HERE, 'edits.json')) ? JSON.parse(readFileSync(join(HERE, 'edits.json'), 'utf8')) : { titles: {}, descriptions: {}, replacements: {}, ohio: {} }
 Object.assign(TITLES, EDITS.titles)
 Object.assign(DESCRIPTIONS, EDITS.descriptions)
@@ -176,12 +177,18 @@ function syncGraph(html, { title, description }) {
   return replaceJsonLd(html, y.block, y.data)
 }
 
+/** The day the editorial edits were made; the sitemap reports it as lastmod for
+    the pages whose visible content they changed. Untouched pages keep the date
+    WordPress recorded. */
+export const EDIT_DATE = EDITS.date || '2026-09-07'
+
 export async function transformDoc(doc, ctx) {
   const rep = ctx.report.content
   const bump = (k, by = 1) => { rep[k] = (rep[k] || 0) + by }
   const miss = (what) => { (rep.unmatched ||= []).push(`${doc.url} ${what}`) }
   let html = doc.html
   const url = doc.url
+  const original = html
 
   if (TITLES[url] && getTitle(html) !== TITLES[url]) {
     html = setTitle(html, TITLES[url])
@@ -244,6 +251,13 @@ export async function transformDoc(doc, ctx) {
     let n = 0
     html = html.replace(/<h1(\s+data-start="[^"]*"\s+data-end="[^"]*")>([\s\S]*?)<\/h1>/gi, (m, attrs, inner) => { n++; return `<h2>${inner}</h2>` })
     if (n) bump('h1sDemoted', n); else miss('no pasted <h1 data-start> found')
+  }
+
+  // Only page-specific edits count as a content change worth a new lastmod.
+  // The site-wide link and brand-casing swaps are not.
+  if (html !== original && (TITLES[url] || DESCRIPTIONS[url] || H1[url] || REPLACEMENTS[url] || DEMOTE_PASTED_H1.has(url))) {
+    doc.edited = EDIT_DATE
+    bump('pagesEdited')
   }
 
   doc.html = html
