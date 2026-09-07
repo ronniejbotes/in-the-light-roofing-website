@@ -32,7 +32,9 @@ import { fileURLToPath } from 'node:url'
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const MIRROR = join(ROOT, 'mirror')
 const OVR = join(ROOT, 'overrides')
-const OUT = resolve(join(ROOT, process.env.OUT || 'publish'))
+// resolve(), not join(): an absolute OUT (OUT=C:/somewhere) has to win outright,
+// and join() would glue it onto ROOT and produce a path that cannot be created.
+const OUT = resolve(ROOT, process.env.OUT || 'publish')
 const PUBLIC = process.env.PUBLISH_PUBLIC === '1'
 
 /* Served URL -> file in overrides/. Must match OVERRIDE_FILES in serve.mjs. */
