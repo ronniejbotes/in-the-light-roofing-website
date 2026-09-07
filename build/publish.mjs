@@ -20,11 +20,20 @@
  *   5. writes .htaccess: the redirects, the two fake endpoints, the 404
  *   6. writes a staging robots.txt unless PUBLISH_PUBLIC is set
  *
- * The injected markup is kept byte-identical to serve.mjs's. If you add an
- * override there, add it to OVERRIDES here or it ships working locally and
- * missing in production -- which is exactly the failure this file exists to fix.
+ * The injected markup mirrors serve.mjs's, with one difference: each URL here
+ * carries ?v=<content hash>. The host serves these with a seven-day
+ * Cache-Control and sits behind a CDN, so without it a deploy publishes new
+ * files that nobody is served -- observed directly, an edge handing out a
+ * 28-minute-old _overrides.css while the origin had the new one. The hash
+ * changes only when the file does, so caching still works; it just cannot go
+ * stale. serve.mjs needs none of this because it sends no-store.
+ *
+ * If you add an override to serve.mjs, add it to OVERRIDES here too, or it
+ * ships working locally and missing in production -- exactly the failure this
+ * file exists to fix.
  */
 import { readFile, writeFile, mkdir, cp, rm, readdir, stat } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { join, resolve, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -49,16 +58,22 @@ const OVERRIDES = {
   '_team.js': 'team.js',
 }
 
-/* Byte-identical to the tags serve.mjs injects. */
-const TAGS =
-  '<link rel="stylesheet" href="/_overrides.css">'
-  + '<link rel="stylesheet" href="/_reviews.css">'
-  + '<link rel="stylesheet" href="/_process.css">'
-  + '<link rel="stylesheet" href="/_team.css">'
-  + '<script src="/_overrides.js" defer></script>'
-  + '<script src="/_reviews.js" defer></script>'
-  + '<script src="/_process.js" defer></script>'
-  + '<script src="/_team.js" defer></script>'
+/** Short content hash, so a changed file gets a URL no cache has seen. */
+async function stamp(file) {
+  const p = join(OVR, file)
+  if (!existsSync(p)) return '0'
+  return createHash('sha1').update(await readFile(p)).digest('hex').slice(0, 8)
+}
+
+/** The same tags serve.mjs injects, each carrying its file's content hash. */
+async function buildTags() {
+  const v = {}
+  for (const [url, file] of Object.entries(OVERRIDES)) v[url] = await stamp(file)
+  const css = (u) => `<link rel="stylesheet" href="/${u}?v=${v[u]}">`
+  const js = (u) => `<script src="/${u}?v=${v[u]}" defer></script>`
+  return css('_overrides.css') + css('_reviews.css') + css('_process.css') + css('_team.css')
+    + js('_overrides.js') + js('_reviews.js') + js('_process.js') + js('_team.js')
+}
 
 /** Every file under dir, recursively. */
 async function walk(dir, out = []) {
@@ -182,6 +197,7 @@ async function main() {
   // extension-less URLs, so they land in index.html files too. serve.mjs sniffs
   // the payload rather than trusting the name, and so does this -- injecting a
   // stylesheet link into an RSS feed produces a file no reader can parse.
+  const TAGS = await buildTags()
   let injected = 0
   let skippedXml = 0
   for (const f of await walk(OUT)) {
