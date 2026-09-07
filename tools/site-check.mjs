@@ -84,8 +84,20 @@ const sitemapUrls = new Set()
 for (const d of docs) {
   const { url, html } = d
   const robots = (meta(html, 'robots') || '').toLowerCase()
-  const isIndexable = !/noindex/.test(robots)
+  // A page whose canonical names another URL has declared itself a duplicate:
+  // it is not a search result in its own right, so it is held to the master's
+  // standards, not its own (its title and description are expected to match).
+  const canonTag = (html.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/i) || [''])[0]
+  const canonHref = canonTag ? attr(canonTag, 'href') : null
+  const isDuplicate = !!canonHref && canonHref !== SITE + url
+  const isIndexable = !/noindex/.test(robots) && !isDuplicate
   if (isIndexable) indexable++; else noindex++
+  if (isDuplicate) {
+    if (/noindex/.test(robots)) fail('canonical', `${url} is both noindex and canonical to ${canonHref} -- one signal only`)
+    const target = canonHref.startsWith(SITE) ? canonHref.slice(SITE.length) : canonHref
+    if (target.startsWith('/') && !exists(target)) fail('canonical', `${url} canonicals to a page that does not exist: ${canonHref}`)
+    info.duplicatesDeclared = (info.duplicatesDeclared || 0) + 1
+  }
 
   // Headings
   const h1 = (html.match(/<h1\b/gi) || []).length
@@ -102,15 +114,7 @@ for (const d of docs) {
   }
 
   // Canonical
-  const canon = (html.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/i) || [''])[0]
-  const href = canon ? attr(canon, 'href') : null
-  if (isIndexable) {
-    if (!href) fail('canonical', `no canonical on ${url}`)
-    else if (href !== SITE + url) fail('canonical', `${url} canonicals to ${href}`)
-  } else if (href && href !== SITE + url) {
-    // noindex + canonical elsewhere is a defensible "duplicate of" declaration; note it.
-    info.noindexWithCanonicalElsewhere = (info.noindexWithCanonicalElsewhere || 0) + 1
-  }
+  if (isIndexable && !canonHref) fail('canonical', `no canonical on ${url}`)
 
   // Social images must be absolute.
   for (const k of ['og:image', 'twitter:image']) {

@@ -25,10 +25,15 @@ import {
 /* ------------------------------------------------------------------ spec */
 
 /** url -> new <title>. Keep under ~60 characters. */
-export const TITLES = {}
+export const TITLES = {
+  // The form confirmation carried the blog's title verbatim, so 21 pages shared one title.
+  '/thank-you/': 'Thank You | In The Light Roofing',
+}
 
 /** url -> new meta description (120-158 characters, plain language, town or region named). */
-export const DESCRIPTIONS = {}
+export const DESCRIPTIONS = {
+  '/thank-you/': 'Your message has been sent to In The Light Roofing. We will be in touch shortly.',
+}
 
 /**
  * url -> new H1 inner HTML. The theme's service-page H1s use
@@ -62,6 +67,37 @@ export const REPLACEMENTS = {
 export const GLOBAL_REPLACEMENTS = [
   // Four posts link to a Bethlehem page that never existed. The real one:
   ['href="/service-area/roofing-contractors-bethlehem-pa/"', 'href="/service-area/roofers-bethlehem-pa/"'],
+  // The primary navigation's Home item pointed at /home/, a saved copy of the
+  // homepage, on every page -- 1,288 anchors making the duplicate the most
+  // linked URL on the site. The homepage is /.
+  ['href="/home/"', 'href="/"'],
+  // Twelve "Related Posts" items point at the other homepage draft; five at the
+  // roof-repairs campaign copy. Send them to the pages those duplicate.
+  ['href="/home-in-the-light-roofing-new-design/"', 'href="/"'],
+  ['href="/services/roof-repairs-campaign/"', 'href="/services/roof-repairs/"'],
+  // Twenty-one anchors hit the Center Valley 301 instead of the page.
+  ['href="/service-area/center-valley/"', 'href="/service-area/center-valley-roofing-contractor/"'],
+  // Three buttons link /contact without the slash and take a redirect each.
+  ['href="/contact"', 'href="/contact/"'],
+  // The brand's own casing -- logo, footer, BBB listing, homepage title -- is
+  // "The". Yoast's title suffix on 591 pages had "the".
+  ['| In the Light Roofing', '| In The Light Roofing'],
+]
+
+/**
+ * Anchors to remove outright, with their wrapping <li>: the "Related Posts"
+ * widget on eight posts lists the form-confirmation page as a related post.
+ */
+export const REMOVE_LIST_ITEMS_LINKING_TO = ['/thank-you/']
+
+/**
+ * Site-wide regex replacements, for the few edits an exact string cannot
+ * express. The "Service Areas" list on 27 pages ends with a Quakertown item
+ * whose link goes nowhere (href="#"): there is no Quakertown page, and rule 4
+ * says not to build one, so it points at the service-area hub instead.
+ */
+export const GLOBAL_REGEX_REPLACEMENTS = [
+  { re: /<a href="#"((?:(?!<\/a>)[\s\S])*?<span class="elementor-icon-list-text">Quakertown<\/span>)/g, to: '<a href="/service-area/"$1' },
 ]
 
 /**
@@ -123,6 +159,22 @@ export async function transformDoc(doc, ctx) {
   for (const [find, replace] of GLOBAL_REPLACEMENTS) {
     const [next, n] = replaceAll(html, find, replace)
     if (n) { html = next; bump('globalReplacements', n) }
+  }
+
+  for (const { re, to } of GLOBAL_REGEX_REPLACEMENTS) {
+    let n = 0
+    html = html.replace(re, (...m) => { n++; return to.replace(/\$(\d)/g, (_, d) => m[Number(d)] ?? '') })
+    if (n) bump('regexReplacements', n)
+  }
+
+  for (const target of REMOVE_LIST_ITEMS_LINKING_TO) {
+    if (url === target) continue
+    // The narrowest <li> that contains the anchor and no other <li>.
+    const escaped = target.replace(/[.*+?^()|[\]\\/{}$]/g, '\\$&')
+    const re = new RegExp('<li\\b(?:(?!<li\\b)[\\s\\S])*?href="' + escaped + '"(?:(?!<li\\b)[\\s\\S])*?</li>', 'g')
+    const before = html
+    html = html.replace(re, '')
+    if (html !== before) bump('listItemsRemoved', (before.length - html.length) > 0 ? 1 : 0)
   }
 
   if (DEMOTE_PASTED_H1.has(url)) {

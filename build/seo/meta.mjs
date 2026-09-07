@@ -13,41 +13,55 @@
  * This module adds one RoofingContractor node (LocalBusiness >
  * HomeAndConstructionBusiness > RoofingContractor, the most specific real type
  * on schema.org for this trade) and wires it into Yoast's graph as the
- * WebSite's publisher, so it is one connected graph rather than two blocks that
- * happen to share a page.
+ * WebSite's publisher, the homepage's subject and every Article's publisher
+ * and author, so it is one connected graph rather than two blocks that happen
+ * to share a page.
  *
- * EVERY FACT IN THE NODE WAS READ OFF THE SITE ITSELF. Address and phone from
- * /contact/, coordinates from the Google Maps embed the site carries, socials
- * from the footer links, founding year and owner from the About/footer copy.
- * Opening hours are stated nowhere on the site, so none are written -- a guess
- * here would be a false promise to someone with water coming through a ceiling.
- * No aggregateRating and no review markup, ever: Google's review-snippet rules
- * make a business that marks up its own reviews ineligible for the star
- * feature, and it is pointless besides -- stars come from the Business Profile.
+ * EVERY FACT IN THE NODE WAS READ OFF THE SITE OR ITS OWN PROFILES. Address
+ * and phone from /contact/, coordinates from the Google Maps embed the site
+ * carries, socials from the footer links, founding year and owner from the
+ * About copy, the registered name from the BBB profile at the same address
+ * and number. Opening hours are stated nowhere on the site, so none are written
+ * -- a guess here would be a false promise to someone with water coming
+ * through a ceiling. No aggregateRating and no review markup, ever: Google's
+ * review-snippet rules make a business that marks up its own reviews
+ * ineligible for the star feature, and it is pointless besides -- stars come
+ * from the Business Profile.
  *
  * The declutter pass turned absolute https://inthelightroofing.com/wp-content/
  * URLs into root-relative /assets/ ones. Right for <img>, wrong for og:image,
  * twitter:image and JSON-LD image fields, which must be absolute; this puts the
  * live domain back on those.
  *
- * Canonicals: /services/asphalt-shingle-roofing/ canonicalised into a blog
- * category archive, handing its ranking to a page whose H1 is "Blog"; it is
- * made self-canonical. Three near-duplicates (a campaign copy of roof repairs
- * and two saved homepage drafts) are declared as duplicates of their masters
- * and kept out of the index.
+ * INDEXABILITY -- ONE SIGNAL PER PAGE
+ * -----------------------------------
+ * A page is either a duplicate (canonical to its master, left indexable so the
+ * canonical is the only signal) or thin (noindex, follow, self-canonical), never
+ * both: Google treats noindex plus a canonical elsewhere as conflicting and can
+ * carry the noindex onto the target. The duplicates are the roof-repairs
+ * campaign copy and two saved homepage drafts. The thin pages are the blog
+ * archives -- nineteen category URLs, their pagination, /roofing/ and
+ * /testimonial/ all render the identical eighteen posts under the H1 "Blog"
+ * from one broken archive template -- and the sixteen single-testimonial pages,
+ * each one customer quote titled with the customer's name. All stay live and
+ * crawlable; none belongs in a search result.
  */
 import {
   SITE, absolutize, getYoastGraph, replaceJsonLd, addJsonLd, getCanonical, setCanonical, setIndexable,
-  getMeta, setMeta, getTitle,
+  getMeta, setMeta, replaceAll,
 } from './lib.mjs'
 
 const ORG_ID = `${SITE}/#organization`
 const LOGO_ID = `${SITE}/#logo`
 
-/* Read off /contact/, the footer and the About page. See the header comment. */
+/* Read off /contact/, the footer, the About page and the BBB profile. */
 const BUSINESS = {
-  name: 'In the Light Roofing',
-  alternateName: 'In The Light Roofing',
+  // The brand's own casing: the logo, the footer, the BBB listing and the
+  // homepage title all write "The". Yoast's site name and most post titles
+  // had "the"; content.mjs brings those into line.
+  name: 'In The Light Roofing',
+  alternateName: 'In the Light Roofing',
+  legalName: 'In The Light Roofing, LLC',
   telephone: '+1-484-553-0213',
   email: 'info@inthelightroofing.com',
   street: '871 N Fenwick St',
@@ -60,13 +74,17 @@ const BUSINESS = {
   map: 'https://maps.app.goo.gl/Jp6StBjJ9B6f7mDQ9',
   founded: '2017',
   founder: 'Bryson Berard',
-  logo: '/assets/2023/12/header-logo1.webp',
-  logoW: 562,
-  logoH: 225,
+  // A square PNG for the logo slot -- what a knowledge panel actually uses --
+  // and the wide header mark as the image.
+  logo: '/assets/2023/12/cropped-header-logo-192x192.png',
+  logoW: 192,
+  logoH: 192,
+  image: '/assets/2023/12/header-logo1.webp',
   sameAs: [
     'https://www.facebook.com/InthelightcontractingLLC/',
     'https://www.instagram.com/inthelightroofing/',
     'https://www.youtube.com/@inthelightroofing',
+    'https://www.bbb.org/us/pa/allentown/profile/roofing-contractors/in-the-light-roofing-llc-0241-236020858',
     'https://maps.app.goo.gl/Jp6StBjJ9B6f7mDQ9',
   ],
 }
@@ -88,28 +106,33 @@ export const SERVICES = [
   { url: '/services/epdm-rubber-roofing/', name: 'EPDM Rubber Roofing', type: 'EPDM flat roofing' },
 ]
 
-/* Near-duplicates: declared as copies of their master and kept out of the index.
-   /services/roof-repairs-campaign/ is a same-title twin of roof repairs with no
-   canonical of its own; /home/ and /home-in-the-light-roofing-new-design/ are
-   saved drafts of the homepage that carry its exact title. */
+/* Exact duplicates: canonical to the master, and nothing else. The campaign
+   page arrived as noindex,nofollow with no canonical; it becomes index,follow
+   so the canonical is the one signal. publish.mjs also 301s the two homepage
+   drafts, so on the live host these two are never served at all. */
 const DUPLICATE_OF = {
   '/services/roof-repairs-campaign/': '/services/roof-repairs/',
   '/home/': '/',
   '/home-in-the-light-roofing-new-design/': '/',
 }
 
-/* Pages whose canonical currently points somewhere it should not. */
-const FORCE_SELF_CANONICAL = new Set(['/services/asphalt-shingle-roofing/'])
+/* /services/asphalt-shingle-roofing/ declared the blog category archive as its
+   canonical, and Yoast then built og:url and the BreadcrumbList and ImageObject
+   @ids from that wrong URL too. Every form of it is put back before the graph
+   is read, so the fix is one consistent page rather than a corrected <link>
+   over a graph that still points at the archive. */
+const WRONG_URL = { '/services/asphalt-shingle-roofing/': `${SITE}/asphalt-shingle-roofing/` }
 
 /* Utility pages nobody should land on from a search result. /thank-you/ is the
-   form confirmation and carries the blog's title and description verbatim. */
+   form confirmation. */
 const NOINDEX = new Set(['/thank-you/'])
+
+/* The one real hub among the archive-shaped pages. */
+const HUBS = new Set(['/blog/'])
 
 /* Descriptions for pages that have none and are not covered by the content
    pass. Written from what the page itself shows. */
-const DESCRIPTIONS = {
-  '/testimonial/': 'Read what homeowners across the Lehigh Valley say about working with In the Light Roofing on roof repairs, replacements, inspections and insurance claims.',
-}
+const DESCRIPTIONS = {}
 
 function areaServed() {
   return [
@@ -124,12 +147,10 @@ function organizationNode() {
     '@id': ORG_ID,
     name: BUSINESS.name,
     alternateName: BUSINESS.alternateName,
-    // As registered: the BBB profile reads "In The Light Roofing, LLC" at this
-    // address and number, and the Facebook page slug is InthelightcontractingLLC.
-    legalName: 'In The Light Roofing, LLC',
+    legalName: BUSINESS.legalName,
     url: `${SITE}/`,
     logo: { '@id': LOGO_ID },
-    image: { '@id': LOGO_ID },
+    image: [{ '@id': LOGO_ID }, absolutize(BUSINESS.image)],
     telephone: BUSINESS.telephone,
     email: BUSINESS.email,
     address: {
@@ -193,11 +214,21 @@ function absolutizeNode(n, count) {
   }
 }
 
+const hasType = (n, t) => n && ([].concat(n['@type'] || []).includes(t))
+
 export async function transformDoc(doc, ctx) {
   const rep = ctx.report.meta
   const bump = (k, by = 1) => { rep[k] = (rep[k] || 0) + by }
   let html = doc.html
   const url = doc.url
+
+  /* 0. A page whose Yoast output was built on the wrong URL. */
+  if (WRONG_URL[url]) {
+    const right = `${SITE}${url}`
+    let n = 0, out
+    ;[out, n] = replaceAll(html, WRONG_URL[url], right); html = out; bump('wrongUrlFixed', n)
+    ;[out, n] = replaceAll(html, WRONG_URL[url].replace(/\//g, '\\/'), right.replace(/\//g, '\\/')); html = out; bump('wrongUrlFixed', n)
+  }
 
   /* 1. Social images and URLs back to absolute. */
   for (const key of ['og:image', 'og:image:secure_url', 'twitter:image', 'og:url']) {
@@ -213,21 +244,48 @@ export async function transformDoc(doc, ctx) {
     absolutizeNode(graph, count)
     if (count.n) bump('absolutizedJsonLd', count.n)
 
-    const types = new Set(graph.flatMap((n) => [].concat(n['@type'] || [])))
-    doc.kind = types.has('Article') ? 'post' : types.has('CollectionPage') ? 'archive'
+    const article = graph.find((n) => hasType(n, 'Article'))
+    const webpage = graph.find((n) => hasType(n, 'WebPage') || hasType(n, 'CollectionPage'))
+    const website = graph.find((n) => hasType(n, 'WebSite'))
+    doc.kind = article ? 'post' : graph.some((n) => hasType(n, 'CollectionPage')) ? 'archive'
       : url.startsWith('/testimonial/') ? 'testimonial' : 'page'
+    doc.lastmod = (webpage && webpage.dateModified) || (article && article.dateModified) || null
 
     if (!graph.some((n) => n['@id'] === ORG_ID)) {
       graph.push(organizationNode(), logoNode())
       bump('organizationNodes')
     }
-    const website = graph.find((n) => n['@type'] === 'WebSite')
-    if (website && !website.publisher) website.publisher = { '@id': ORG_ID }
-    const webpage = graph.find((n) => n['@type'] === 'WebPage' || (Array.isArray(n['@type']) && n['@type'].includes('WebPage')))
+
+    if (website) {
+      if (website.name === BUSINESS.alternateName) website.name = BUSINESS.name
+      if (!website.publisher) website.publisher = { '@id': ORG_ID }
+      // A sitelinks search box: retired by Google in 2024, and this host has no
+      // search to point it at anyway.
+      if (website.potentialAction) { delete website.potentialAction; bump('searchActionsRemoved') }
+    }
+
     if (url === '/' && webpage && !webpage.about) webpage.about = { '@id': ORG_ID }
 
+    // Posts: the company publishes them, and "Admin" is not an author anyone
+    // can look up. The Person node it pointed at had an avatar URL that
+    // resolves to nothing here.
+    if (article) {
+      article.publisher = { '@id': ORG_ID }
+      const authorId = article.author && article.author['@id']
+      article.author = { '@id': ORG_ID }
+      if (webpage && webpage.author && webpage.author['@id'] === authorId) webpage.author = { '@id': ORG_ID }
+      if (authorId) {
+        const stillUsed = JSON.stringify(graph).includes(`"@id":"${authorId}"`) && graph.some((n) => n['@id'] !== authorId && JSON.stringify(n).includes(authorId))
+        if (!stillUsed) {
+          const i = graph.findIndex((n) => n['@id'] === authorId && hasType(n, 'Person'))
+          if (i !== -1) { graph.splice(i, 1); bump('authorPersonsRemoved') }
+        }
+      }
+      bump('articlesAttributed')
+    }
+
     const svc = SERVICES.find((s) => s.url === url)
-    if (svc && !graph.some((n) => n['@type'] === 'Service')) {
+    if (svc && !graph.some((n) => hasType(n, 'Service'))) {
       graph.push(serviceNode(svc, getMeta(html, 'description') || undefined))
       if (webpage && !webpage.about) webpage.about = { '@id': `${SITE}${svc.url}#service` }
       bump('serviceNodes')
@@ -240,29 +298,22 @@ export async function transformDoc(doc, ctx) {
     bump('organizationNodes')
   }
 
-  /* 3. Canonicals and indexability. */
+  /* 3. Canonicals and indexability -- one signal per page. */
   if (DUPLICATE_OF[url]) {
-    html = setCanonical(html, `${SITE}${DUPLICATE_OF[url]}`)
-    html = setIndexable(html, false)
+    const master = `${SITE}${DUPLICATE_OF[url]}`
+    html = setCanonical(html, master)
+    html = setMeta(html, 'og:url', master)
+    html = setIndexable(html, true)
     bump('duplicatesDeclared')
-  } else if (FORCE_SELF_CANONICAL.has(url) || !getCanonical(html)) {
-    const cur = getCanonical(html)
-    if (cur !== `${SITE}${url}`) { html = setCanonical(html, `${SITE}${url}`); bump('canonicalsFixed') }
-  }
-
-  /* The blog archives. Nineteen category URLs, their pagination and /roofing/
-     all render the identical eighteen posts under the H1 "Blog" -- one broken
-     Elementor archive template, not nineteen pages of content. Yoast already
-     keeps the tag and blog-pagination archives out of the index; this extends
-     that to the rest, leaving /blog/ and /testimonial/ as the two real hubs.
-     A single testimonial page is one quote under the customer's name as the
-     title; it stays crawlable (the quotes are real and linked) but out of the
-     index, where it could only compete with the pages that sell the work. */
-  const HUBS = new Set(['/blog/', '/testimonial/'])
-  const thin = (doc.kind === 'archive' && !HUBS.has(url)) || (doc.kind === 'testimonial' && !HUBS.has(url))
-  if ((thin || NOINDEX.has(url)) && !/noindex/i.test(getMeta(html, 'robots'))) {
-    html = setIndexable(html, false)
-    bump(NOINDEX.has(url) ? 'utilityNoindexed' : doc.kind === 'archive' ? 'archivesNoindexed' : 'testimonialsNoindexed')
+  } else {
+    if (!getCanonical(html) || getCanonical(html) !== `${SITE}${url}`) {
+      html = setCanonical(html, `${SITE}${url}`); bump('canonicalsFixed')
+    }
+    const thin = (doc.kind === 'archive' && !HUBS.has(url)) || doc.kind === 'testimonial' || NOINDEX.has(url)
+    if (thin && !/noindex/i.test(getMeta(html, 'robots'))) {
+      html = setIndexable(html, false)
+      bump(NOINDEX.has(url) ? 'utilityNoindexed' : doc.kind === 'archive' ? 'archivesNoindexed' : 'testimonialsNoindexed')
+    }
   }
 
   if (DESCRIPTIONS[url] && !getMeta(html, 'description')) {

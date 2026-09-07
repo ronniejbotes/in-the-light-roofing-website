@@ -125,9 +125,26 @@ function htaccess(redirectLines) {
 
 DirectoryIndex index.html
 ErrorDocument 404 /404.html
+# A static tree has directories a browser can list; the live site's audit found
+# applicants' CVs reachable that way.
+Options -Indexes
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # --- Canonical host ---------------------------------------------------------
+  # www -> bare domain in one hop. Matched on the host so a staging hostname
+  # is never redirected onto the live domain, and on the host only so it cannot
+  # loop behind a TLS-terminating proxy -- which is also why http -> https is
+  # left to the host's own Force-HTTPS setting rather than a %{HTTPS} test.
+  RewriteCond %{HTTP_HOST} ^www\\.inthelightroofing\\.com$ [NC]
+  RewriteRule ^ https://inthelightroofing.com%{REQUEST_URI} [R=301,NE,L]
+
+  # --- /index.html -> / -------------------------------------------------------
+  # Only when the client literally asked for index.html. THE_REQUEST is the raw
+  # request line, which DirectoryIndex does not rewrite, so this cannot loop.
+  RewriteCond %{THE_REQUEST} \\s/+(.*/)?index\\.html[\\s?] [NC]
+  RewriteRule ^(.*/)?index\\.html$ /%1 [R=301,NE,L]
 
   # --- Redirects the live site serves, from mirror/_redirects -----------------
 ${redirectLines.map((l) => '  ' + l).join('\n')}
@@ -244,9 +261,18 @@ async function main() {
   // Through the same path mapping as everything else: _redirects still names
   // /wp-content/, and the .htaccess is written after the declutter pass, so
   // without this one rule would 301 into a directory that no longer exists.
-  const rules = existsSync(redirFile)
-    ? redirectsToApache(rewritePaths(await readFile(redirFile, 'utf8')))
-    : []
+  // Two saved drafts of the homepage were published as pages of their own and
+  // then linked from the navigation and from "Related Posts". They are the
+  // homepage; serve the homepage. Appended to the copied _redirects too, so the
+  // local preview (which reads that file) behaves like the host.
+  const EXTRA_REDIRECTS = [
+    ['/home/', '/', 301],
+    ['/home-in-the-light-roofing-new-design/', '/', 301],
+  ]
+  const redirectText = (existsSync(redirFile) ? rewritePaths(await readFile(redirFile, 'utf8')) : '')
+    + '\n' + EXTRA_REDIRECTS.map((r) => r.join(' ')).join('\n') + '\n'
+  await writeFile(join(OUT, '_redirects'), redirectText, 'utf8')
+  const rules = redirectsToApache(redirectText)
   await writeFile(join(OUT, '.htaccess'), htaccess(rules), 'utf8')
   await mkdir(join(OUT, '_static'), { recursive: true })
   await writeFile(join(OUT, '_static', 'guest.vary.json'), '{"reload":"no"}', 'utf8')

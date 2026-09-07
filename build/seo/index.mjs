@@ -69,6 +69,8 @@ export async function seo(OUT, opts = {}) {
       file: doc.file,
       // post | page | archive | testimonial -- set by meta.mjs from the Yoast graph
       kind: doc.kind || 'page',
+      // the page's own dateModified, for the sitemap when Yoast had no lastmod
+      lastmod: doc.lastmod || null,
       title: getTitle(doc.html),
       description: getMeta(doc.html, 'description'),
       canonical: getCanonical(doc.html),
