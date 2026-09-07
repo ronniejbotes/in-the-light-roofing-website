@@ -129,10 +129,10 @@ const WRONG_URL = { '/services/asphalt-shingle-roofing/': `${SITE}/asphalt-shing
    form confirmation. */
 const NOINDEX = new Set(['/thank-you/'])
 
-/* The share image for pages whose own is missing or absent: the crew under the
-   flag, from the homepage. 1365x2048; the platforms crop, and a real photograph
-   of this company beats a logo card. */
-const OG_FALLBACK = '/assets/2026/03/SEMI8066.jpg.webp'
+/* The share image for pages whose own is missing or absent: the branded roof
+   photograph the blog archive already uses -- 1731x909, landscape, with the
+   company logo on it, so it crops to a share card cleanly. */
+const OG_FALLBACK = '/assets/2026/07/Roofing-quality-with-scenic-views.png.webp'
 
 /* The one real hub among the archive-shaped pages. */
 const HUBS = new Set(['/blog/'])
