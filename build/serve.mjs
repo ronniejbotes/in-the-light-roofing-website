@@ -103,6 +103,8 @@ createServer(async (req, res) => {
     '/_careers.css': 'careers.css',
     '/_careers.js': 'careers.js',
     '/_links.css': 'links.css',
+    '/_perf.css': 'perf.css',
+    '/_perf.js': 'perf.js',
     '/_mobile.css': 'mobile.css',
   }
   // OVERRIDES=off means "serve exactly what is in the directory". Previewing
@@ -168,7 +170,9 @@ createServer(async (req, res) => {
         + '<link rel="stylesheet" href="/_team.css">'
         + '<link rel="stylesheet" href="/_careers.css">'
         + '<link rel="stylesheet" href="/_links.css">'
+        + '<link rel="stylesheet" href="/_perf.css">'
         + '<link rel="stylesheet" href="/_mobile.css">'
+        + '<script src="/_perf.js" defer></script>'
         + '<script src="/_overrides.js" defer></script>'
         + '<script src="/_reviews.js" defer></script>'
         + '<script src="/_process.js" defer></script>'

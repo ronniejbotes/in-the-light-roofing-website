@@ -61,6 +61,8 @@ const OVERRIDES = {
   '_careers.css': 'careers.css',
   '_careers.js': 'careers.js',
   '_links.css': 'links.css',
+  '_perf.css': 'perf.css',
+  '_perf.js': 'perf.js',
   '_mobile.css': 'mobile.css',
 }
 
@@ -79,8 +81,8 @@ async function buildTags() {
   const js = (u) => `<script src="/${u}?v=${v[u]}" defer></script>`
   // mobile.css last: its fixes must win on order over every stylesheet above.
   return css('_overrides.css') + css('_reviews.css') + css('_process.css') + css('_team.css')
-    + css('_careers.css') + css('_links.css') + css('_mobile.css')
-    + js('_overrides.js') + js('_reviews.js') + js('_process.js') + js('_team.js')
+    + css('_careers.css') + css('_links.css') + css('_perf.css') + css('_mobile.css')
+    + js('_perf.js') + js('_overrides.js') + js('_reviews.js') + js('_process.js') + js('_team.js')
     + js('_careers.js')
 }
 
