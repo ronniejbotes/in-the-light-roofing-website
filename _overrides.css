@@ -13,7 +13,7 @@
  *
  * The six service cards use the same Elementor image-box markup, but the source
  * artwork is not the same size: four icons are 60x60 and two -- roof replacement
- * (wp-image-5320) and roof inspections (wp-image-5322) -- are 330x330. Nothing
+ * (ui-image-5320) and roof inspections (ui-image-5322) -- are 330x330. Nothing
  * constrained them, so those two rendered at 330px, swallowing the photograph
  * behind them and making their cards five times taller than the rest.
  *
@@ -25,14 +25,14 @@
  * same widget, and a blanket 60px rule shrinks all thirteen town photographs to
  * thumbnails. Learned the hard way; do not widen this selector.
  *
- *   wp-image-5320  roof-replacement-icon.webp  (330x330 source)
- *   wp-image-5322  roof-inspection-icon.webp   (330x330 source)
+ *   ui-image-5320  roof-replacement-icon.webp  (330x330 source)
+ *   ui-image-5322  roof-inspection-icon.webp   (330x330 source)
  *
  * The other four service icons are already 60x60 and are left untouched, so all
  * six cards end up the same height.
  */
-.elementor-image-box-img img.wp-image-5320,
-.elementor-image-box-img img.wp-image-5322 {
+.elementor-image-box-img img.ui-image-5320,
+.elementor-image-box-img img.ui-image-5322 {
   width: 60px !important;
   height: 60px !important;
   max-width: 60px !important;
@@ -294,4 +294,438 @@
 .swiper-slide:has(.elementor-element-6d5023c),
 .swiper-slide:has(.elementor-element-8ac57c0) {
   display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * 4. Certification strip: one band instead of five white rectangles.
+ *
+ * Elementor sets `background: #fff` on each .swiper-slide of the badge
+ * carousel, so on a dark section the five logos arrive as five ragged white
+ * rectangles of differing widths -- they read as screenshots someone pasted in
+ * rather than as a trust bar.
+ *
+ * The white cannot simply be removed. The marks are transparent PNGs and most
+ * of them do read on dark, but BBB's "Start With Trust" strapline and Google's
+ * "Reviews / 5.0" line are dark grey and disappear entirely against the navy.
+ * Recolouring is not an option either: these are third-party brand marks, and
+ * Google's in particular may not be restyled.
+ *
+ * So the white stays and is made deliberate -- one rounded band behind the
+ * whole strip, with the logos scaled to a common height so the row reads as
+ * one object. Applies to all five pages carrying .image-slider.
+ * ------------------------------------------------------------------------- */
+.image-slider .elementor-image-carousel-wrapper {
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px 12px;
+  box-shadow: 0 12px 34px rgb(0 0 0 / .22);
+}
+
+/* The per-slide rectangles are what made the row look ragged. */
+.image-slider .swiper-slide {
+  background: transparent !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* A common optical height. The source files run from 44px to 65px tall, which
+   is why some marks looked twice the weight of their neighbours. */
+.image-slider .swiper-slide-inner,
+.image-slider figure.swiper-slide-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.image-slider .swiper-slide-image {
+  max-height: 46px;
+  width: auto !important;
+  max-width: 82%;
+  height: auto;
+  object-fit: contain;
+  margin-inline: auto;
+}
+
+/* The arrows sat over the band once it had a defined edge. */
+.image-slider .elementor-swiper-button,
+.image-slider .swiper-button-next,
+.image-slider .swiper-button-prev {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .image-slider .elementor-image-carousel-wrapper { border-radius: 14px; padding: 12px 8px; }
+  .image-slider .swiper-slide-image { max-height: 38px; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 5. /home/ hero: the lightning still, animated.
+ *
+ * The lightning is an <img> inside .banner-bg-img, not a CSS background -- the
+ * stylesheet rule that looks like it paints it is invalid (the url() carries a
+ * stray `fetchpriority(high)` inside the value, so the whole declaration is
+ * dropped). overrides.js wraps that img and lays a looping video over it.
+ *
+ * The img stays in place underneath rather than being removed: it holds the
+ * layout box the video is sized against, and it is what remains visible if
+ * autoplay is refused, which mobile browsers do on Low Power Mode.
+ * ------------------------------------------------------------------------- */
+.itlr-hero-videowrap {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+.itlr-hero-videowrap > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.itlr-hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  /* Fades up once the first frame is decoded, so a slow connection shows the
+     still rather than a black rectangle. */
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+.itlr-hero-video[data-ready="1"] { opacity: 1; }
+
+/* Someone who asked for less motion keeps the still image; overrides.js never
+   builds the video at all, so this is only belt and braces. */
+@media (prefers-reduced-motion: reduce) {
+  .itlr-hero-video { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 6. Service-area town cards: lift and clear on hover.
+ *
+ * Thirteen cards in one .service-areas section, on six pages (/, /home/,
+ * /services/, /service-area/, /roof-types/ and the duplicate home design), all
+ * carrying the hand-written .city-box class -- so one rule covers every copy.
+ *
+ * The "tint" over each photograph is not an overlay. There is no ::before, no
+ * background and no filter anywhere in the card; the images themselves are
+ * dark, with channel means around 19/23/28 and a blue lean. So it cannot be
+ * removed by deleting a layer -- hovering brightens the photograph back up
+ * instead, which is the same result and touches no markup.
+ *
+ * The whole wrapper scales, not just the image, so the town name grows with the
+ * photograph rather than staying pinned at its original size.
+ * ------------------------------------------------------------------------- */
+.service-areas .city-box {
+  /* Already position:relative from Elementor; the z-index needs a stacking
+     context to raise against, and the transition has to live on the resting
+     state or the card snaps back instantly when the pointer leaves. */
+  transition: z-index 0s linear .01s;
+}
+
+.service-areas .city-box .elementor-image-box-wrapper {
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1),
+              filter .45s ease,
+              box-shadow .45s ease;
+  will-change: transform;
+}
+
+.service-areas .city-box img {
+  transition: filter .45s ease;
+}
+
+/* Gated on a real pointer: on a touch screen :hover latches after a tap and
+   leaves one card stuck at 1.5 until you tap elsewhere. */
+@media (hover: hover) {
+  .service-areas .city-box:hover,
+  .service-areas .city-box:focus-within {
+    z-index: 20;
+  }
+
+  .service-areas .city-box:hover .elementor-image-box-wrapper,
+  .service-areas .city-box:focus-within .elementor-image-box-wrapper {
+    transform: scale(1.5);
+    box-shadow: 0 26px 60px rgb(0 0 0 / .55);
+  }
+
+  /* Lifting the baked-in darkness. Brightness alone goes grey and washed out,
+     so a little saturation and contrast come with it. */
+  .service-areas .city-box:hover img,
+  .service-areas .city-box:focus-within img {
+    filter: brightness(1.45) saturate(1.12) contrast(1.04);
+  }
+}
+
+/* Keyboard users get the same reveal without the section jumping around. */
+.service-areas .city-box a:focus-visible {
+  outline: 3px solid var(--e-global-color-primary, #00B6F1);
+  outline-offset: 3px;
+}
+
+/* Reduced motion keeps the reveal -- it is information, not decoration -- and
+   drops the movement, which is the part that was objected to. */
+@media (prefers-reduced-motion: reduce) {
+  .service-areas .city-box:hover .elementor-image-box-wrapper,
+  .service-areas .city-box:focus-within .elementor-image-box-wrapper {
+    transform: none;
+  }
+  .service-areas .city-box .elementor-image-box-wrapper,
+  .service-areas .city-box img { transition: filter .2s ease; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 7. The lightning video on the CSS-background banner (every page but /home/).
+ *
+ * On /home/ the artwork is an <img>, so the video sits inside a wrapper and
+ * inherits its box. Everywhere else it is a background-image on the banner
+ * section itself, so the video is inserted as that section's first child and
+ * has to be layered by hand: above the section's own background, below the
+ * decorative overlay and below the content.
+ *
+ * The z-index bumps are scoped to sections that actually received a video, so
+ * no other Elementor section's stacking is touched.
+ * ------------------------------------------------------------------------- */
+[data-itlr-herovid="1"] > .itlr-hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+[data-itlr-herovid="1"] > .itlr-hero-video[data-ready="1"] { opacity: 1; }
+
+/* Elementor's decorative overlay and the content both have to stay on top. */
+[data-itlr-herovid="1"] > .elementor-background-overlay { z-index: 1; }
+
+[data-itlr-herovid="1"] > .elementor-container,
+[data-itlr-herovid="1"] > .e-con-inner,
+[data-itlr-herovid="1"] > .elementor-column-gap-default {
+  position: relative;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-itlr-herovid="1"] > .itlr-hero-video { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+ * 8. /past-work/ gallery: a placeholder while an item is still loading.
+ *
+ * Elementor's own lazyload leaves items with no background at all, which is a
+ * hole in the grid rather than a loading state. overrides.js loads them
+ * properly; this just means the half-second before it does looks deliberate.
+ * ------------------------------------------------------------------------- */
+.e-gallery-image[data-thumbnail] {
+  background-color: rgb(255 255 255 / .06);
+  background-size: cover;
+  background-position: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * 9. The map: footer column, and the contact page.
+ *
+ * The footer row is a four-column flex container capped at Elementor's 1170px,
+ * and the four columns already fill it exactly (351+234+234+351). So the map
+ * cannot simply be dropped in -- the row is widened to take the space that was
+ * sitting empty either side of the footer, and the columns give up a little
+ * width to make room. They are flex: 0 1 auto, so they shrink rather than
+ * overflow.
+ *
+ * Below 1200px there is no spare width to take, so the map stops being a column
+ * and becomes a full-width band under the four.
+ * ------------------------------------------------------------------------- */
+.itlr-footer-map {
+  display: block;
+  min-width: 0;
+}
+
+.itlr-footer-map .itlr-map-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  border: 0;
+  border-radius: 14px;
+  /* The embed is a bright daylight map on a near-white footer; a hairline stops
+     it floating. */
+  box-shadow: 0 6px 20px rgb(0 0 0 / .12);
+}
+
+@media (min-width: 1200px) {
+  /* Take back the page margin the footer was leaving empty, without letting the
+     row outgrow the viewport.
+     Both the row and every boxed ancestor up to the footer section: a flex row
+     cannot grow past its parent, and Elementor caps that parent at 1170px, so
+     releasing only the row squeezed the four columns instead of widening
+     anything. !important because Elementor's own cap is a three-class selector
+     and this is one attribute. */
+  [data-itlr-map="1"],
+  [data-itlr-mapwide="1"] {
+    max-width: min(1560px, calc(100vw - 60px)) !important;
+    width: auto !important;
+  }
+
+  .itlr-footer-map {
+    flex: 0 0 clamp(260px, 22%, 380px);
+    margin-left: clamp(20px, 2.4vw, 46px);
+    /* Same height as the columns beside it, whatever they come to. */
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 1199px) {
+  /* Below this there is no spare page margin to take, so the map stops being a
+     column. The row has to be allowed to wrap or a 100% basis just gets shrunk
+     back into the line by flex. */
+  [data-itlr-map="1"] { flex-wrap: wrap; }
+
+  .itlr-footer-map {
+    flex: 1 0 100%;
+    width: 100%;
+    margin-top: 34px;
+  }
+  .itlr-footer-map .itlr-map-frame { height: 260px; min-height: 0; }
+}
+
+/* The contact page's own map, repointed at the pinned embed by overrides.js.
+   Only the corners are touched -- its size is Elementor's. */
+.itlr-map-frame--page {
+  border: 0;
+  border-radius: 14px;
+}
+
+/* ---------------------------------------------------------------------------
+ * The "Start the build" gate -- homepage only.
+ *
+ * Modelled on the Eye Candy Customs warehouse gate, with one deliberate
+ * difference: nothing here darkens the footage. ECC paints a near-black ground
+ * and a top-to-bottom black gradient over its still. This does not. The ground
+ * is white, there is no scrim, and the button earns its contrast from a solid
+ * brand-cyan chip rather than from dimming the picture behind it.
+ *
+ * Full-bleed cover at every width, including portrait phones. The clip is 16:9
+ * against a viewport of roughly 0.46:1, so a phone sees about the middle
+ * quarter of the frame -- but the footage was shot for that: the prompt held
+ * the house centred with all the action in the central third. Checked against
+ * the closing frame, a phone still gets the new roof, the stone, the siding
+ * and the front door. Letterboxing onto white was the alternative and it read
+ * as a small strip marooned in a lot of nothing.
+ * ------------------------------------------------------------------------ */
+#itlr-build-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #ffffff;
+  opacity: 1;
+  transition: opacity .7s ease;
+}
+#itlr-build-gate[data-state="done"] { opacity: 0; pointer-events: none; }
+
+#itlr-build-gate .itlr-gate-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+#itlr-build-gate .itlr-gate-video { opacity: 0; transition: opacity .35s ease; }
+#itlr-build-gate[data-state="playing"] .itlr-gate-video { opacity: 1; }
+#itlr-build-gate[data-state="playing"] .itlr-gate-poster {
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+
+#itlr-build-gate .itlr-gate-ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 24px;
+  text-align: center;
+  transition: opacity .3s ease;
+}
+#itlr-build-gate[data-state="playing"] .itlr-gate-ui {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#itlr-build-gate .itlr-gate-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 700;
+  font-size: clamp(26px, 5vw, 54px);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  /* Ink on cyan is 7.8:1. White on cyan is 2.3:1 and fails even the large-text
+     threshold, which is why this label is not white. */
+  color: var(--e-global-color-secondary, #14161E);
+  background: var(--e-global-color-primary, #00B6F1);
+  padding: 22px 44px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, .85), 0 18px 40px rgba(20, 22, 30, .28);
+  transition: transform .2s ease, background-color .2s ease;
+}
+#itlr-build-gate .itlr-gate-btn:hover { background: #00a2d8; transform: translateY(-2px); }
+#itlr-build-gate .itlr-gate-btn:focus-visible {
+  outline: 4px solid var(--e-global-color-secondary, #14161E);
+  outline-offset: 8px;
+}
+
+#itlr-build-gate .itlr-gate-note {
+  margin: 0;
+  font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--e-global-color-secondary, #14161E);
+  background: rgba(255, 255, 255, .92);
+  padding: 8px 16px;
+  border-radius: 100px;
+}
+
+#itlr-build-gate .itlr-gate-skip {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  border: 1px solid rgba(20, 22, 30, .18);
+  background: rgba(255, 255, 255, .94);
+  color: var(--e-global-color-secondary, #14161E);
+  font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 4px;
+}
+#itlr-build-gate .itlr-gate-skip:hover { background: #ffffff; border-color: rgba(20, 22, 30, .4); }
+
+@media (prefers-reduced-motion: no-preference) {
+  #itlr-build-gate .itlr-gate-btn { animation: itlrGatePulse 2.8s ease-in-out infinite; }
+}
+@keyframes itlrGatePulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(255, 255, 255, .85), 0 18px 40px rgba(20, 22, 30, .28); }
+  50%      { box-shadow: 0 0 0 14px rgba(255, 255, 255, .55), 0 18px 40px rgba(20, 22, 30, .28); }
 }

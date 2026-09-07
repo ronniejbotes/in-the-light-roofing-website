@@ -26,4 +26,4 @@
 # they are visually interchangeable. Without this, the three pages that
 # reference the lowercase name lose the icon on any case-sensitive host --
 # which is every Linux and macOS checkout, and most static hosts.
-/wp-content/uploads/2023/12/Insurance.svg  /wp-content/uploads/2023/12/INSURANCE.svg        301
+/assets/2023/12/Insurance.svg  /assets/2023/12/INSURANCE.svg        301

@@ -1,121 +1,121 @@
-<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="//inthelightroofing.com/wp-content/plugins/wordpress-seo/css/main-sitemap.xsl"?>
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="//inthelightroofing.com/lib/seo/css/main-sitemap.xsl"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
 		<loc>https://inthelightroofing.com/</loc>
 		<lastmod>2026-07-09T22:18:17+00:00</lastmod>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2026/03/owner-headshot.png</image:loc>
+			<image:loc>/assets/2026/03/owner-headshot.png</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line.svg</image:loc>
+			<image:loc>/assets/2023/12/section-line.svg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line.svg</image:loc>
+			<image:loc>/assets/2023/12/section-line.svg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2026/03/SEMI8066.jpg</image:loc>
+			<image:loc>/assets/2026/03/SEMI8066.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line.svg</image:loc>
+			<image:loc>/assets/2023/12/section-line.svg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/damage.webp</image:loc>
+			<image:loc>/assets/2024/05/damage.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/roof-replacement-icon.webp</image:loc>
+			<image:loc>/assets/2024/05/roof-replacement-icon.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/Installment.webp</image:loc>
+			<image:loc>/assets/2024/05/Installment.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/roof-inspection-icon.webp</image:loc>
+			<image:loc>/assets/2024/05/roof-inspection-icon.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/Insurance.webp</image:loc>
+			<image:loc>/assets/2024/05/Insurance.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/damage.webp</image:loc>
+			<image:loc>/assets/2024/05/damage.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line.svg</image:loc>
+			<image:loc>/assets/2023/12/section-line.svg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/2.webp</image:loc>
+			<image:loc>/assets/2024/05/2.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/3.webp</image:loc>
+			<image:loc>/assets/2024/05/3.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/4.webp</image:loc>
+			<image:loc>/assets/2024/05/4.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/5.webp</image:loc>
+			<image:loc>/assets/2024/05/5.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/6.webp</image:loc>
+			<image:loc>/assets/2024/05/6.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/7.webp</image:loc>
+			<image:loc>/assets/2024/05/7.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/1.webp</image:loc>
+			<image:loc>/assets/2024/05/1.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line-w.png</image:loc>
+			<image:loc>/assets/2023/12/section-line-w.png</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line.svg</image:loc>
+			<image:loc>/assets/2023/12/section-line.svg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line.svg</image:loc>
+			<image:loc>/assets/2023/12/section-line.svg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line.svg</image:loc>
+			<image:loc>/assets/2023/12/section-line.svg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2026/03/SEMI8066.jpg</image:loc>
+			<image:loc>/assets/2026/03/SEMI8066.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2023/12/section-line.svg</image:loc>
+			<image:loc>/assets/2023/12/section-line.svg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/1-1.webp</image:loc>
+			<image:loc>/assets/2024/05/1-1.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/2-1.webp</image:loc>
+			<image:loc>/assets/2024/05/2-1.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/3-1.webp</image:loc>
+			<image:loc>/assets/2024/05/3-1.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/4-1.webp</image:loc>
+			<image:loc>/assets/2024/05/4-1.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/5-1.webp</image:loc>
+			<image:loc>/assets/2024/05/5-1.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/6-1.webp</image:loc>
+			<image:loc>/assets/2024/05/6-1.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/7-1.webp</image:loc>
+			<image:loc>/assets/2024/05/7-1.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/8.webp</image:loc>
+			<image:loc>/assets/2024/05/8.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/9.webp</image:loc>
+			<image:loc>/assets/2024/05/9.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/10.webp</image:loc>
+			<image:loc>/assets/2024/05/10.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/11.webp</image:loc>
+			<image:loc>/assets/2024/05/11.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/12.webp</image:loc>
+			<image:loc>/assets/2024/05/12.webp</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/05/13.webp</image:loc>
+			<image:loc>/assets/2024/05/13.webp</image:loc>
 		</image:image>
 	</url>
 	<url>
@@ -174,7 +174,7 @@
 		<loc>https://inthelightroofing.com/service-area/center-valley-roofing-contractor/</loc>
 		<lastmod>2026-05-06T10:35:43+00:00</lastmod>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/10/2023-08-26-16-53-10-002.png</image:loc>
+			<image:loc>/assets/2024/10/2023-08-26-16-53-10-002.png</image:loc>
 		</image:image>
 	</url>
 	<url>
@@ -245,7 +245,7 @@
 		<loc>https://inthelightroofing.com/service-area/roofers-bethlehem-pa/</loc>
 		<lastmod>2026-05-17T16:23:40+00:00</lastmod>
 		<image:image>
-			<image:loc>https://inthelightroofing.com/wp-content/uploads/2024/10/2023-08-26-16-54-39-881.png</image:loc>
+			<image:loc>/assets/2024/10/2023-08-26-16-54-39-881.png</image:loc>
 		</image:image>
 	</url>
 	<url>

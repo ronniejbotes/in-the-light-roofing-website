@@ -67,11 +67,16 @@
     var(--e-global-color-secondary, #14161E);
   /* The header is fixed at 112px; keep the stage's content clear of it. */
   padding: 112px 0 0;
+  /* Belt to the braces of `visibility` above. This layer is fixed and covers
+     the whole viewport, so any part of it that stays hit-testable while the
+     stage is closed silently eats clicks on the real page underneath. */
+  pointer-events: none;
 }
 
 .itlr-proc__layer[data-visible="true"] {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
   transition: opacity .38s ease, visibility 0s;
 }
 
