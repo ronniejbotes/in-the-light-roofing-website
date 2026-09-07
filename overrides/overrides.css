@@ -531,3 +531,76 @@
   background-size: cover;
   background-position: center;
 }
+
+/* ---------------------------------------------------------------------------
+ * 9. The map: footer column, and the contact page.
+ *
+ * The footer row is a four-column flex container capped at Elementor's 1170px,
+ * and the four columns already fill it exactly (351+234+234+351). So the map
+ * cannot simply be dropped in -- the row is widened to take the space that was
+ * sitting empty either side of the footer, and the columns give up a little
+ * width to make room. They are flex: 0 1 auto, so they shrink rather than
+ * overflow.
+ *
+ * Below 1200px there is no spare width to take, so the map stops being a column
+ * and becomes a full-width band under the four.
+ * ------------------------------------------------------------------------- */
+.itlr-footer-map {
+  display: block;
+  min-width: 0;
+}
+
+.itlr-footer-map .itlr-map-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  border: 0;
+  border-radius: 14px;
+  /* The embed is a bright daylight map on a near-white footer; a hairline stops
+     it floating. */
+  box-shadow: 0 6px 20px rgb(0 0 0 / .12);
+}
+
+@media (min-width: 1200px) {
+  /* Take back the page margin the footer was leaving empty, without letting the
+     row outgrow the viewport.
+     Both the row and every boxed ancestor up to the footer section: a flex row
+     cannot grow past its parent, and Elementor caps that parent at 1170px, so
+     releasing only the row squeezed the four columns instead of widening
+     anything. !important because Elementor's own cap is a three-class selector
+     and this is one attribute. */
+  [data-itlr-map="1"],
+  [data-itlr-mapwide="1"] {
+    max-width: min(1560px, calc(100vw - 60px)) !important;
+    width: auto !important;
+  }
+
+  .itlr-footer-map {
+    flex: 0 0 clamp(260px, 22%, 380px);
+    margin-left: clamp(20px, 2.4vw, 46px);
+    /* Same height as the columns beside it, whatever they come to. */
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 1199px) {
+  /* Below this there is no spare page margin to take, so the map stops being a
+     column. The row has to be allowed to wrap or a 100% basis just gets shrunk
+     back into the line by flex. */
+  [data-itlr-map="1"] { flex-wrap: wrap; }
+
+  .itlr-footer-map {
+    flex: 1 0 100%;
+    width: 100%;
+    margin-top: 34px;
+  }
+  .itlr-footer-map .itlr-map-frame { height: 260px; min-height: 0; }
+}
+
+/* The contact page's own map, repointed at the pinned embed by overrides.js.
+   Only the corners are touched -- its size is Elementor's. */
+.itlr-map-frame--page {
+  border: 0;
+  border-radius: 14px;
+}

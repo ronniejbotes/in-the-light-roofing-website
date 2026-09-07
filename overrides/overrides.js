@@ -476,8 +476,107 @@
     return a || b
   }
 
+  /* -------------------------------------------------------------------------
+   * The Google Maps embed: in the footer, and on the contact page.
+   *
+   * One place embed with the business pinned. The contact page already had a
+   * map, but it was the generic `maps?q=In The Light Roofing` search embed at
+   * zoom 10 -- the whole Lehigh Valley and no marker on the premises. That one
+   * is repointed rather than a second map added below it.
+   *
+   * loading="lazy" is on the iframe deliberately and matters more than usual
+   * here: the footer is on all 427 pages, and without it every page load would
+   * pull Google Maps whether or not anyone scrolled that far.
+   * ---------------------------------------------------------------------- */
+  var MAP_EMBED = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3028.3642109374377'
+    + '!2d-75.44724580028523!3d40.62184923270019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2'
+    + '!1s0x89c43b840ffd0c33%3A0x21c950328309980d!2sIn%20The%20Light%20Roofing!5e0!3m2!1sen!2sza'
+    + '!4v1788795465393!5m2!1sen!2sza'
+
+  var MAP_TITLE = 'Google Map showing In The Light Roofing, 871 N Fenwick St, Allentown PA'
+
+  function makeMapFrame() {
+    var f = document.createElement('iframe')
+    f.className = 'itlr-map-frame'
+    f.src = MAP_EMBED
+    // A named frame, or a screen reader announces only "iframe".
+    f.title = MAP_TITLE
+    f.setAttribute('loading', 'lazy')
+    f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin')
+    f.setAttribute('allowfullscreen', '')
+    f.style.border = '0'
+    return f
+  }
+
+  /**
+   * The footer row holding the four columns.
+   *
+   * Found by content, not by id: it is the innermost container that holds all
+   * three of the footer's column headings. Taking the innermost match matters --
+   * every wrapper above it contains those words too, and attaching the map to
+   * one of those would put it beside the whole page rather than beside the
+   * columns.
+   */
+  function findFooterRow() {
+    var conts = document.querySelectorAll('.elementor-container, .e-con-inner')
+    var best = null
+    var bestSize = Infinity
+    for (var i = 0; i < conts.length; i++) {
+      var t = (conts[i].textContent || '').toUpperCase()
+      if (t.indexOf('QUICK LINKS') === -1) continue
+      if (t.indexOf('CONTACT INFO') === -1) continue
+      if (conts[i].children.length < 3) continue
+      var size = conts[i].querySelectorAll('*').length
+      if (size < bestSize) { best = conts[i]; bestSize = size }
+    }
+    return best
+  }
+
+  function injectFooterMap() {
+    var row = findFooterRow()
+    if (!row || row.getAttribute('data-itlr-map') === '1') return false
+    row.setAttribute('data-itlr-map', '1')
+
+    // The row cannot grow past its parent, and the footer sits inside the
+    // site's 1170px container. Widening the row alone just squeezed the four
+    // columns (351px down to 242px) instead of using the empty page margin the
+    // map is meant to occupy, so every boxed ancestor up to the footer section
+    // is marked and released by the stylesheet as well.
+    var up = row.parentElement
+    for (var g = 0; up && g < 6; g++) {
+      if (up.classList.contains('elementor-container') || up.classList.contains('e-con-inner')) {
+        up.setAttribute('data-itlr-mapwide', '1')
+      }
+      up = up.parentElement
+    }
+    var col = document.createElement('div')
+    col.className = 'itlr-footer-map'
+    col.appendChild(makeMapFrame())
+    row.appendChild(col)
+    return true
+  }
+
+  /** Repoint the contact page's existing map at the pinned place embed. */
+  function upgradeContactMap() {
+    var frames = document.querySelectorAll('iframe[src*="google.com/maps"], iframe[src*="maps.google.com"]')
+    var changed = false
+    for (var i = 0; i < frames.length; i++) {
+      var f = frames[i]
+      if (f.classList.contains('itlr-map-frame')) continue      // the footer's own
+      if ((f.src || '').indexOf('/maps/embed?pb=') > -1) continue // already pinned
+      f.src = MAP_EMBED
+      if (!f.getAttribute('title')) f.setAttribute('title', MAP_TITLE)
+      f.setAttribute('loading', 'lazy')
+      f.classList.add('itlr-map-frame', 'itlr-map-frame--page')
+      changed = true
+    }
+    return changed
+  }
+
   function init() {
     removeFormerStaffSlides()
+    injectFooterMap()
+    upgradeContactMap()
     founderAboveTeamCarousel()
     heroLightningVideo()
     fixGalleryLazyLoad()

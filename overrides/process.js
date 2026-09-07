@@ -201,10 +201,16 @@
         var alpha = 1 - smoothstep(ak, 0.35, 1.15)
         if (alpha <= 0.004) {
           shotEls[i].style.opacity = '0'
-          shotEls[i].style.visibility = 'hidden'
+          shotEls[i].style.display = 'none'
           continue
         }
-        shotEls[i].style.visibility = 'visible'
+        // `display`, not `visibility`. visibility is inherited, so setting a
+        // child to `visible` overrides the hidden layer above it: the render
+        // stayed hit-testable while the stage was closed, and this layer is
+        // fixed and full-viewport, so it silently swallowed clicks on whatever
+        // sat under its rectangle -- six town cards on the homepage, as it
+        // turned out. display is not inherited, so the layer stays in charge.
+        shotEls[i].style.display = ''
         shotEls[i].style.opacity = String(alpha)
         shotEls[i].style.zIndex = String(100 - Math.round(ak * 10))
         shotEls[i].style.transform =
