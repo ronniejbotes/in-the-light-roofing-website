@@ -97,6 +97,8 @@ createServer(async (req, res) => {
     '/_reviews.js': 'reviews.js',
     '/_process.css': 'process.css',
     '/_process.js': 'process.js',
+    '/_team.css': 'team.css',
+    '/_team.js': 'team.js',
   }
   if (OVERRIDE_FILES[url]) {
     const f = join(ROOT, 'overrides', OVERRIDE_FILES[url])
@@ -152,9 +154,11 @@ createServer(async (req, res) => {
       const tags = '<link rel="stylesheet" href="/_overrides.css">'
         + '<link rel="stylesheet" href="/_reviews.css">'
         + '<link rel="stylesheet" href="/_process.css">'
+        + '<link rel="stylesheet" href="/_team.css">'
         + '<script src="/_overrides.js" defer></script>'
         + '<script src="/_reviews.js" defer></script>'
         + '<script src="/_process.js" defer></script>'
+        + '<script src="/_team.js" defer></script>'
       const html = body.toString('utf8')
       const i = html.lastIndexOf('</head>')
       out = Buffer.from(i === -1 ? html + tags : html.slice(0, i) + tags + html.slice(i), 'utf8')

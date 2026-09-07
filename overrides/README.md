@@ -21,6 +21,7 @@ CSS, JS into a footer snippet (Elementor → Custom Code, or a snippets plugin).
 | `overrides.css` / `overrides.js` | Service-grid icon sizing; Past Work carousel as a full-width continuous crawl, with rounded cards, hover-to-hold and an estimate prompt beneath it |
 | `reviews.css` / `reviews.js` | 3D testimonial marquee replacing the Trustindex widget |
 | `process.css` / `process.js` | The 5-step process section as a scroll-driven stage |
+| `team.css` / `team.js` | The crew carousel as a photo stack, and the founder/team section order |
 | `assets/` | The five step renders (generated; see below) |
 | `reviews.json` | The nine Google reviews, captured verbatim |
 
@@ -122,11 +123,80 @@ phone call, a calendar or a pallet of shingles claims nothing that isn't true.
 To move them to WordPress: upload to the media library and repoint `SHOTS` at
 the top of `process.js`.
 
+## The crew photo stack
+
+"Contact Our Roofing Team" was an Elementor carousel of crew portraits. It is
+now a pile of photographs that fans out when you point at it; clicking one spins
+it back to the top of the pile.
+
+- **Only the carousel widget is replaced.** The section's `<h2>` is a sibling of
+  it, not a child, so the heading stays exactly where it was.
+- **Portraits are read from the DOM, not hard-coded.** They are CSS
+  `background-image` on a container inside each slide -- no `<img>`, no alt --
+  so computed style is the only place to get them. Reading them means a portrait
+  swapped in Elementor still flows through, *and* it inherits the
+  former-employee suppression for free: `overrides.css` sets `background-image:
+  none` on his element, so he resolves to nothing and is skipped. `team.js` also
+  carries an explicit `SEMI7879|SEMI7885` filename guard as a second lock.
+- **The fan uses shuffled slots, not rejection sampling.** The original picks
+  random positions and retries on collision; with five cards in a 1170px stage
+  the last one ran out of retries and landed on a neighbour in roughly one
+  layout in five. Each card now gets its own slot and jitters inside it, so
+  overlap is impossible by construction, while shuffling which card lands in
+  which slot keeps the arrangement different on every hover. Measured at 0
+  heavy overlaps across 12 layouts, down from ~1 in 5.
+- **The fan is biased clear of the bottom ~60px.** This section is a
+  height-constrained flex column whose items deliberately overlap -- that is how
+  the outlined heading sits *behind* the portraits -- and the section's
+  "Contact Us Now" button is one of those items. Without the bias, two cards
+  covered it on most layouts.
+- **The card selector is doubled (`.itlr-team .itlr-team__card`).** These are
+  `<button>` elements and the theme styles bare buttons at a specificity that
+  beats a single class; the first build came out with the theme's padding. The
+  narrow-screen rules are doubled to match, or the desktop rule would outrank
+  them and the mobile grid would never happen.
+- **Cards are dark, not the white of the original.** The portraits are shot
+  against a pale studio backdrop, so a white frame lets the photograph bleed
+  into the card. Navy is the site's own secondary colour.
+- **No CTA of its own** -- the section already ends with a "Contact Us Now"
+  button, and the carousel put the same link on all seven slides.
+
+### The crew have no names, and none were invented
+
+The card design has a caption slot and looks better filled. `CREW_NAMES` in
+`team.js` is deliberately empty, because **this repository does not contain the
+crew's names**. The slides are bare containers with the portrait as a CSS
+background: no alt text, no caption, and `content/media.json` gives every one of
+these files an empty alt and a title that is just the camera filename
+(`SEMI7900`, `SEMI8023`...). The repo's own history confirms it -- commit
+`2e1cd9d` had to open all twelve photographs to work out which were the former
+employee's, because there was no name metadata to go on.
+
+First names do appear in customer reviews (Luis, Keylor, John, Mike, Juan,
+Adam), but nothing ties any of them to a face. Guessing which photograph is
+which person is not something to ship on a real business's site.
+
+**Fill `CREW_NAMES` with the five real names, in portrait order, and the caption
+row appears by itself.** Anything left blank renders no caption.
+
+## Founder section before the team carousel
+
+`founderAboveTeamCarousel()` in `overrides.js` moves the founder section above
+the crew carousel, so the owner's story introduces a named human before the page
+asks you to pick one of five faces. Neither section is found by its Elementor id
+-- the founder section carries a hand-written `founder-section` class and the
+carousel is found by its heading.
+
+Idempotent: `init()` re-runs on a 250ms timer, and the `compareDocumentPosition`
+guard makes every tick after the first a no-op. **With JavaScript off the order
+is unchanged**, so this belongs in Elementor for real.
+
 ## Why the marquee components were ported, not installed
 
-Both supplied components — the testimonial marquee and the animated hero
-marquee the Past Work treatment came from — were React + shadcn/ui + Tailwind +
-TypeScript. This project is none of those:
+Every supplied component so far — the testimonial marquee, the animated hero
+marquee behind the Past Work treatment, and the interactive photo stack behind
+the crew section — arrived as React + shadcn/ui + Tailwind + TypeScript. This
+project is none of those:
 
 - no `react` or `react-dom` — the only dependencies are `playwright-core`,
   `sharp` and `vite`

@@ -256,8 +256,44 @@
     return touched.length
   }
 
+  /* -------------------------------------------------------------------------
+   * Put the founder section above the "Contact Our Roofing Team" carousel.
+   *
+   * The owner's story is the stronger opener of the two: it introduces a named
+   * human before the page asks you to pick one of seven faces to contact.
+   *
+   * Neither section is found by its Elementor id. Those are regenerated every
+   * time the page is re-saved, and this pair is the whole point of the change --
+   * if the ids drift, a silent no-op puts the sections back in the old order
+   * with nothing to show for it. The founder section carries a hand-written
+   * `founder-section` class, and the carousel is identified by its heading.
+   * ---------------------------------------------------------------------- */
+  function findTeamCarouselSection(founder) {
+    var sibs = founder.parentNode.children
+    for (var i = 0; i < sibs.length; i++) {
+      if (sibs[i] === founder) continue
+      var h = sibs[i].querySelector('h1, h2, h3, h4')
+      if (h && /contact\s+our[\s\S]{0,20}team/i.test(h.textContent)) return sibs[i]
+    }
+    return null
+  }
+
+  function founderAboveTeamCarousel() {
+    var founder = document.querySelector('.founder-section')
+    if (!founder || !founder.parentNode) return false
+    var carousel = findTeamCarouselSection(founder)
+    if (!carousel) return false
+    // DOCUMENT_POSITION_FOLLOWING means the carousel already comes after the
+    // founder section, i.e. this has run. Re-running insertBefore would be
+    // harmless but it also fires on every poll tick, so stop here.
+    if (founder.compareDocumentPosition(carousel) & 4) return true
+    carousel.parentNode.insertBefore(founder, carousel)
+    return true
+  }
+
   function init() {
     removeFormerStaffSlides()
+    founderAboveTeamCarousel()
     var el = findPastWorkCarousel()
     if (!el) return false
     var ok = buildMarquee(el)
