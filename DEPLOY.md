@@ -17,6 +17,31 @@ npm run build
 npm run verify:build     # must pass — it gates URL, link and SEO parity
 ```
 
+> **Read this first.** Everything below describes deploying `dist/`, the earlier
+> hand-built rebuild. That is almost certainly not what you want.
+>
+> To deploy the site as it currently is — the mirror plus the fixes in
+> `overrides/` — the command is:
+>
+> ```bash
+> npm run publish:mirror     # -> publish/
+> npm run serve:publish      # check it at :4323 with injection OFF
+> ```
+>
+> Then upload the **contents** of `publish/` to the web root. It ships a
+> generated `.htaccess` carrying the redirects, the two endpoints the live site
+> answers with PHP, and the 404 document, so Apache/LiteSpeed hosts (Hostinger
+> included) need no further configuration.
+>
+> `publish/` is `noindex` by default — it is a byte-faithful copy of a live
+> client site on a second hostname, and indexed it would compete with the real
+> domain. `PUBLISH_PUBLIC=1` lifts that, and is only correct on the real domain.
+>
+> Uploading `dist/` instead gets you the earlier rebuild: different hero,
+> different typography, and none of the work in `overrides/`.
+
+---
+
 Publish directory: `dist/`. Build command: `npm run build`.
 
 The build is deterministic: same `content/` in, same `dist/` out. It needs no

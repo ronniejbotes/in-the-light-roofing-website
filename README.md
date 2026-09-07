@@ -13,10 +13,23 @@ what is being worked on now.
 through a real browser, and what does not work (forms need PHP).
 
 ```bash
-npm run dev            # serve the clone at http://127.0.0.1:4322
-npm run check:mirror   # load every page, report broken assets and JS errors
-npm run verify:mirror  # pixel-diff a sample against the live site
+npm run dev             # serve the clone at http://127.0.0.1:4322
+npm run check:mirror    # load every page, report broken assets and JS errors
+npm run verify:mirror   # pixel-diff a sample against the live site
+npm run publish:mirror  # bake mirror/ + overrides/ into publish/ for a real host
+npm run serve:publish   # serve publish/ with injection OFF, at :4323
 ```
+
+**Deploying this is `npm run publish:mirror`, not `npm run build`.** The fixes in
+`overrides/` are injected per-request by `build/serve.mjs`, so until they are
+baked in they exist only while the dev server is running. `npm run build` builds
+the *other* codebase below into `dist/` and contains none of them. Uploading
+`dist/` gets you the earlier rebuild, not this one.
+
+`publish/` carries a staging `robots.txt` and an `X-Robots-Tag: noindex` by
+default, because it is a byte-faithful copy of a live client site on a second
+hostname. `PUBLISH_PUBLIC=1 npm run publish:mirror` restores the mirror's real
+robots.txt — only do that on the real domain.
 
 ### 2. `src/` + `content/` + `build/` — the earlier hand-built rebuild
 
@@ -28,6 +41,7 @@ referencing the wrong town. It is kept for its performance work and its
 extracted content, and is **not** what the site currently is.
 
 Its build still runs via `npm run build` and is served by `npm run serve`.
+**It is not what you want to deploy** — see `npm run publish:mirror` above.
 
 ---
 

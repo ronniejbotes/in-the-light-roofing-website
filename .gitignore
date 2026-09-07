@@ -22,3 +22,6 @@ keyword-map.md
 
 # Agents drop working files here; never part of the project
 scratchpad/
+
+# Built by build/publish.mjs; regenerate rather than commit (264MB).
+publish/

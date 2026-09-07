@@ -13,6 +13,8 @@
     "verify:mirror": "node tools/mirror-verify.mjs",
     "audit:mirror": "node tools/mirror-audit-routes.mjs && python tools/mirror-audit-canonical.py && python tools/mirror-audit-crawler-urls.py",
     "functions:mirror": "node tools/mirror-functions.mjs",
+    "publish:mirror": "node build/publish.mjs",
+    "serve:publish": "node -e \"process.env.SERVE_DIR=process.env.OUT||'publish';process.env.OVERRIDES='off';process.env.PORT=process.env.PORT||'4323';import('./build/serve.mjs')\"",
     "serve": "node build/serve.mjs",
     "build": "npm run build:bundle && npm run build:html",
     "build:bundle": "vite build",
