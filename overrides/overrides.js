@@ -483,6 +483,237 @@
   }
 
   /* -------------------------------------------------------------------------
+   * The "Start the build" gate. Homepage only.
+   *
+   * Same shape as the Eye Candy Customs warehouse gate: you arrive on a still
+   * of the job not yet started, choose to begin it, watch the roof go on, and
+   * are let through. Scroll stays locked until then so the sequence can never
+   * be scrolled past halfway.
+   *
+   * Two deliberate departures from ECC. Nothing darkens the footage -- no black
+   * ground, no gradient scrim -- because the clip is a bright daylight aerial
+   * and dimming it is the opposite of what it is for; the button takes its
+   * contrast from a solid cyan chip instead. And the video is not fetched until
+   * the page itself has finished loading: it is 1.8MB, nobody sees a frame of
+   * it before a click, and it has no business competing with the homepage.
+   *
+   * GATE_ONCE_PER_SESSION is false to match ECC, where the door is part of
+   * arriving and shows on every load. Set it to true and a visitor sees the
+   * gate once per tab instead -- worth weighing on a site whose job is to move
+   * people toward a quote.
+   * ---------------------------------------------------------------------- */
+  var GATE_VIDEO = '/_assets/build-gate'
+  var GATE_POSTER = '/_assets/build-gate-poster.jpg'
+  var GATE_END = '/_assets/build-gate-end.jpg'
+  var GATE_FAILSAFE_MS = 10500          // the clip runs 8.04s; +2s of headroom
+  var GATE_ONCE_PER_SESSION = false
+  var GATE_KEY = 'itlr-gate-seen'
+  var gateBuilt = false
+
+  /**
+   * The landing page, and only the landing page.
+   *
+   * `/` and `/home/` are two different pages here -- both real, both with their
+   * own canonical, and `/` links to `/home/`. The lightning banner is on
+   * `/home/` and the service pages; the landing page's hero is a photograph.
+   * The gate and the hero swap below are a matched pair -- the clip ends on the
+   * finished house and the hero underneath is that same frame -- so they both
+   * belong here and nowhere else. On `/home/` the gate would hand off from a
+   * house to a lightning bolt.
+   */
+  function isLandingPage() {
+    var p = (location.pathname || '/').replace(/\/+$/, '')
+    return p === '' || p === '/index.html'
+  }
+
+  function gateAlreadySeen() {
+    if (!GATE_ONCE_PER_SESSION) return false
+    try { return sessionStorage.getItem(GATE_KEY) === '1' } catch (e) { return false }
+  }
+
+  function buildGate() {
+    // Runs exactly once. init() polls for 20 seconds and the gate removes
+    // itself from the DOM when it is done, so an "is it already there" check
+    // would rebuild it the moment somebody got through.
+    if (gateBuilt) return false
+    gateBuilt = true
+
+    if (!isLandingPage()) return false
+    // Reduced motion asked not to sit through this. Let them straight in.
+    if (reducedMotion()) return false
+    if (gateAlreadySeen()) return false
+    if (!document.body) return false
+
+    var gate = document.createElement('div')
+    gate.id = 'itlr-build-gate'
+    gate.setAttribute('data-state', 'closed')
+    gate.setAttribute('role', 'dialog')
+    gate.setAttribute('aria-modal', 'true')
+    gate.setAttribute('aria-label', 'Start the build')
+
+    // The still is frame 0 of the clip itself -- the worn roof, before anyone
+    // has touched it -- so the first frame of playback is the picture that was
+    // already on screen and the cut into motion is invisible.
+    var poster = document.createElement('img')
+    poster.className = 'itlr-gate-media itlr-gate-poster'
+    poster.src = GATE_POSTER
+    poster.alt = ''
+    poster.setAttribute('aria-hidden', 'true')
+    gate.appendChild(poster)
+
+    var v = document.createElement('video')
+    v.className = 'itlr-gate-media itlr-gate-video'
+    v.muted = true
+    v.playsInline = true
+    v.setAttribute('muted', '')
+    v.setAttribute('playsinline', '')
+    v.setAttribute('preload', 'none')
+    v.setAttribute('poster', GATE_POSTER)
+    v.setAttribute('aria-hidden', 'true')
+    v.setAttribute('tabindex', '-1')
+    gate.appendChild(v)
+
+    var ui = document.createElement('div')
+    ui.className = 'itlr-gate-ui'
+    var btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'itlr-gate-btn'
+    btn.textContent = 'Start the build'
+    var note = document.createElement('p')
+    note.className = 'itlr-gate-note'
+    note.textContent = 'Watch a roof go on in eight seconds'
+    ui.appendChild(btn)
+    ui.appendChild(note)
+    gate.appendChild(ui)
+
+    var skip = document.createElement('button')
+    skip.type = 'button'
+    skip.className = 'itlr-gate-skip'
+    skip.textContent = 'Skip'
+    gate.appendChild(skip)
+
+    document.body.appendChild(gate)
+
+    // Every arrival starts at the top, behind the gate.
+    try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }) }
+    catch (e) { window.scrollTo(0, 0) }
+
+    var prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    var failsafe = null
+    var done = false
+
+    function onKey(e) {
+      if (e.key === 'Escape' || e.keyCode === 27) finish()
+    }
+
+    function finish() {
+      if (done) return
+      done = true
+      if (failsafe) clearTimeout(failsafe)
+      document.removeEventListener('keydown', onKey)
+      gate.setAttribute('data-state', 'done')
+      document.body.style.overflow = prevOverflow
+      try { sessionStorage.setItem(GATE_KEY, '1') } catch (e) { }
+      // Let the crossfade finish, then take it out of the tree entirely so it
+      // cannot swallow clicks or hold a decoded video frame in memory.
+      setTimeout(function () {
+        if (gate.parentNode) gate.parentNode.removeChild(gate)
+      }, 800)
+    }
+
+    function start() {
+      if (gate.getAttribute('data-state') !== 'closed') return
+      gate.setAttribute('data-state', 'playing')
+      var p = v.play()
+      if (p && p.catch) {
+        // Playback refused, or the file never arrived. Never strand somebody
+        // behind a video that is not going to play.
+        p.catch(finish)
+      }
+      failsafe = setTimeout(finish, GATE_FAILSAFE_MS)
+    }
+
+    btn.addEventListener('click', start)
+    skip.addEventListener('click', finish)
+    v.addEventListener('ended', finish)
+    v.addEventListener('error', finish)
+    document.addEventListener('keydown', onKey)
+    try { btn.focus({ preventScroll: true }) } catch (e) { }
+
+    // Only now go and fetch it. The homepage has first claim on the connection
+    // and there is nothing to see here until somebody clicks.
+    function arm() {
+      if (v.getElementsByTagName('source').length) return
+      v.innerHTML = '<source src="' + GATE_VIDEO + '.webm" type="video/webm">'
+        + '<source src="' + GATE_VIDEO + '.mp4" type="video/mp4">'
+      v.setAttribute('preload', 'auto')
+      v.load()
+    }
+    if (document.readyState === 'complete') arm()
+    else window.addEventListener('load', arm)
+
+    return true
+  }
+
+  /* -------------------------------------------------------------------------
+   * The landing page hero: the finished house, not the team photograph.
+   *
+   * This is the other half of the gate. The hero is the clip's closing frame,
+   * so someone who watches the build through sees the page settle onto the
+   * exact picture it ended on rather than cutting to something unrelated.
+   *
+   * The hero is a CSS background on an Elementor container, not an <img>, and
+   * it is found by matching that background's URL rather than by Elementor's
+   * generated id (elementor-element-4823434c today) -- ids here change whenever
+   * a page is re-saved in the editor. Same reasoning as the lightning banner
+   * above, and the same reason there is no hard-coded list of pages anywhere in
+   * this file.
+   *
+   * It injects a stylesheet rule rather than setting the background inline,
+   * which is the second attempt. Setting it inline -- with or without
+   * !important -- does apply, and then something on this page puts the original
+   * photograph back inside 250ms: the poll below was landing a successful swap
+   * on every single tick and the hero still rendered the team. A rule keyed to
+   * Elementor's own class survives that, because it does not live on the node.
+   *
+   * background-position has to be reset explicitly. The team photograph is a
+   * 1097x1408 portrait shifted up with `0px -786px` to frame the faces; the
+   * replacement is 16:9, and inheriting that offset would park it well above
+   * the container.
+   * ---------------------------------------------------------------------- */
+  var HERO_PHOTO_MATCH = /Untitled-2/
+  var heroRuleFor = {}
+
+  function landingHeroPhoto() {
+    if (!isLandingPage()) return false
+    var els = document.querySelectorAll('.e-con, .elementor-top-section')
+    var changed = false
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i]
+      if (!HERO_PHOTO_MATCH.test(window.getComputedStyle(el).backgroundImage || '')) continue
+
+      // Discover Elementor's generated id class rather than hard-coding it, for
+      // the usual reason: it changes when the page is re-saved.
+      var id = (el.className || '').toString().match(/elementor-element-[0-9a-z]+/)
+      if (!id || heroRuleFor[id[0]]) continue
+      heroRuleFor[id[0]] = true
+
+      var st = document.createElement('style')
+      st.setAttribute('data-itlr-hero', id[0])
+      st.textContent = '.' + id[0] + '{'
+        + 'background-image:url("' + GATE_END + '")!important;'
+        + 'background-position:center!important;'
+        + 'background-size:cover!important;'
+        + 'background-repeat:no-repeat!important}'
+      document.head.appendChild(st)
+      changed = true
+    }
+    return changed
+  }
+
+  /* -------------------------------------------------------------------------
    * The Google Maps embed: in the footer, and on the contact page.
    *
    * One place embed with the business pinned. The contact page already had a
@@ -585,6 +816,7 @@
     upgradeContactMap()
     founderAboveTeamCarousel()
     heroLightningVideo()
+    landingHeroPhoto()
     fixGalleryLazyLoad()
     var el = findPastWorkCarousel()
     if (!el) return false
@@ -592,6 +824,20 @@
     injectEstimateCta(el)
     return ok
   }
+
+  // The gate goes up before anything else and outside init()'s poll. This
+  // script is deferred, so the body is parsed but not yet painted -- which is
+  // the last moment the overlay can appear without the page flashing behind it
+  // first. It also must not be re-run: init() fires every 250ms for 20 seconds
+  // and the gate deletes itself once someone is through.
+  buildGate()
+
+  // And the hero underneath it, now rather than on the first poll. Behind the
+  // gate a 250ms swap would never be seen, but reduced-motion visitors do not
+  // get a gate and would otherwise catch the team photograph for a frame before
+  // it turned into the house. init() keeps calling this; Elementor re-renders
+  // after load and puts the original background back at least once.
+  landingHeroPhoto()
 
   // Elementor initialises its widgets after load, and Swiper attaches a moment
   // later still, so poll briefly rather than guessing a single delay.
