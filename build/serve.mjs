@@ -80,6 +80,34 @@ createServer(async (req, res) => {
     return res.end('{"reload":"no"}')
   }
 
+  // Every form on the published site posts to /_forms/submit.php, a small PHP
+  // handler build/publish.mjs writes into publish/_forms/. There is no PHP
+  // here, so without this the submit that the whole form fix exists to produce
+  // would end at a 404 and the flow could not be walked locally at all.
+  //
+  // This answers the way the real handler answers a good submission -- 303 to
+  // /thank-you/ -- and nothing else. It sends no mail, validates nothing, and
+  // keeps nothing: it is here to prove the form reaches its endpoint and lands
+  // on the thank-you page, not to stand in for the handler. Anything about the
+  // handler's own behaviour has to be tested on a host that runs PHP.
+  if (url === '/_forms/submit.php') {
+    if (req.method !== 'POST') {
+      res.writeHead(405, { Allow: 'POST', 'Content-Type': 'text/plain; charset=utf-8' })
+      return res.end('This address accepts form submissions only.\n')
+    }
+    // Read the body to the end before answering. A browser still uploading a CV
+    // when the response arrives reports the request as failed, which looks
+    // exactly like the endpoint being broken.
+    let bytes = 0
+    req.on('data', (c) => { bytes += c.length })
+    req.on('end', () => {
+      console.log(`  form post accepted (${bytes} bytes) -> 303 /thank-you/  [dev server: nothing was emailed]`)
+      res.writeHead(303, { Location: '/thank-you/', 'Cache-Control': 'no-store' })
+      res.end()
+    })
+    return
+  }
+
   // CallRail's beacon posts visit data to a WordPress REST route. There is no
   // PHP here to receive it, and an unanswered POST logs an error on every page,
   // so acknowledge it and drop it on the floor.

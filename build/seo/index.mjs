@@ -29,8 +29,12 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 
 /* Order matters: content edits first (titles/H1s), then meta/schema that read
    the final title, then alt/perf attributes, then links, then the sitemap
-   which needs every page's final indexability. */
-const MODULES = ['content', 'meta', 'alt', 'perf', 'nap', 'links', 'sitemap']
+   which needs every page's final indexability.
+   forms sits ahead of perf rather than next to the other markup passes: it
+   deletes the inline script that is the only caller of grecaptcha.ready(), and
+   perf decides whether to keep Google's reCAPTCHA eager by looking for exactly
+   that call. Running it first lets reCAPTCHA be deferred everywhere. */
+const MODULES = ['content', 'forms', 'meta', 'alt', 'perf', 'nap', 'links', 'sitemap']
 
 export async function seo(OUT, opts = {}) {
   const ctx = {
