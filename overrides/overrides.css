@@ -722,6 +722,22 @@
 }
 #itlr-build-gate .itlr-gate-skip:hover { background: #ffffff; border-color: rgba(20, 22, 30, .4); }
 
+/* The chat widget is `position: fixed` at `z-index: 2147483647` -- the largest
+   a 32-bit signed z-index can be, so the gate cannot out-stack it, and it
+   loaded over the top of an `aria-modal` dialog and sat exactly on the Skip
+   button in the bottom-right corner. `elementsFromPoint` at the middle of Skip
+   returned the widget, not the button: a mouse user could not skip the video.
+
+   Hidden from CSS rather than from `buildGate()` on purpose. The widget script
+   is deferred (see build/seo/perf.mjs), so it is usually injected *after* the
+   gate is built -- a one-shot sweep at build time would miss it, whereas a rule
+   keyed off a class on <html> applies whenever the widget turns up. The class
+   is removed in finish(), which restores the widget on every exit path. */
+html.itlr-gate-open [id^="chat-widget"],
+html.itlr-gate-open iframe.iframe-hidden {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   #itlr-build-gate .itlr-gate-btn { animation: itlrGatePulse 2.8s ease-in-out infinite; }
 }

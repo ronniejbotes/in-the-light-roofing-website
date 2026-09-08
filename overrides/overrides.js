@@ -600,6 +600,10 @@
 
     var prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    // Suppresses the chat widget, which outranks the gate on z-index and lands
+    // on the Skip button. The rule lives in overrides.css so it also catches a
+    // widget injected after this point -- that script is deferred.
+    document.documentElement.classList.add('itlr-gate-open')
 
     var failsafe = null
     var done = false
@@ -615,6 +619,7 @@
       document.removeEventListener('keydown', onKey)
       gate.setAttribute('data-state', 'done')
       document.body.style.overflow = prevOverflow
+      document.documentElement.classList.remove('itlr-gate-open')
       try { sessionStorage.setItem(GATE_KEY, '1') } catch (e) { }
       // Let the crossfade finish, then take it out of the tree entirely so it
       // cannot swallow clicks or hold a decoded video frame in memory.
