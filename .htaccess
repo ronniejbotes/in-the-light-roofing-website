@@ -16,6 +16,11 @@ Options -Indexes
   # is never redirected onto the live domain, and on the host only so it cannot
   # loop behind a TLS-terminating proxy -- which is also why http -> https is
   # left to the host's own Force-HTTPS setting rather than a %{HTTPS} test.
+  # POST is exempt. A 301 turns a POST into a GET and drops the body, so a
+  # visitor who reached the page on www would lose the whole submission on its
+  # way to /_forms/submit.php. Canonicalising is a GET concern; a form post is
+  # answered on whichever host served the page it came from.
+  RewriteCond %{REQUEST_METHOD} !=POST
   RewriteCond %{HTTP_HOST} ^www\.inthelightroofing\.com$ [NC]
   RewriteRule ^ https://inthelightroofing.com%{REQUEST_URI} [R=301,NE,L]
 

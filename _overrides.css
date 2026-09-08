@@ -606,6 +606,87 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * 10. The YouTube embed: 16:9 at every width.
+ *
+ * /services/, /service-area/ and /roof-types/ carry the same embed, written by
+ * hand into an Elementor HTML widget with width="560" height="500" on the tag.
+ * The width attribute never binds, because the theme already ships
+ * `.elementor iframe { max-width: 100%; width: 100% }` and the frame therefore
+ * fits its column at every width. The height attribute does bind: nothing in
+ * the theme gives these frames a height, so the box stays 500px tall however
+ * wide the column gets. The rendered shape swings from 0.68:1 on a 375px phone
+ * to 2.34:1 on a 1440px desktop, and YouTube letterboxes its 16:9 picture
+ * inside whichever of those it is handed -- pillarboxed on the phone, thick
+ * bands top and bottom on the desktop. Neither ever shows the video full size.
+ *
+ * aspect-ratio settles both ends at once, but only once the height attribute
+ * stops applying, which is what height:auto is for. A presentational attribute
+ * maps to its property at the lowest priority there is, so one plain
+ * declaration releases it.
+ *
+ * Scoped to the YouTube frames rather than to iframes generally, because the
+ * footer and service-area Google Maps embeds are iframes too and are not 16:9,
+ * and the Tag Manager noscript frame is a 0x0 pixel that has to stay 0x0. One
+ * class plus an attribute selector outscores `.elementor iframe`, which is one
+ * class and one type, so this wins on specificity alone and needs no
+ * !important and no particular position in the cascade.
+ * ------------------------------------------------------------------------- */
+.elementor-widget-html iframe[src*="youtube.com/embed"] {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+/* ---------------------------------------------------------------------------
+ * 11. The two focus rings the theme deletes.
+ *
+ * Most of the outline:none in the mirrored CSS is harmless: it is either
+ * guarded by :not(:focus-visible), or it sits on something a keyboard cannot
+ * reach anyway (the Essential Addons load-more button is inside a wrapper the
+ * theme hides with display:none !important, and the accordion tab titles carry
+ * role="button" but no tabindex, so nothing can focus them). Two rules do land
+ * on something reachable, on all 424 pages:
+ *
+ *   .hfe-has-submenu-container a.hfe-menu-item:focus { outline: 0 }
+ *       the five footer navigation links that own a submenu: Services, Roof
+ *       Types, About Us, Careers and Service Area. The links either side of
+ *       them are untouched and keep the browser's own ring, so tabbing along
+ *       the footer menu the highlight disappears for five stops and comes back.
+ *
+ *   body .get-form-banner.bnr-form form .forminator-row.forminator-row-last
+ *   button.forminator-button.forminator-button-submit { outline: none }
+ *       the Submit button on the banner form. This one is not scoped to :focus
+ *       at all, so there is no state in which a ring can appear on it.
+ *
+ * Restored on :focus-visible, not on :focus, so a mouse click still leaves no
+ * ring behind. That is almost certainly what the theme's authors were trying
+ * to achieve with outline:none back when :focus-visible was not available.
+ *
+ * The colours are the site's own Elementor globals with the literals as
+ * fallbacks, for when this is pasted somewhere the variables are not defined.
+ * Primary cyan is the ring already used on the town cards in section 6, on the
+ * team cards and on the careers CTA. The Submit button is filled with that
+ * same cyan (#00B6F1, set !important by the rule that blanks its outline), so
+ * a cyan ring on it would be invisible against its own background; it takes
+ * the dark secondary instead, the way the gate button below does.
+ *
+ * Both selectors deliberately restate enough of the original to outrank it.
+ * The nav rule scores three classes and one type and the Submit rule six
+ * classes and three types, which is too much for a short selector to beat, and
+ * winning on specificity is steadier here than winning on source order.
+ * ------------------------------------------------------------------------- */
+.hfe-nav-menu .hfe-has-submenu-container a.hfe-menu-item:focus-visible {
+  outline: 3px solid var(--e-global-color-primary, #00B6F1);
+  outline-offset: 3px;
+}
+
+body .get-form-banner.bnr-form form .forminator-row.forminator-row-last button.forminator-button.forminator-button-submit:focus-visible {
+  outline: 3px solid var(--e-global-color-secondary, #14161E);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------------
  * The "Start the build" gate -- homepage only.
  *
  * Modelled on the Eye Candy Customs warehouse gate, with one deliberate
