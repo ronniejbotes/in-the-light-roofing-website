@@ -34,7 +34,7 @@ const HERE = dirname(fileURLToPath(import.meta.url))
    deletes the inline script that is the only caller of grecaptcha.ready(), and
    perf decides whether to keep Google's reCAPTCHA eager by looking for exactly
    that call. Running it first lets reCAPTCHA be deferred everywhere. */
-const MODULES = ['content', 'forms', 'meta', 'alt', 'perf', 'nap', 'links', 'sitemap']
+const MODULES = ['content', 'forms', 'meta', 'alt', 'perf', 'nap', 'links', 'a11y', 'icons', 'sitemap']
 
 export async function seo(OUT, opts = {}) {
   const ctx = {

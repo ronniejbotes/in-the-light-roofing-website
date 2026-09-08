@@ -947,3 +947,111 @@ html.itlr-gate-open body {
 }
 html.itlr-gate-open { touch-action: none; }
 
+
+/* ---------------------------------------------------------------------------
+ * 12. The mobile call bar.
+ *
+ * The homepage is 18,677px tall at 375px wide and nothing keeps a phone number
+ * on screen while you read it: there is no sticky header and no fixed bar, so
+ * the header's CALL NOW scrolls away in the first swipe and the next of the
+ * ten tel: links is thousands of pixels down. Roofing is urgent-intent and
+ * phone-driven, and the moment someone decides to call is not the moment they
+ * want to scroll back to the top to find out how.
+ *
+ * Phones only. Above 768px the header is visible often enough, and a fixed bar
+ * on a desktop is just lost height.
+ *
+ * The bar is two targets rather than one because the two intents are different:
+ * a leak now wants the phone, a quote next week wants the form. Calling is the
+ * louder of the two, in the brand cyan, because that is the one that cannot
+ * wait. Both clear 48px, above the 44px minimum.
+ *
+ * body gets matching bottom padding so the bar never covers the footer or the
+ * last field of the form it is pointing at, and the padding is applied to the
+ * same breakpoint so desktop keeps its layout untouched.
+ * ------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  /* The reserve is written by the script from the bar's measured height, because
+     the bar grows with the visitor's font size and with the home indicator on an
+     iPhone, and a hardcoded number is wrong on the first phone that differs.
+     The value here is only the fallback for a first paint before the script has
+     measured, and for the case where the script does not run at all. */
+  body.itlr-has-callbar {
+    padding-bottom: var(--itlr-callbar-h, calc(64px + env(safe-area-inset-bottom, 0px)));
+  }
+
+  .itlr-callbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9998;
+    display: flex;
+    gap: 8px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    background: #14161E;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, .28);
+  }
+
+  .itlr-callbar__btn {
+    /* The number has to fit on one line, and it is the longer of the two
+       labels, so the call button takes the larger share rather than both
+       splitting the width evenly and wrapping "(484) 553-0213" across two. */
+    flex: 1.35 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 10px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: .01em;
+  }
+
+  .itlr-callbar__btn--call {
+    background: #00B6F1;
+    color: #14161E;
+  }
+
+  .itlr-callbar__btn--quote {
+    flex: 1 1 0;
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, .55);
+  }
+
+  .itlr-callbar__btn:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  .itlr-callbar__icon {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 auto;
+  }
+}
+
+/* The gate owns the viewport while it plays, so the bar must not sit on top of
+   it. Hidden rather than removed, so it is back the moment the gate closes. */
+@media (max-width: 767px) {
+  html.itlr-gate-open .itlr-callbar { display: none; }
+}
+
+/* The chat widget is fixed 20px off the bottom right at the largest z-index
+   there is, so it cannot be put behind the bar and it lands squarely on the
+   estimate button. Lifting it by the bar's own height keeps both usable and
+   keeps the widget where its own script expects to find it. */
+@media (max-width: 767px) {
+  #chat-widget-push-to-talk {
+    bottom: calc(20px + var(--itlr-callbar-h, 64px)) !important;
+  }
+}
