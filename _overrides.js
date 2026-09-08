@@ -892,4 +892,75 @@
   } else {
     init()
   }
+})();
+
+/*
+ * The mobile call bar.
+ *
+ * Injected rather than written into the markup because it is a conversion
+ * element, not an indexable one, and because the same IIFE then works pasted
+ * into a WordPress footer snippet. See section 12 of overrides.css for why it
+ * exists and why it is phones only.
+ *
+ * The number is the one every other click-to-call on the site uses, in E.164.
+ * The second button goes to /contact/ rather than scrolling to the nearest
+ * form: most pages carry the popup form rather than an inline one, so a scroll
+ * target is not reliably on the page, and /contact/ always is.
+ */
+(function () {
+  'use strict'
+
+  var PHONE_E164 = '+14845530213'
+  var PHONE_TEXT = '(484) 553-0213'
+  var QUOTE_HREF = '/contact/'
+
+  /* Drawn rather than loaded: two icons at 17px are not worth a request, and an
+     inline SVG here costs nothing because this markup exists once per page. */
+  var PHONE_ICON = '<svg class="itlr-callbar__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">'
+    + '<path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/></svg>'
+  var QUOTE_ICON = '<svg class="itlr-callbar__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">'
+    + '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2 4.5 4.5H14V4ZM8 13h8v2H8v-2Zm0 4h5v2H8v-2Z"/></svg>'
+
+  function build() {
+    if (document.querySelector('.itlr-callbar')) return
+
+    var bar = document.createElement('div')
+    bar.className = 'itlr-callbar'
+
+    /* Not role="navigation": two shortcuts to things already in the page are
+       not a landmark, and adding one more region to tab through on a phone
+       makes the page harder to move around, not easier. */
+    bar.innerHTML =
+      '<a class="itlr-callbar__btn itlr-callbar__btn--call" href="tel:' + PHONE_E164 + '">'
+      + PHONE_ICON + '<span>Call ' + PHONE_TEXT + '</span></a>'
+      + '<a class="itlr-callbar__btn itlr-callbar__btn--quote" href="' + QUOTE_HREF + '">'
+      + QUOTE_ICON + '<span>Free Estimate</span></a>'
+
+    document.body.appendChild(bar)
+    document.body.classList.add('itlr-has-callbar')
+    reserve(bar)
+  }
+
+  /* Reserve exactly the bar's height at the foot of the page, so it never
+     covers the footer or the last field of the form it points at. Measured
+     rather than assumed: the bar is 64px at the default font size and taller
+     with a larger one, or on a phone with a home indicator. */
+  function reserve(bar) {
+    if (!window.matchMedia || !window.matchMedia('(max-width: 767px)').matches) return
+    var h = Math.ceil(bar.getBoundingClientRect().height)
+    if (h > 0) document.body.style.setProperty('--itlr-callbar-h', h + 'px')
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', build)
+  } else {
+    build()
+  }
+
+  /* Re-measure on rotate and on resize: crossing the breakpoint either way
+     changes whether the bar is there at all. */
+  window.addEventListener('resize', function () {
+    var bar = document.querySelector('.itlr-callbar')
+    if (bar) reserve(bar)
+  })
 })()
