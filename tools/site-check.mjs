@@ -198,8 +198,21 @@ for (const u of sitemapUrls) {
   const h = c ? attr(c, 'href') : null
   if (h && h !== SITE + u) fail('sitemap', `sitemap lists ${u} whose canonical is ${h}`)
 }
-const notInSitemap = docs.filter((d) => !/noindex/i.test(meta(d.html, 'robots') || '') && !sitemapUrls.has(d.url)).map((d) => d.url)
-if (notInSitemap.length) warn('sitemap', `${notInSitemap.length} indexable pages not in sitemap`, notInSitemap.slice(0, 20))
+/* A page belongs in the sitemap only if it is indexable AND speaks for itself.
+   A declared duplicate is left index,follow on purpose -- noindex plus a
+   canonical elsewhere is a conflicting pair Google can carry onto the target
+   (see build/seo/meta.mjs) -- so it canonicalises to its master and stays out
+   of the sitemap. That is the same rule the loop above enforces from the other
+   side: every URL listed must be self-canonical. */
+const selfCanonical = (d) => {
+  const c = (d.html.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/i) || [''])[0]
+  const h = c ? attr(c, 'href') : null
+  return !h || h === SITE + d.url
+}
+const notInSitemap = docs
+  .filter((d) => !/noindex/i.test(meta(d.html, 'robots') || '') && selfCanonical(d) && !sitemapUrls.has(d.url))
+  .map((d) => d.url)
+if (notInSitemap.length) warn('sitemap', `${notInSitemap.length} indexable, self-canonical pages not in sitemap`, notInSitemap.slice(0, 20))
 
 // robots.txt
 if (existsSync(join(DIR, 'robots.txt'))) {
