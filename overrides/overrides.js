@@ -197,7 +197,7 @@
     'needs a repair or a full replacement, and what that would involve.</p>' +
     '<div class="itlr-cta__actions">' +
       '<a class="itlr-cta__btn itlr-cta__btn--primary" href="/contact/">Get your free estimate</a>' +
-      '<a class="itlr-cta__btn itlr-cta__btn--secondary" href="tel:4845530213">Call (484) 553-0213</a>' +
+      '<a class="itlr-cta__btn itlr-cta__btn--secondary" href="tel:+14845530213">Call (484) 553-0213</a>' +
     '</div>'
 
   function injectEstimateCta(carouselEl) {
