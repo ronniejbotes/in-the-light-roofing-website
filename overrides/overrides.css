@@ -672,14 +672,20 @@
   cursor: pointer;
   font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
   font-weight: 700;
-  font-size: clamp(26px, 5vw, 54px);
-  line-height: 1.05;
-  letter-spacing: -.02em;
+  /* Sized for the label it carries. At the old clamp() this ran to 54px, which
+     suited a three-word label and puts a forty-three character one off both
+     edges of a phone. It wraps to two or three lines instead, so the cap is the
+     line length rather than the type size. */
+  font-size: clamp(17px, 2.9vw, 34px);
+  max-width: min(88vw, 780px);
+  line-height: 1.15;
+  text-wrap: balance;
+  letter-spacing: -.01em;
   /* Ink on cyan is 7.8:1. White on cyan is 2.3:1 and fails even the large-text
      threshold, which is why this label is not white. */
   color: var(--e-global-color-secondary, #14161E);
   background: var(--e-global-color-primary, #00B6F1);
-  padding: 22px 44px;
+  padding: clamp(16px, 2.2vw, 26px) clamp(24px, 3.4vw, 44px);
   border-radius: 6px;
   box-shadow: 0 0 0 6px rgba(255, 255, 255, .85), 0 18px 40px rgba(20, 22, 30, .28);
   transition: transform .2s ease, background-color .2s ease;
@@ -737,6 +743,24 @@ html.itlr-gate-open [id^="chat-widget"],
 html.itlr-gate-open iframe.iframe-hidden {
   display: none !important;
 }
+
+/* The scroll lock. buildGate() sets `document.body.style.overflow = 'hidden'`,
+   which on this site locks nothing: the theme puts `overflow-y: auto` on the
+   root element, so <html> is the scrolling box and hiding body's overflow just
+   hides overflow *inside* body. The page went on scrolling behind the gate.
+   Lock the root as well, and the one that actually scrolls is pinned.
+
+   overscroll-behavior stops the scroll chaining through to the page on a
+   trackpad or a phone, and touch-action stops a touch drag panning the document
+   before any of that applies. Neither blocks a tap, so the button and Skip still
+   work. Keyboard scrolling (space, PageDown, arrows) stops too, because there is
+   no longer a scrollable box to move. */
+html.itlr-gate-open,
+html.itlr-gate-open body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+html.itlr-gate-open { touch-action: none; }
 
 @media (prefers-reduced-motion: no-preference) {
   #itlr-build-gate .itlr-gate-btn { animation: itlrGatePulse 2.8s ease-in-out infinite; }

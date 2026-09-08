@@ -578,7 +578,7 @@
     var btn = document.createElement('button')
     btn.type = 'button'
     btn.className = 'itlr-gate-btn'
-    btn.textContent = 'Start the build'
+    btn.textContent = 'Click here to experience world class roofing'
     var note = document.createElement('p')
     note.className = 'itlr-gate-note'
     note.textContent = 'Watch a roof go on in eight seconds'
@@ -605,6 +605,30 @@
     // widget injected after this point -- that script is deferred.
     document.documentElement.classList.add('itlr-gate-open')
 
+    /* Belt and braces on the scroll lock. The CSS in overrides.css pins the
+       root element, which is what actually scrolls here -- but `overflow:
+       hidden` only takes away *user* scrolling, and on iOS a touch drag can
+       still rubber-band the document behind a fixed overlay. Blocking the
+       gesture itself closes both. The listeners must be non-passive or the
+       preventDefault is ignored.
+
+       Scroll keys are blocked too, but never while a button is focused: Space
+       on a focused button is how a keyboard user presses it, and swallowing
+       the keydown would swallow the press with it. */
+    var SCROLL_KEYS = {
+      ' ': 1, 'Spacebar': 1, 'PageDown': 1, 'PageUp': 1,
+      'End': 1, 'Home': 1, 'ArrowDown': 1, 'ArrowUp': 1,
+    }
+    function blockScroll(e) { e.preventDefault() }
+    function blockScrollKeys(e) {
+      var t = e.target
+      if (t && (t.tagName === 'BUTTON' || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return
+      if (SCROLL_KEYS[e.key]) e.preventDefault()
+    }
+    document.addEventListener('wheel', blockScroll, { passive: false })
+    document.addEventListener('touchmove', blockScroll, { passive: false })
+    document.addEventListener('keydown', blockScrollKeys, { passive: false })
+
     var failsafe = null
     var done = false
 
@@ -617,6 +641,9 @@
       done = true
       if (failsafe) clearTimeout(failsafe)
       document.removeEventListener('keydown', onKey)
+      document.removeEventListener('wheel', blockScroll, { passive: false })
+      document.removeEventListener('touchmove', blockScroll, { passive: false })
+      document.removeEventListener('keydown', blockScrollKeys, { passive: false })
       gate.setAttribute('data-state', 'done')
       document.body.style.overflow = prevOverflow
       document.documentElement.classList.remove('itlr-gate-open')
