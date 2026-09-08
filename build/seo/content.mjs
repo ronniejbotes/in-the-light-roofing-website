@@ -35,6 +35,21 @@ export const TITLES = {
   '/thank-you/': 'Thank You | In The Light Roofing',
 }
 
+/**
+ * Yoast gave the blog archive an og:title of the bare word "Blog" while its
+ * <title> is the real one, so anyone sharing /blog/ or any of its nineteen
+ * paginated pages posts a card headed "Blog". The sync above rewrites og:title,
+ * twitter:title and the WebPage name from TITLES, so naming these pages here is
+ * the whole fix. The paginated pages take the archive's title because they are
+ * the same list of posts and meta.mjs has already marked them noindex, and the
+ * casing follows the brand's own: "In The Light Roofing", not "In the". The
+ * superlative in the old title ("Best Roofing Tips") goes for the same reason
+ * "leading" and "#1" went everywhere else: nothing on the site supports it.
+ */
+const BLOG_ARCHIVE_TITLE = 'In The Light Roofing Blog | Roofing Tips & Insights'
+TITLES['/blog/'] = BLOG_ARCHIVE_TITLE
+for (let page = 2; page <= 20; page++) TITLES[`/blog/page/${page}/`] = BLOG_ARCHIVE_TITLE
+
 /** url -> new meta description (120-158 characters, plain language, town or region named). */
 export const DESCRIPTIONS = {
   '/thank-you/': 'Your message has been sent to In The Light Roofing. We will be in touch shortly.',
@@ -79,9 +94,37 @@ export const REPLACEMENTS = {
       replace: ' is honored to contribute to the preservation of Allentown’s historic architecture. Our office is at 871 N Fenwick St, Allentown, PA 18109 — call (484) 553-0213 or use the <a href="/contact/">contact page</a> to book a free estimate.' },
   ],
   // Third geography on one page: H1 said Pennsylvania, the description Lehigh
-  // Valley, the body Center Valley. The brand link that follows is kept.
+  // Valley, the body Center Valley. The brand link that follows is kept. The
+  // second edit is the banner heading described below.
   '/services/roof-inspections/': [
     { find: 'In Center Valley, <a href="https://g.co/kgs/upMJXvq"', replace: 'In Allentown and across the Lehigh Valley, <a href="https://g.co/kgs/upMJXvq"' },
+    { find: '<p class="elementor-heading-title elementor-size-default">Get a No Cost ROOf REPLACEMENT Estimate</p>',
+      replace: '<p class="elementor-heading-title elementor-size-default" role="heading" aria-level="2">Get a No Cost Estimate</p>' },
+  ],
+  // The banner form's heading asks for a roof REPLACEMENT estimate on three
+  // pages that sell something else, so the reader is offered the wrong thing at
+  // the moment they are ready to act. The site's own neutral wording, "Get a No
+  // Cost Estimate", is already the heading of the second form on all 424 pages,
+  // so reusing it here promises nothing new. It has to be that rather than a
+  // free inspection: the FAQ on the site says inspections may come with a fee.
+  // These run before GLOBAL_REPLACEMENTS, so the site-wide casing fix below
+  // finds nothing left to do on these three pages, which is the intent.
+  '/services/roof-repairs/': [
+    { find: '<p class="elementor-heading-title elementor-size-default">Get a No Cost ROOf REPLACEMENT Estimate</p>',
+      replace: '<p class="elementor-heading-title elementor-size-default" role="heading" aria-level="2">Get a No Cost Estimate</p>' },
+  ],
+  '/services/insurance-claim-facilitation/': [
+    { find: '<p class="elementor-heading-title elementor-size-default">Get a No Cost ROOf REPLACEMENT Estimate</p>',
+      replace: '<p class="elementor-heading-title elementor-size-default" role="heading" aria-level="2">Get a No Cost Estimate</p>' },
+  ],
+  // The address block on the contact page is the only place on the site that
+  // punctuates the street as "871 N Fenwick St." and then breaks the line, so
+  // it renders as "871 N Fenwick St. Allentown, PA 18109" while the other 423
+  // pages, the JSON-LD in meta.mjs and the NAP block in nap.mjs all say
+  // "871 N Fenwick St, Allentown, PA 18109". The page carrying the real address
+  // is the one that should not be the odd one out.
+  '/contact/': [
+    { find: '871 N Fenwick St.\nAllentown, PA 18109</p>', replace: '871 N Fenwick St, Allentown, PA 18109</p>' },
   ],
   // Ohio comparisons whose sentences carry inline markup the audit's plain-text
   // finds could not see.
@@ -126,6 +169,13 @@ export const GLOBAL_REPLACEMENTS = [
   // Nine click-to-call links carry the display format inside the URI. Valid
   // dialers cope, but the E.164 form is what every other tel: link here uses.
   ['href="tel:(484) 553-0213"', 'href="tel:+14845530213"'],
+  // The other 2,123 click-to-call links write the number as ten bare digits
+  // with no country code, so the site ships three spellings of one number. The
+  // E.164 form is the one the entry above produces and the one the JSON-LD
+  // telephone property in meta.mjs carries, so it is the spelling everything
+  // else is made to agree with. The Bethlehem page's tel:4849789366 is left
+  // alone on purpose: see the note on REPLACEMENTS above.
+  ['href="tel:4845530213"', 'href="tel:+14845530213"'],
   // One post states an availability the site nowhere else claims and the owner
   // has not confirmed. The repair claim stands; the hours claim goes.
   ['we offer 24/7 emergency services and expert <b>Storm Damage Repair</b> throughout Allentown', 'we offer expert <b>Storm Damage Repair</b> throughout Allentown'],
@@ -133,6 +183,91 @@ export const GLOBAL_REPLACEMENTS = [
   // Coplay variant has a space before a comma.
   ['scope and costs</div>', 'scope and costs.</div>'],
   ['commercial roofing , particularly', 'commercial roofing, particularly'],
+  // Every one of the 424 pages carries a skip link to "#content", but only the
+  // 16 testimonial pages ship a <main id="content"> for it to land on. The
+  // other 408 open their content with an Elementor wrapper div immediately
+  // after </header>, so the skip link goes nowhere and a screen reader is given
+  // no main landmark to jump to. Putting the id and role="main" on that div
+  // fixes both without moving any content: the div already closes before the
+  // footer, it sits outside the header so it nests inside no other landmark,
+  // and the only "#content" rules in the CSS are WooCommerce product-grid
+  // descendants of a widget class that appears nowhere in this site's markup,
+  // so nothing restyles. The 16 pages that already have the landmark are not
+  // matched by any of these finds, so no page ends up with two.
+  ['</header><div data-elementor-type="single-post"', '</header><div id="content" role="main" data-elementor-type="single-post"'],
+  ['</header><div data-elementor-type="archive"', '</header><div id="content" role="main" data-elementor-type="archive"'],
+  // Declutter renames wp- to ui- before this pass runs, so the page wrapper is
+  // "ui-page" here even though the mirror stores it as "wp-page".
+  ['</header><div data-elementor-type="ui-page"', '</header><div id="content" role="main" data-elementor-type="ui-page"'],
+  // Forminator renders the phone field as type="text" with autocomplete="off",
+  // so a number the browser already knows is never offered and a phone gets the
+  // alphabet keyboard for a field that only takes digits. autocomplete="tel"
+  // restores the autofill and inputmode="numeric" brings up the number pad. The
+  // type stays "text" on purpose: Forminator's two phone rules,
+  // forminatorPhoneNational and forminatorPhoneInternational, both start with
+  // intlTelInput.getInstance(), and intlTelInput is only initialised for fields
+  // carrying a national_mode data attribute, which no page here has. Switching
+  // to type="tel" would therefore change no validation at all while changing
+  // markup the plugin itself writes, so it buys nothing and risks something.
+  // These two shapes occur only on .forminator-field--phone inputs; the other
+  // autocomplete="off" on each page belongs to CleanTalk's hidden honeypot,
+  // which needs to keep it.
+  ['data-required="" aria-required="false" autocomplete="off"', 'data-required="" aria-required="false" autocomplete="tel" inputmode="numeric"'],
+  ['data-required="1" aria-required="true" autocomplete="off"', 'data-required="1" aria-required="true" autocomplete="tel" inputmode="numeric"'],
+  // The heading over the primary conversion form is a <p>, so the one line that
+  // says what the form is for cannot be reached by anyone navigating the page
+  // by heading. It cannot simply become an <h2>: seven responsive rules in the
+  // theme's CSS are written as ".bnr-title p.elementor-heading-title{font-size:
+  // ..px!important}", and changing the tag would leave the line at its desktop
+  // 24px on a phone instead of the 20px it is meant to be. role="heading" with
+  // aria-level="2" gives assistive technology the heading and leaves all seven
+  // rules matching. Level 2 is the right level: on the posts and on the service
+  // pages alike this banner sits among h2 siblings. The stray capital in "ROOf"
+  // never reached a visitor, because the widget's CSS uppercases the whole
+  // line, but the source should still read as English.
+  ['<p class="elementor-heading-title elementor-size-default">Get a No Cost ROOf REPLACEMENT Estimate</p>', '<p class="elementor-heading-title elementor-size-default" role="heading" aria-level="2">Get a No Cost Roof Replacement Estimate</p>'],
+  // Two review badges in the header print counts that nothing keeps current:
+  // 237 for Google and 18 for Facebook, on all 424 pages, alongside the 232 and
+  // the 39 the same header used to carry elsewhere. The house rule, set by
+  // overrides/reviews.js and by the "4.9 rating of 39 reviews" edit in
+  // edits.json, is to drop the number rather than swap in another one that will
+  // rot the same way. The star image, the badge and the link to each listing
+  // all stay; only the count goes, and the label now says where the link leads.
+  ['Based on 237 Reviews', 'Read Our Google Reviews'],
+  ['Based on 18 Reviews', 'Read Our Facebook Reviews'],
+  // Yoast cut the spring post's title off mid-phrase, and the truncated string
+  // was then copied into the og:title, the JSON-LD headline, the BreadcrumbList
+  // name and the H1 on that post, plus five "Related Posts" labels on other
+  // pages: nine places all ending "... Key Steps for Spring Roof". "Spring Roof
+  // Maintenance" is already an H2 twice on that page and one of its tags, so
+  // finishing the phrase states nothing the page does not already state.
+  ['Preparing Your Roof for Spring in Pennsylvania: Key Steps for Spring Roof', 'Preparing Your Roof for Spring in Pennsylvania: Key Steps for Spring Roof Maintenance'],
+  // The four spun posts whose bodies edits.json now replaces outright had their
+  // first sentence copied into the post excerpt, and the excerpt is what the
+  // Essential Addons grid prints on every archive: /blog/ and its paginated
+  // pages, every /tag/ and every category listing, 182 pages in all, one card
+  // each. Replacing the body alone would leave the keyword-first spun sentence
+  // ("<keyword> works best when the decision begins with observed conditions")
+  // on all 182 while the post itself read differently. The old excerpt is a
+  // truncation ending in an ellipsis, so the find carries the trailing dots and
+  // cannot collide with the body sentence it was cut from; the replacement is
+  // the post's real opening sentence, which reads whole rather than cut off.
+  ['storm damage roof checklist Lehigh Valley works best when the decision begins with observed conditions rather than assumptions. Owners often see a symptom and jump directly to a product, repair or proposal....', 'Storms move through the Lehigh Valley faster than most homeowners expect, and what they leave behind is rarely as obvious as a hole in the roof.'],
+  ['spring roof inspection Lehigh Valley works best when the decision begins with observed conditions rather than assumptions. Owners often see a symptom and jump directly to a product, repair or proposal. A...', 'Winter in the Lehigh Valley rarely leaves a roof exactly the way it found it.'],
+  ['roof repair or replacement Allentown works best when the decision begins with observed conditions rather than assumptions. Owners often see a symptom and jump directly to a product, repair or proposal. A...', 'Deciding between a roof repair and a full replacement is one of the larger calls an Allentown homeowner has to make, and it almost never arrives at a convenient moment.'],
+  ['Lehigh Valley roof ice dam prevention works best when the decision begins with observed conditions rather than assumptions. Owners often see a symptom and jump directly to a product, repair or proposal....', 'Ice dams are one of the few roof problems in the Lehigh Valley that build slowly enough to stop before they ever reach your ceiling.'],
+  // Four posts ship the SEO contractor's WordPress username as their author
+  // while the other 188 say "Admin". meta.mjs has already re-attributed every
+  // post's JSON-LD author to the organization, so this tag is the last place a
+  // third-party account name is printed. It joins the other 188.
+  ['<meta name="author" content="SEODev2" />', '<meta name="author" content="Admin" />'],
+  // The ice-dam post's editorial title changes with its rewritten body, and the
+  // old wording is the same string in six places on its own page -- title,
+  // og:title, the Article headline, the WebPage name, the breadcrumb and the H1
+  // -- plus 365 "Related Posts" and archive-card labels across 183 other pages.
+  // TITLES above rewrites the head; this carries the H1, the schema and every
+  // off-page label with it, so no page ends up naming the post two ways.
+  ['Lehigh Valley Roof Ice Dam Prevention for Homeowners', 'Lehigh Valley Roof Ice Dam Prevention: Start in the Attic'],
 ]
 
 /**
