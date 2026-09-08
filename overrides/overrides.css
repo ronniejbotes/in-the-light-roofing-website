@@ -631,6 +631,9 @@
   transition: opacity .7s ease;
 }
 #itlr-build-gate[data-state="done"] { opacity: 0; pointer-events: none; }
+/* The dialog takes focus on open (see overrides.js); it is a full-bleed panel,
+   so a ring around it would just outline the viewport. */
+#itlr-build-gate:focus { outline: none; }
 
 #itlr-build-gate .itlr-gate-media {
   position: absolute;
@@ -665,47 +668,148 @@
   pointer-events: none;
 }
 
+/* Gate CTA -- refined capsule. Replaces every previous rule for this button:
+   the flat slab, the 6px white ring, the hard outline and the white pulse are
+   all gone, so appearance is restated in full below. */
+
 #itlr-build-gate .itlr-gate-btn {
   -webkit-appearance: none;
   appearance: none;
+  margin: 0;
   border: 0;
+  text-decoration: none;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  animation: none; /* clears the old white-ring pulse if it is still cascading */
+
+  /* Flex, so the chevron is a sibling of the (anonymous) text item and stays
+     optically centred whether the label sets on one line or two. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .62em;
+
+  /* The premium move is spacing, not size: 15px caps tracked out at .15em read
+     as considered; 34px caps read as a shout. */
   font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-weight: 700;
-  /* Sized for the label it carries. At the old clamp() this ran to 54px, which
-     suited a three-word label and puts a forty-three character one off both
-     edges of a phone. It wraps to two or three lines instead, so the cap is the
-     line length rather than the type size. */
-  font-size: clamp(17px, 2.9vw, 34px);
-  max-width: min(88vw, 780px);
-  line-height: 1.15;
+  font-weight: 600;
+  font-size: clamp(13px, 1.05vw, 15px);
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  line-height: 1.45;
+  text-align: center;
   text-wrap: balance;
-  letter-spacing: -.01em;
-  /* Ink on cyan is 7.8:1. White on cyan is 2.3:1 and fails even the large-text
-     threshold, which is why this label is not white. */
+  white-space: normal;
+
+  /* 43 tracked characters run ~600px wide with the chrome. The cap keeps it on
+     one line from roughly 760px up, and lets it break to a balanced two lines
+     below that -- never three. */
+  max-width: min(86vw, 640px);
+  min-height: 48px; /* touch target */
+  padding: clamp(14px, 1.35vw, 18px) clamp(24px, 2.5vw, 36px);
+  border-radius: 999px;
+
+  /* Ink on brand cyan. The white wash only lightens the fill, so the measured
+     ratio is a floor, never a ceiling. */
   color: var(--e-global-color-secondary, #14161E);
-  background: var(--e-global-color-primary, #00B6F1);
-  padding: clamp(16px, 2.2vw, 26px) clamp(24px, 3.4vw, 44px);
-  border-radius: 6px;
-  box-shadow: 0 0 0 6px rgba(255, 255, 255, .85), 0 18px 40px rgba(20, 22, 30, .28);
-  transition: transform .2s ease, background-color .2s ease;
-}
-#itlr-build-gate .itlr-gate-btn:hover { background: #00a2d8; transform: translateY(-2px); }
-#itlr-build-gate .itlr-gate-btn:focus-visible {
-  outline: 4px solid var(--e-global-color-secondary, #14161E);
-  outline-offset: 8px;
+  background-color: var(--e-global-color-primary, #00B6F1);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 58%);
+
+  /* Separation without a scrim: a 1px ink rim to hold the edge against pale
+     plywood, a catch-light along the top, and three ambient shadow layers that
+     fall off the way a real object's would -- tight and dark near the edge,
+     wide and soft underneath. */
+  box-shadow:
+    0 0 0 1px rgba(20, 22, 30, .18),
+    inset 0 1px 0 rgba(255, 255, 255, .38),
+    0 2px 4px rgba(20, 22, 30, .18),
+    0 10px 22px -8px rgba(20, 22, 30, .42),
+    0 26px 48px -22px rgba(20, 22, 30, .5);
 }
 
-#itlr-build-gate .itlr-gate-note {
-  margin: 0;
-  font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--e-global-color-secondary, #14161E);
-  background: rgba(255, 255, 255, .92);
-  padding: 8px 16px;
-  border-radius: 100px;
+/* Chevron drawn from two borders -- no glyph, no icon font, no request. */
+#itlr-build-gate .itlr-gate-btn::after {
+  content: "";
+  flex: 0 0 auto;
+  width: .42em;
+  height: .42em;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  /* letter-spacing leaves a trailing space after the last glyph; this takes it
+     back so the chevron sits where the eye expects it. */
+  margin-left: -.14em;
+  opacity: .85;
 }
+
+#itlr-build-gate .itlr-gate-btn:hover {
+  /* One step lighter than brand cyan, so ink contrast rises rather than falls. */
+  background-color: #1AC3F6;
+  background-color: color-mix(in srgb, var(--e-global-color-primary, #00B6F1) 88%, #ffffff);
+  box-shadow:
+    0 0 0 1px rgba(20, 22, 30, .2),
+    inset 0 1px 0 rgba(255, 255, 255, .45),
+    0 3px 6px rgba(20, 22, 30, .2),
+    0 16px 30px -10px rgba(20, 22, 30, .44),
+    0 34px 60px -24px rgba(20, 22, 30, .52);
+}
+
+#itlr-build-gate .itlr-gate-btn:active {
+  background-color: var(--e-global-color-primary, #00B6F1);
+  box-shadow:
+    0 0 0 1px rgba(20, 22, 30, .22),
+    inset 0 1px 0 rgba(255, 255, 255, .3),
+    0 1px 2px rgba(20, 22, 30, .2),
+    0 6px 14px -6px rgba(20, 22, 30, .38);
+}
+
+/* Keyboard ring: a white hairline hugging the fill, then the ink outline
+   outside it, so the focus state survives both pale decking and dark shingle. */
+#itlr-build-gate .itlr-gate-btn:focus-visible {
+  outline: 3px solid var(--e-global-color-secondary, #14161E);
+  outline-offset: 4px;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, .95),
+    0 2px 4px rgba(20, 22, 30, .18),
+    0 10px 22px -8px rgba(20, 22, 30, .42),
+    0 26px 48px -22px rgba(20, 22, 30, .5);
+}
+
+/* Phones: tighter tracking so 43 characters still land on two lines, not three. */
+@media (max-width: 480px) {
+  #itlr-build-gate .itlr-gate-btn {
+    letter-spacing: .1em;
+    gap: .55em;
+    padding: 15px 22px;
+    max-width: min(92vw, 360px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #itlr-build-gate .itlr-gate-btn {
+    transition:
+      transform .35s cubic-bezier(.22, .61, .36, 1),
+      background-color .25s ease,
+      box-shadow .35s cubic-bezier(.22, .61, .36, 1);
+  }
+  #itlr-build-gate .itlr-gate-btn::after {
+    transition: transform .35s cubic-bezier(.22, .61, .36, 1);
+    animation: itlrGateNudge 4.2s ease-in-out infinite; /* quiet beckon, arrow only */
+  }
+  #itlr-build-gate .itlr-gate-btn:hover { transform: translateY(-2px); }
+  #itlr-build-gate .itlr-gate-btn:hover::after {
+    animation: none;
+    transform: rotate(45deg) translate(2px, -2px);
+  }
+  #itlr-build-gate .itlr-gate-btn:active { transform: translateY(0); }
+}
+
+@keyframes itlrGateNudge {
+  0%, 74%, 100% { transform: rotate(45deg) translate(0, 0); }
+  86%           { transform: rotate(45deg) translate(2.5px, -2.5px); }
+}
+
 
 #itlr-build-gate .itlr-gate-skip {
   position: absolute;
@@ -762,10 +866,3 @@ html.itlr-gate-open body {
 }
 html.itlr-gate-open { touch-action: none; }
 
-@media (prefers-reduced-motion: no-preference) {
-  #itlr-build-gate .itlr-gate-btn { animation: itlrGatePulse 2.8s ease-in-out infinite; }
-}
-@keyframes itlrGatePulse {
-  0%, 100% { box-shadow: 0 0 0 6px rgba(255, 255, 255, .85), 0 18px 40px rgba(20, 22, 30, .28); }
-  50%      { box-shadow: 0 0 0 14px rgba(255, 255, 255, .55), 0 18px 40px rgba(20, 22, 30, .28); }
-}

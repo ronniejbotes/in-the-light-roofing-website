@@ -550,6 +550,8 @@
     gate.setAttribute('role', 'dialog')
     gate.setAttribute('aria-modal', 'true')
     gate.setAttribute('aria-label', 'Start the build')
+    // Focus lands here, not on the button -- see the focus() call below.
+    gate.setAttribute('tabindex', '-1')
 
     // The still is frame 0 of the clip itself -- the worn roof, before anyone
     // has touched it -- so the first frame of playback is the picture that was
@@ -579,11 +581,7 @@
     btn.type = 'button'
     btn.className = 'itlr-gate-btn'
     btn.textContent = 'Click here to experience world class roofing'
-    var note = document.createElement('p')
-    note.className = 'itlr-gate-note'
-    note.textContent = 'Watch a roof go on in eight seconds'
     ui.appendChild(btn)
-    ui.appendChild(note)
     gate.appendChild(ui)
 
     var skip = document.createElement('button')
@@ -672,7 +670,14 @@
     v.addEventListener('ended', finish)
     v.addEventListener('error', finish)
     document.addEventListener('keydown', onKey)
-    try { btn.focus({ preventScroll: true }) } catch (e) { }
+    /* Focus the dialog, not the button, which is what the ARIA modal pattern
+       asks for anyway. Focusing the button directly also *looked* wrong: Chrome
+       matches :focus-visible on a programmatic focus, so the button opened
+       wearing its keyboard ring -- a 3px ink outline and a white hairline
+       around the capsule, on every single visit. Moving focus to the container
+       keeps the dialog keyboard-reachable (Tab reaches the button and Skip,
+       Escape still closes) without painting a focus ring nobody asked for. */
+    try { gate.focus({ preventScroll: true }) } catch (e) { }
 
     // Only now go and fetch it. The homepage has first claim on the connection
     // and there is nothing to see here until somebody clicks.
