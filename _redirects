@@ -27,3 +27,6 @@
 # reference the lowercase name lose the icon on any case-sensitive host --
 # which is every Linux and macOS checkout, and most static hosts.
 /assets/2023/12/Insurance.svg  /assets/2023/12/INSURANCE.svg        301
+
+/home/ / 301
+/home-in-the-light-roofing-new-design/ / 301

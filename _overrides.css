@@ -604,3 +604,168 @@
   border: 0;
   border-radius: 14px;
 }
+
+/* ---------------------------------------------------------------------------
+ * The "Start the build" gate -- homepage only.
+ *
+ * Modelled on the Eye Candy Customs warehouse gate, with one deliberate
+ * difference: nothing here darkens the footage. ECC paints a near-black ground
+ * and a top-to-bottom black gradient over its still. This does not. The ground
+ * is white, there is no scrim, and the button earns its contrast from a solid
+ * brand-cyan chip rather than from dimming the picture behind it.
+ *
+ * Full-bleed cover at every width, including portrait phones. The clip is 16:9
+ * against a viewport of roughly 0.46:1, so a phone sees about the middle
+ * quarter of the frame -- but the footage was shot for that: the prompt held
+ * the house centred with all the action in the central third. Checked against
+ * the closing frame, a phone still gets the new roof, the stone, the siding
+ * and the front door. Letterboxing onto white was the alternative and it read
+ * as a small strip marooned in a lot of nothing.
+ * ------------------------------------------------------------------------ */
+#itlr-build-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #ffffff;
+  opacity: 1;
+  transition: opacity .7s ease;
+}
+#itlr-build-gate[data-state="done"] { opacity: 0; pointer-events: none; }
+
+#itlr-build-gate .itlr-gate-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+#itlr-build-gate .itlr-gate-video { opacity: 0; transition: opacity .35s ease; }
+#itlr-build-gate[data-state="playing"] .itlr-gate-video { opacity: 1; }
+#itlr-build-gate[data-state="playing"] .itlr-gate-poster {
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+
+#itlr-build-gate .itlr-gate-ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 24px;
+  text-align: center;
+  transition: opacity .3s ease;
+}
+#itlr-build-gate[data-state="playing"] .itlr-gate-ui {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#itlr-build-gate .itlr-gate-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 700;
+  /* Sized for the label it carries. At the old clamp() this ran to 54px, which
+     suited a three-word label and puts a forty-three character one off both
+     edges of a phone. It wraps to two or three lines instead, so the cap is the
+     line length rather than the type size. */
+  font-size: clamp(17px, 2.9vw, 34px);
+  max-width: min(88vw, 780px);
+  line-height: 1.15;
+  text-wrap: balance;
+  letter-spacing: -.01em;
+  /* Ink on cyan is 7.8:1. White on cyan is 2.3:1 and fails even the large-text
+     threshold, which is why this label is not white. */
+  color: var(--e-global-color-secondary, #14161E);
+  background: var(--e-global-color-primary, #00B6F1);
+  padding: clamp(16px, 2.2vw, 26px) clamp(24px, 3.4vw, 44px);
+  border-radius: 6px;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, .85), 0 18px 40px rgba(20, 22, 30, .28);
+  transition: transform .2s ease, background-color .2s ease;
+}
+#itlr-build-gate .itlr-gate-btn:hover { background: #00a2d8; transform: translateY(-2px); }
+#itlr-build-gate .itlr-gate-btn:focus-visible {
+  outline: 4px solid var(--e-global-color-secondary, #14161E);
+  outline-offset: 8px;
+}
+
+#itlr-build-gate .itlr-gate-note {
+  margin: 0;
+  font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--e-global-color-secondary, #14161E);
+  background: rgba(255, 255, 255, .92);
+  padding: 8px 16px;
+  border-radius: 100px;
+}
+
+#itlr-build-gate .itlr-gate-skip {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  border: 1px solid rgba(20, 22, 30, .18);
+  background: rgba(255, 255, 255, .94);
+  color: var(--e-global-color-secondary, #14161E);
+  font-family: "Exo 2", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 4px;
+}
+#itlr-build-gate .itlr-gate-skip:hover { background: #ffffff; border-color: rgba(20, 22, 30, .4); }
+
+/* The chat widget is `position: fixed` at `z-index: 2147483647` -- the largest
+   a 32-bit signed z-index can be, so the gate cannot out-stack it, and it
+   loaded over the top of an `aria-modal` dialog and sat exactly on the Skip
+   button in the bottom-right corner. `elementsFromPoint` at the middle of Skip
+   returned the widget, not the button: a mouse user could not skip the video.
+
+   Hidden from CSS rather than from `buildGate()` on purpose. The widget script
+   is deferred (see build/seo/perf.mjs), so it is usually injected *after* the
+   gate is built -- a one-shot sweep at build time would miss it, whereas a rule
+   keyed off a class on <html> applies whenever the widget turns up. The class
+   is removed in finish(), which restores the widget on every exit path. */
+html.itlr-gate-open [id^="chat-widget"],
+html.itlr-gate-open iframe.iframe-hidden {
+  display: none !important;
+}
+
+/* The scroll lock. buildGate() sets `document.body.style.overflow = 'hidden'`,
+   which on this site locks nothing: the theme puts `overflow-y: auto` on the
+   root element, so <html> is the scrolling box and hiding body's overflow just
+   hides overflow *inside* body. The page went on scrolling behind the gate.
+   Lock the root as well, and the one that actually scrolls is pinned.
+
+   overscroll-behavior stops the scroll chaining through to the page on a
+   trackpad or a phone, and touch-action stops a touch drag panning the document
+   before any of that applies. Neither blocks a tap, so the button and Skip still
+   work. Keyboard scrolling (space, PageDown, arrows) stops too, because there is
+   no longer a scrollable box to move. */
+html.itlr-gate-open,
+html.itlr-gate-open body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+html.itlr-gate-open { touch-action: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  #itlr-build-gate .itlr-gate-btn { animation: itlrGatePulse 2.8s ease-in-out infinite; }
+}
+@keyframes itlrGatePulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(255, 255, 255, .85), 0 18px 40px rgba(20, 22, 30, .28); }
+  50%      { box-shadow: 0 0 0 14px rgba(255, 255, 255, .55), 0 18px 40px rgba(20, 22, 30, .28); }
+}

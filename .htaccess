@@ -4,9 +4,26 @@
 
 DirectoryIndex index.html
 ErrorDocument 404 /404.html
+# A static tree has directories a browser can list; the live site's audit found
+# applicants' CVs reachable that way.
+Options -Indexes
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # --- Canonical host ---------------------------------------------------------
+  # www -> bare domain in one hop. Matched on the host so a staging hostname
+  # is never redirected onto the live domain, and on the host only so it cannot
+  # loop behind a TLS-terminating proxy -- which is also why http -> https is
+  # left to the host's own Force-HTTPS setting rather than a %{HTTPS} test.
+  RewriteCond %{HTTP_HOST} ^www\.inthelightroofing\.com$ [NC]
+  RewriteRule ^ https://inthelightroofing.com%{REQUEST_URI} [R=301,NE,L]
+
+  # --- /index.html -> / -------------------------------------------------------
+  # Only when the client literally asked for index.html. THE_REQUEST is the raw
+  # request line, which DirectoryIndex does not rewrite, so this cannot loop.
+  RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+  RewriteRule ^(.*/)?index\.html$ /%1 [R=301,NE,L]
 
   # --- Redirects the live site serves, from mirror/_redirects -----------------
   RewriteRule ^home-in-the-light-roofing-final-update/?$ / [R=301,L]
@@ -14,6 +31,8 @@ ErrorDocument 404 /404.html
   RewriteRule ^feed/?$ / [R=301,L]
   RewriteRule ^service-area/center-valley/?$ /service-area/center-valley-roofing-contractor/ [R=301,L]
   RewriteRule ^assets/2023/12/Insurance\.svg/?$ /assets/2023/12/INSURANCE.svg [R=301,L]
+  RewriteRule ^home/?$ / [R=301,L]
+  RewriteRule ^home-in-the-light-roofing-new-design/?$ / [R=301,L]
 
   # --- Two endpoints the live site answers with PHP --------------------------
   # LiteSpeed's guest-mode script POSTs here on every page load and parses the
