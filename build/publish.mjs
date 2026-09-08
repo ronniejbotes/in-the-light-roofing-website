@@ -259,6 +259,7 @@ async function main() {
   }
 
   // 5. Host config, and the two static answers it points at.
+  let redirectedDrafts = 0
   const redirFile = join(MIRROR, '_redirects')
   // Through the same path mapping as everything else: _redirects still names
   // /wp-content/, and the .htaccess is written after the declutter pass, so
@@ -274,6 +275,19 @@ async function main() {
   const redirectText = (existsSync(redirFile) ? rewritePaths(await readFile(redirFile, 'utf8')) : '')
     + '\n' + EXTRA_REDIRECTS.map((r) => r.join(' ')).join('\n') + '\n'
   await writeFile(join(OUT, '_redirects'), redirectText, 'utf8')
+
+  // ...and take the two drafts out of the tree, or on the hosts DEPLOY.md names
+  // the redirect above never fires. Netlify and Cloudflare Pages both serve a
+  // real file in preference to a `_redirects` rule, and neither honours a
+  // forced-redirect marker that Apache would also accept -- so the only fix
+  // that works on every host is for the file not to be there. Nothing links to
+  // them any more (seo/content.mjs rewrites the nav and Related Posts hrefs to
+  // `/`) and the sitemap has never listed them, so this drops ~1.3MB of pages
+  // that exist only to be redirected away from.
+  for (const [from] of EXTRA_REDIRECTS) {
+    const dir = join(OUT, from.replace(/^\/|\/$/g, ''))
+    if (existsSync(dir)) { await rm(dir, { recursive: true, force: true }); redirectedDrafts++ }
+  }
   const rules = redirectsToApache(redirectText)
   await writeFile(join(OUT, '.htaccess'), htaccess(rules), 'utf8')
   await mkdir(join(OUT, '_static'), { recursive: true })
@@ -303,7 +317,7 @@ async function main() {
   console.log(`  ${files} files`)
   console.log(`  ${injected} HTML pages injected  (${skippedXml} feeds left alone)`)
   console.log(`  ${wrote} override files, ${assetCount} assets`)
-  console.log(`  ${rules.length} redirects written to .htaccess`)
+  console.log(`  ${rules.length} redirects written to .htaccess` + (redirectedDrafts ? `, ${redirectedDrafts} redirected duplicate pages removed` : ''))
   console.log(`  de-WordPressed: ${clean.movedDirs.length} dirs moved, `
     + `${clean.rewritten} files rewritten, ${clean.htmlCleaned} pages cleaned`)
   if (clean.wpContentLeftovers) console.warn('  ! wp-content not empty:', clean.wpContentLeftovers)
