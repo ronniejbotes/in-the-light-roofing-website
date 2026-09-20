@@ -134,7 +134,8 @@ export async function transformDoc(doc, ctx) {
   }
   out += html.slice(at)
 
-  const cleaned = guardUnhide(removeBlockers(out, bump), bump)
+  const stripped = dropNoncePrefetch(removeBlockers(out, bump), bump)
+  const cleaned = guardUnhide(repointAjaxUrl(stripped, bump), bump)
   if (cleaned === out) bump('pagesWithNoBlocker')
   doc.html = cleaned
 }
@@ -184,6 +185,62 @@ function removeBlockers(html, bump) {
     if (!/preventDefault|stopImmediatePropagation/.test(js)) return tag
     bump('blockersRemoved')
     return ''
+  })
+}
+
+/**
+ * Drop the nonce prefetch.
+ *
+ * Every page carrying a form also carries an inline script that fires
+ * `forminator_get_nonce` at WordPress admin-ajax on page load, before a visitor
+ * has touched anything. Off WordPress there is nothing to answer it, so each
+ * one is a guaranteed failed request on every page view.
+ *
+ * It is worth being precise about what this is NOT, because it cost a session:
+ * these prefetches are what shows up in a browser network panel as failing
+ * POSTs. They fire on load, not on submit, and mistaking them for the submit
+ * leads to the conclusion that the forms are broken when they are not. The
+ * submit itself is a native form post to ACTION and works.
+ *
+ * They are removed because a request that can only ever fail does not belong on
+ * a page, not because they break the form. Forminator only uses the nonce on
+ * the AJAX branch, which rewriteOpenTag has already taken us off.
+ */
+function dropNoncePrefetch(html, bump) {
+  return html.replace(/<script\b[^>]*\bsrc="data:text\/javascript;base64,([A-Za-z0-9+/=]*)"[^>]*>\s*<\/script>/gi, (tag, b64) => {
+    let js
+    try { js = Buffer.from(b64, 'base64').toString('utf8') } catch { return tag }
+    if (!js.includes('forminator_get_nonce')) return tag
+    bump('noncePrefetchRemoved')
+    return ''
+  })
+}
+
+/**
+ * Repoint the vendor config's ajaxUrl at the handler.
+ *
+ * `ForminatorFront.ajaxUrl` still names a WordPress endpoint. Nothing should
+ * read it once the class is off the form tag, but leaving a dead WordPress
+ * address inlined on 424 pages is a trap for whoever reads this next, and it is
+ * the value anything else in the bundle would fall back to. Pointing it at the
+ * handler means the worst case is a request that works rather than one that
+ * cannot.
+ *
+ * The config is base64 inside a data: URI, so it is decoded, rewritten and
+ * re-encoded. Only the ForminatorFront object is touched; wpilFrontend and the
+ * other configs in the same shape are left alone, because their endpoints are
+ * a separate decision.
+ */
+function repointAjaxUrl(html, bump) {
+  return html.replace(/<script\b[^>]*\bsrc="data:text\/javascript;base64,([A-Za-z0-9+/=]*)"([^>]*)>\s*<\/script>/gi, (tag, b64, rest) => {
+    let js
+    try { js = Buffer.from(b64, 'base64').toString('utf8') } catch { return tag }
+    if (!js.includes('ForminatorFront')) return tag
+    const fixed = js.replace(/("ajaxUrl"\s*:\s*")[^"]*(")/g, `$1${ACTION}$2`)
+    if (fixed === js) return tag
+    bump('ajaxUrlRepointed')
+    const b = Buffer.from(fixed, 'utf8').toString('base64')
+    return tag.replace(b64, b)
   })
 }
 
