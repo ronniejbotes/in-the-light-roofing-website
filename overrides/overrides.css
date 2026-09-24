@@ -970,6 +970,25 @@ html.itlr-gate-open { touch-action: none; }
  * last field of the form it is pointing at, and the padding is applied to the
  * same breakpoint so desktop keeps its layout untouched.
  * ------------------------------------------------------------------------- */
+
+/* Say something on BOTH sides of the breakpoint.
+ *
+ * Every rule below lives inside the phone query, and the script that builds the
+ * bar did not check the width -- so above 768px the bar arrived with no styling
+ * at all: static, at the foot of the page, its two inline SVGs auto-sized from
+ * their viewBox, which is to say as wide as whatever contains them. That is a
+ * 1,280px phone glyph and a 1,280px document glyph stacked under the footer of
+ * every page, which is what "the site is broken" looked like.
+ *
+ * The script now builds it on phones only, so this rule should never have
+ * anything to hide. It is here because a stylesheet is the cheap place to be
+ * certain, and because the same CSS is meant to be pasted into WordPress, where
+ * the script it is paired with may not be the one in this repo.
+ */
+@media (min-width: 768px) {
+  .itlr-callbar { display: none; }
+}
+
 @media (max-width: 767px) {
   /* The reserve is written by the script from the bar's measured height, because
      the bar grows with the visitor's font size and with the home indicator on an

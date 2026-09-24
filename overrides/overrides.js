@@ -915,10 +915,16 @@
   var QUOTE_HREF = '/contact/'
 
   /* Drawn rather than loaded: two icons at 17px are not worth a request, and an
-     inline SVG here costs nothing because this markup exists once per page. */
-  var PHONE_ICON = '<svg class="itlr-callbar__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">'
+     inline SVG here costs nothing because this markup exists once per page.
+
+     width and height are on the element, not left to the stylesheet. An inline
+     <svg> carrying neither is auto-sized from its viewBox: the width fills the
+     containing block and the height follows the ratio, so a rule that does not
+     reach it does not make the icon slightly wrong, it makes it as wide as the
+     page. The CSS still sizes them; this is the floor under it. */
+  var PHONE_ICON = '<svg class="itlr-callbar__icon" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">'
     + '<path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/></svg>'
-  var QUOTE_ICON = '<svg class="itlr-callbar__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">'
+  var QUOTE_ICON = '<svg class="itlr-callbar__icon" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">'
     + '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2 4.5 4.5H14V4ZM8 13h8v2H8v-2Zm0 4h5v2H8v-2Z"/></svg>'
 
   function build() {
@@ -941,26 +947,49 @@
     reserve(bar)
   }
 
+  function remove(bar) {
+    if (bar.parentNode) bar.parentNode.removeChild(bar)
+    document.body.classList.remove('itlr-has-callbar')
+    document.body.style.removeProperty('--itlr-callbar-h')
+  }
+
   /* Reserve exactly the bar's height at the foot of the page, so it never
      covers the footer or the last field of the form it points at. Measured
      rather than assumed: the bar is 64px at the default font size and taller
      with a larger one, or on a phone with a home indicator. */
   function reserve(bar) {
-    if (!window.matchMedia || !window.matchMedia('(max-width: 767px)').matches) return
     var h = Math.ceil(bar.getBoundingClientRect().height)
     if (h > 0) document.body.style.setProperty('--itlr-callbar-h', h + 'px')
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', build)
-  } else {
-    build()
+  /* Phones only, and it is the script that decides -- not the stylesheet on its
+     own. Built at every width and styled away above 768px, the bar spends a
+     desktop visit as markup nothing can reach: fine while the CSS is there, and
+     two page-wide icons under the footer on the load where it is not. Nothing
+     is built above the breakpoint, so there is nothing to go wrong. */
+  var phone = window.matchMedia ? window.matchMedia('(max-width: 767px)') : null
+
+  function sync() {
+    if (!document.body) return
+    var bar = document.querySelector('.itlr-callbar')
+    if (!phone || phone.matches) {
+      if (bar) reserve(bar)
+      else build()
+    } else if (bar) {
+      remove(bar)
+    }
   }
 
-  /* Re-measure on rotate and on resize: crossing the breakpoint either way
-     changes whether the bar is there at all. */
-  window.addEventListener('resize', function () {
-    var bar = document.querySelector('.itlr-callbar')
-    if (bar) reserve(bar)
-  })
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', sync)
+  } else {
+    sync()
+  }
+
+  /* Crossing the breakpoint either way changes whether the bar is there at all,
+     and a rotation that stays on one side of it still changes the height to
+     reserve. matchMedia's own event fires for the first; resize covers both and
+     is what an older Safari has. */
+  if (phone && phone.addEventListener) phone.addEventListener('change', sync)
+  window.addEventListener('resize', sync)
 })()
