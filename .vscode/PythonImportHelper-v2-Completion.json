@@ -1,0 +1,448 @@
+[
+    {
+        "label": "json,",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json.",
+        "description": "json.",
+        "detail": "json.",
+        "documentation": {}
+    },
+    {
+        "label": "BeautifulSoup",
+        "importPath": "bs4",
+        "description": "bs4",
+        "isExtraImport": true,
+        "detail": "bs4",
+        "documentation": {}
+    },
+    {
+        "label": "BeautifulSoup",
+        "importPath": "bs4",
+        "description": "bs4",
+        "isExtraImport": true,
+        "detail": "bs4",
+        "documentation": {}
+    },
+    {
+        "label": "ThreadPoolExecutor",
+        "importPath": "concurrent.futures",
+        "description": "concurrent.futures",
+        "isExtraImport": true,
+        "detail": "concurrent.futures",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "pathlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "Counter",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
+        "label": "rel",
+        "kind": 2,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "def rel(u):\n    if not u:\n        return u\n    u = u.strip()\n    for h in (SITE, \"http://inthelightroofing.com\", \"https://www.inthelightroofing.com\"):\n        if u.startswith(h):\n            return u[len(h):] or \"/\"\n    return u\ndef txt(el):\n    return re.sub(r\"\\s+\", \" \", el.get_text(\" \", strip=True)).strip() if el else \"\"",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "txt",
+        "kind": 2,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "def txt(el):\n    return re.sub(r\"\\s+\", \" \", el.get_text(\" \", strip=True)).strip() if el else \"\"\ndef real_src(im):\n    \"\"\"Elementor/LiteSpeed lazy-loads: the placeholder is in src, the file in data-src.\"\"\"\n    for k in (\"data-src\", \"data-lazy-src\", \"src\"):\n        v = im.get(k)\n        if v and not v.startswith(\"data:\"):\n            return rel(v)\n    return None\ndef soup_of(path):",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "real_src",
+        "kind": 2,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "def real_src(im):\n    \"\"\"Elementor/LiteSpeed lazy-loads: the placeholder is in src, the file in data-src.\"\"\"\n    for k in (\"data-src\", \"data-lazy-src\", \"src\"):\n        v = im.get(k)\n        if v and not v.startswith(\"data:\"):\n            return rel(v)\n    return None\ndef soup_of(path):\n    rel_p = \"index.html\" if path == \"/\" else path.strip(\"/\") + \"/index.html\"\n    with open(os.path.join(SP, \"raw\", rel_p), encoding=\"utf-8\", errors=\"replace\") as f:",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "soup_of",
+        "kind": 2,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "def soup_of(path):\n    rel_p = \"index.html\" if path == \"/\" else path.strip(\"/\") + \"/index.html\"\n    with open(os.path.join(SP, \"raw\", rel_p), encoding=\"utf-8\", errors=\"replace\") as f:\n        return BeautifulSoup(f.read(), \"lxml\"), f\ndef menu_tree(ul):\n    out = []\n    for li in ul.find_all(\"li\", recursive=False):\n        a = li.find(\"a\", recursive=False) or li.find(\"a\")\n        if not a:\n            continue",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "menu_tree",
+        "kind": 2,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "def menu_tree(ul):\n    out = []\n    for li in ul.find_all(\"li\", recursive=False):\n        a = li.find(\"a\", recursive=False) or li.find(\"a\")\n        if not a:\n            continue\n        item = {\"label\": txt(a), \"href\": rel(a.get(\"href\", \"\"))}\n        sub = li.find(\"ul\", recursive=False)\n        if sub:\n            kids = menu_tree(sub)",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "def main():\n    with open(os.path.join(SP, \"raw\", \"index.html\"), encoding=\"utf-8\", errors=\"replace\") as f:\n        raw = f.read()\n    s = BeautifulSoup(raw, \"lxml\")\n    hd = s.select_one(\"header#masthead\")\n    ft = s.select_one(\"footer#colophon\")\n    site = {}\n    # ---- identity / NAP -------------------------------------------------\n    with open(os.path.join(SP, \"raw\", \"contact\", \"index.html\"), encoding=\"utf-8\", errors=\"replace\") as f:\n        contact_raw = f.read()",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "REPO",
+        "kind": 5,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))\nSP = os.environ.get(\"ITLR_SCRATCH\") or (\n    r\"C:/Users/ronja/AppData/Local/Temp/claude/\"\n    r\"c--Users-ronja-iCloudDrive-Documents-GitHub-in-the-light-roofing-website/\"\n    r\"e4f72178-8f47-4887-9127-6503e961e26b/scratchpad\"\n)\nSITE = \"https://inthelightroofing.com\"\ndef rel(u):\n    if not u:\n        return u",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "SP",
+        "kind": 5,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "SP = os.environ.get(\"ITLR_SCRATCH\") or (\n    r\"C:/Users/ronja/AppData/Local/Temp/claude/\"\n    r\"c--Users-ronja-iCloudDrive-Documents-GitHub-in-the-light-roofing-website/\"\n    r\"e4f72178-8f47-4887-9127-6503e961e26b/scratchpad\"\n)\nSITE = \"https://inthelightroofing.com\"\ndef rel(u):\n    if not u:\n        return u\n    u = u.strip()",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "SITE",
+        "kind": 5,
+        "importPath": "tools.extract_chrome",
+        "description": "tools.extract_chrome",
+        "peekOfCode": "SITE = \"https://inthelightroofing.com\"\ndef rel(u):\n    if not u:\n        return u\n    u = u.strip()\n    for h in (SITE, \"http://inthelightroofing.com\", \"https://www.inthelightroofing.com\"):\n        if u.startswith(h):\n            return u[len(h):] or \"/\"\n    return u\ndef txt(el):",
+        "detail": "tools.extract_chrome",
+        "documentation": {}
+    },
+    {
+        "label": "fetch",
+        "kind": 2,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "def fetch(url, dest):\n    if os.path.exists(dest) and os.path.getsize(dest) > 200:\n        return open(dest, encoding=\"utf-8\", errors=\"replace\").read()\n    try:\n        req = urllib.request.Request(url, headers=HDR)\n        with urllib.request.urlopen(req, timeout=90) as r:\n            data = r.read()\n            if r.headers.get(\"Content-Encoding\") == \"gzip\":\n                data = gzip.decompress(data)\n            text = data.decode(\"utf-8\", \"replace\")",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "rel",
+        "kind": 2,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "def rel(u):\n    u = u.strip().strip(\"'\\\"\")\n    for h in (SITE, \"http://inthelightroofing.com\"):\n        if u.startswith(h):\n            return u[len(h):]\n    # The live CSS also references a dead staging host; normalise it back to a\n    # site-relative path so the rebuild never points at temp-site.link.\n    m = re.match(r\"https?://[a-z0-9.-]*temp-site\\.link(/.*)\", u, re.I)\n    if m:\n        return m.group(1)",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "parse",
+        "kind": 2,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "def parse(css):\n    \"\"\"element id -> {background, background_color, color} (last rule wins).\"\"\"\n    out = {}\n    for sel, body in RULE.findall(css):\n        ids = set(ELEM.findall(sel))\n        if not ids:\n            continue\n        # Only take rules that target the element itself, not a descendant\n        # widget inside it, so a section's background is not confused with a\n        # button's.",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "def main():\n    pages = json.load(open(os.path.join(SP, \"api\", \"pages.json\"), encoding=\"utf-8\"))\n    ids = [p[\"id\"] for p in pages]\n    # The Elementor \"kit\" holds sitewide defaults; header/footer templates too.\n    ids += [7, 11, 13]\n    styles = {}\n    def one(pid):\n        url = f\"{SITE}/wp-content/uploads/elementor/css/post-{pid}.css\"\n        css = fetch(url, os.path.join(CACHE, f\"post-{pid}.css\"))\n        return parse(css) if css else {}",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "SP",
+        "kind": 5,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "SP = os.environ.get(\"ITLR_SCRATCH\") or (\n    r\"C:/Users/ronja/AppData/Local/Temp/claude/\"\n    r\"c--Users-ronja-iCloudDrive-Documents-GitHub-in-the-light-roofing-website/\"\n    r\"e4f72178-8f47-4887-9127-6503e961e26b/scratchpad\"\n)\nSITE = \"https://inthelightroofing.com\"\nHDR = {\"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0\",\n       \"Accept-Encoding\": \"gzip\"}\nCACHE = os.path.join(SP, \"elementor-css\")\nos.makedirs(CACHE, exist_ok=True)",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "SITE",
+        "kind": 5,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "SITE = \"https://inthelightroofing.com\"\nHDR = {\"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0\",\n       \"Accept-Encoding\": \"gzip\"}\nCACHE = os.path.join(SP, \"elementor-css\")\nos.makedirs(CACHE, exist_ok=True)\ndef fetch(url, dest):\n    if os.path.exists(dest) and os.path.getsize(dest) > 200:\n        return open(dest, encoding=\"utf-8\", errors=\"replace\").read()\n    try:\n        req = urllib.request.Request(url, headers=HDR)",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "HDR",
+        "kind": 5,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "HDR = {\"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0\",\n       \"Accept-Encoding\": \"gzip\"}\nCACHE = os.path.join(SP, \"elementor-css\")\nos.makedirs(CACHE, exist_ok=True)\ndef fetch(url, dest):\n    if os.path.exists(dest) and os.path.getsize(dest) > 200:\n        return open(dest, encoding=\"utf-8\", errors=\"replace\").read()\n    try:\n        req = urllib.request.Request(url, headers=HDR)\n        with urllib.request.urlopen(req, timeout=90) as r:",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "CACHE",
+        "kind": 5,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "CACHE = os.path.join(SP, \"elementor-css\")\nos.makedirs(CACHE, exist_ok=True)\ndef fetch(url, dest):\n    if os.path.exists(dest) and os.path.getsize(dest) > 200:\n        return open(dest, encoding=\"utf-8\", errors=\"replace\").read()\n    try:\n        req = urllib.request.Request(url, headers=HDR)\n        with urllib.request.urlopen(req, timeout=90) as r:\n            data = r.read()\n            if r.headers.get(\"Content-Encoding\") == \"gzip\":",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "RULE",
+        "kind": 5,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "RULE = re.compile(r\"([^{}]+)\\{([^{}]*)\\}\")\nELEM = re.compile(r\"\\.elementor-element-([a-z0-9]+)\\b\")\ndef parse(css):\n    \"\"\"element id -> {background, background_color, color} (last rule wins).\"\"\"\n    out = {}\n    for sel, body in RULE.findall(css):\n        ids = set(ELEM.findall(sel))\n        if not ids:\n            continue\n        # Only take rules that target the element itself, not a descendant",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "ELEM",
+        "kind": 5,
+        "importPath": "tools.fetch_elementor_css",
+        "description": "tools.fetch_elementor_css",
+        "peekOfCode": "ELEM = re.compile(r\"\\.elementor-element-([a-z0-9]+)\\b\")\ndef parse(css):\n    \"\"\"element id -> {background, background_color, color} (last rule wins).\"\"\"\n    out = {}\n    for sel, body in RULE.findall(css):\n        ids = set(ELEM.findall(sel))\n        if not ids:\n            continue\n        # Only take rules that target the element itself, not a descendant\n        # widget inside it, so a section's background is not confused with a",
+        "detail": "tools.fetch_elementor_css",
+        "documentation": {}
+    },
+    {
+        "label": "ORIGIN",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-canonical",
+        "description": "tools.mirror-audit-canonical",
+        "peekOfCode": "ORIGIN = \"https://inthelightroofing.com\"\nROOT = pathlib.Path(\"mirror\")\nmismatched = []\nmissing_indexable = []\nmissing_noindex = 0\nNOINDEX = re.compile(r\"\"\"<meta[^>]+name=['\"]robots['\"][^>]*content=['\"][^'\"]*noindex\"\"\", re.I)\nCANONICAL = re.compile(r\"\"\"<link[^>]+rel=['\"]canonical['\"][^>]*href=['\"]([^'\"]+)\"\"\", re.I)\nfor path in ROOT.rglob(\"index.html\"):\n    parent = path.parent.relative_to(ROOT).as_posix()\n    rel = \"/\" if parent == \".\" else \"/\" + parent + \"/\"",
+        "detail": "tools.mirror-audit-canonical",
+        "documentation": {}
+    },
+    {
+        "label": "ROOT",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-canonical",
+        "description": "tools.mirror-audit-canonical",
+        "peekOfCode": "ROOT = pathlib.Path(\"mirror\")\nmismatched = []\nmissing_indexable = []\nmissing_noindex = 0\nNOINDEX = re.compile(r\"\"\"<meta[^>]+name=['\"]robots['\"][^>]*content=['\"][^'\"]*noindex\"\"\", re.I)\nCANONICAL = re.compile(r\"\"\"<link[^>]+rel=['\"]canonical['\"][^>]*href=['\"]([^'\"]+)\"\"\", re.I)\nfor path in ROOT.rglob(\"index.html\"):\n    parent = path.parent.relative_to(ROOT).as_posix()\n    rel = \"/\" if parent == \".\" else \"/\" + parent + \"/\"\n    try:",
+        "detail": "tools.mirror-audit-canonical",
+        "documentation": {}
+    },
+    {
+        "label": "mismatched",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-canonical",
+        "description": "tools.mirror-audit-canonical",
+        "peekOfCode": "mismatched = []\nmissing_indexable = []\nmissing_noindex = 0\nNOINDEX = re.compile(r\"\"\"<meta[^>]+name=['\"]robots['\"][^>]*content=['\"][^'\"]*noindex\"\"\", re.I)\nCANONICAL = re.compile(r\"\"\"<link[^>]+rel=['\"]canonical['\"][^>]*href=['\"]([^'\"]+)\"\"\", re.I)\nfor path in ROOT.rglob(\"index.html\"):\n    parent = path.parent.relative_to(ROOT).as_posix()\n    rel = \"/\" if parent == \".\" else \"/\" + parent + \"/\"\n    try:\n        html = path.read_text(encoding=\"utf-8\", errors=\"replace\")",
+        "detail": "tools.mirror-audit-canonical",
+        "documentation": {}
+    },
+    {
+        "label": "missing_indexable",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-canonical",
+        "description": "tools.mirror-audit-canonical",
+        "peekOfCode": "missing_indexable = []\nmissing_noindex = 0\nNOINDEX = re.compile(r\"\"\"<meta[^>]+name=['\"]robots['\"][^>]*content=['\"][^'\"]*noindex\"\"\", re.I)\nCANONICAL = re.compile(r\"\"\"<link[^>]+rel=['\"]canonical['\"][^>]*href=['\"]([^'\"]+)\"\"\", re.I)\nfor path in ROOT.rglob(\"index.html\"):\n    parent = path.parent.relative_to(ROOT).as_posix()\n    rel = \"/\" if parent == \".\" else \"/\" + parent + \"/\"\n    try:\n        html = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n    except OSError:",
+        "detail": "tools.mirror-audit-canonical",
+        "documentation": {}
+    },
+    {
+        "label": "missing_noindex",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-canonical",
+        "description": "tools.mirror-audit-canonical",
+        "peekOfCode": "missing_noindex = 0\nNOINDEX = re.compile(r\"\"\"<meta[^>]+name=['\"]robots['\"][^>]*content=['\"][^'\"]*noindex\"\"\", re.I)\nCANONICAL = re.compile(r\"\"\"<link[^>]+rel=['\"]canonical['\"][^>]*href=['\"]([^'\"]+)\"\"\", re.I)\nfor path in ROOT.rglob(\"index.html\"):\n    parent = path.parent.relative_to(ROOT).as_posix()\n    rel = \"/\" if parent == \".\" else \"/\" + parent + \"/\"\n    try:\n        html = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n    except OSError:\n        continue",
+        "detail": "tools.mirror-audit-canonical",
+        "documentation": {}
+    },
+    {
+        "label": "NOINDEX",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-canonical",
+        "description": "tools.mirror-audit-canonical",
+        "peekOfCode": "NOINDEX = re.compile(r\"\"\"<meta[^>]+name=['\"]robots['\"][^>]*content=['\"][^'\"]*noindex\"\"\", re.I)\nCANONICAL = re.compile(r\"\"\"<link[^>]+rel=['\"]canonical['\"][^>]*href=['\"]([^'\"]+)\"\"\", re.I)\nfor path in ROOT.rglob(\"index.html\"):\n    parent = path.parent.relative_to(ROOT).as_posix()\n    rel = \"/\" if parent == \".\" else \"/\" + parent + \"/\"\n    try:\n        html = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n    except OSError:\n        continue\n    # Feeds are RSS saved as index.html. They carry neither a canonical nor a",
+        "detail": "tools.mirror-audit-canonical",
+        "documentation": {}
+    },
+    {
+        "label": "CANONICAL",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-canonical",
+        "description": "tools.mirror-audit-canonical",
+        "peekOfCode": "CANONICAL = re.compile(r\"\"\"<link[^>]+rel=['\"]canonical['\"][^>]*href=['\"]([^'\"]+)\"\"\", re.I)\nfor path in ROOT.rglob(\"index.html\"):\n    parent = path.parent.relative_to(ROOT).as_posix()\n    rel = \"/\" if parent == \".\" else \"/\" + parent + \"/\"\n    try:\n        html = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n    except OSError:\n        continue\n    # Feeds are RSS saved as index.html. They carry neither a canonical nor a\n    # robots meta by nature, so they are not pages this check has anything to say",
+        "detail": "tools.mirror-audit-canonical",
+        "documentation": {}
+    },
+    {
+        "label": "report",
+        "kind": 2,
+        "importPath": "tools.mirror-audit-crawler-urls",
+        "description": "tools.mirror-audit-crawler-urls",
+        "peekOfCode": "def report(path, label, value):\n    problems.append(f\"{path}: {label} is not absolute -> {value}\")\n# --- sitemaps: every <loc> must be an absolute URL at ORIGIN ---------------\nfor xml in sorted(ROOT.glob(\"*sitemap*.xml\")):\n    text = xml.read_text(encoding=\"utf-8\", errors=\"replace\")\n    locs = re.findall(r\"<loc>([^<]*)</loc>\", text)\n    if not locs:\n        problems.append(f\"{xml}: no <loc> elements at all\")\n        continue\n    checked += len(locs)",
+        "detail": "tools.mirror-audit-crawler-urls",
+        "documentation": {}
+    },
+    {
+        "label": "ORIGIN",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-crawler-urls",
+        "description": "tools.mirror-audit-crawler-urls",
+        "peekOfCode": "ORIGIN = \"https://inthelightroofing.com\"\nROOT = pathlib.Path(\"mirror\")\nproblems = []\nchecked = 0\ndef report(path, label, value):\n    problems.append(f\"{path}: {label} is not absolute -> {value}\")\n# --- sitemaps: every <loc> must be an absolute URL at ORIGIN ---------------\nfor xml in sorted(ROOT.glob(\"*sitemap*.xml\")):\n    text = xml.read_text(encoding=\"utf-8\", errors=\"replace\")\n    locs = re.findall(r\"<loc>([^<]*)</loc>\", text)",
+        "detail": "tools.mirror-audit-crawler-urls",
+        "documentation": {}
+    },
+    {
+        "label": "ROOT",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-crawler-urls",
+        "description": "tools.mirror-audit-crawler-urls",
+        "peekOfCode": "ROOT = pathlib.Path(\"mirror\")\nproblems = []\nchecked = 0\ndef report(path, label, value):\n    problems.append(f\"{path}: {label} is not absolute -> {value}\")\n# --- sitemaps: every <loc> must be an absolute URL at ORIGIN ---------------\nfor xml in sorted(ROOT.glob(\"*sitemap*.xml\")):\n    text = xml.read_text(encoding=\"utf-8\", errors=\"replace\")\n    locs = re.findall(r\"<loc>([^<]*)</loc>\", text)\n    if not locs:",
+        "detail": "tools.mirror-audit-crawler-urls",
+        "documentation": {}
+    },
+    {
+        "label": "problems",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-crawler-urls",
+        "description": "tools.mirror-audit-crawler-urls",
+        "peekOfCode": "problems = []\nchecked = 0\ndef report(path, label, value):\n    problems.append(f\"{path}: {label} is not absolute -> {value}\")\n# --- sitemaps: every <loc> must be an absolute URL at ORIGIN ---------------\nfor xml in sorted(ROOT.glob(\"*sitemap*.xml\")):\n    text = xml.read_text(encoding=\"utf-8\", errors=\"replace\")\n    locs = re.findall(r\"<loc>([^<]*)</loc>\", text)\n    if not locs:\n        problems.append(f\"{xml}: no <loc> elements at all\")",
+        "detail": "tools.mirror-audit-crawler-urls",
+        "documentation": {}
+    },
+    {
+        "label": "checked",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-crawler-urls",
+        "description": "tools.mirror-audit-crawler-urls",
+        "peekOfCode": "checked = 0\ndef report(path, label, value):\n    problems.append(f\"{path}: {label} is not absolute -> {value}\")\n# --- sitemaps: every <loc> must be an absolute URL at ORIGIN ---------------\nfor xml in sorted(ROOT.glob(\"*sitemap*.xml\")):\n    text = xml.read_text(encoding=\"utf-8\", errors=\"replace\")\n    locs = re.findall(r\"<loc>([^<]*)</loc>\", text)\n    if not locs:\n        problems.append(f\"{xml}: no <loc> elements at all\")\n        continue",
+        "detail": "tools.mirror-audit-crawler-urls",
+        "documentation": {}
+    },
+    {
+        "label": "robots",
+        "kind": 5,
+        "importPath": "tools.mirror-audit-crawler-urls",
+        "description": "tools.mirror-audit-crawler-urls",
+        "peekOfCode": "robots = ROOT / \"robots.txt\"\nif not robots.exists():\n    problems.append(\"mirror/robots.txt is missing\")\nelse:\n    lines = [l for l in robots.read_text(encoding=\"utf-8\").splitlines()\n             if l.lower().startswith(\"sitemap:\")]\n    if not lines:\n        problems.append(f\"{robots}: no Sitemap: directive\")\n    for line in lines:\n        checked += 1",
+        "detail": "tools.mirror-audit-crawler-urls",
+        "documentation": {}
+    },
+    {
+        "label": "words",
+        "kind": 2,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "def words(s):\n    s = html.unescape(s or \"\")\n    s = re.sub(r\"[\\u2018\\u2019\\u02bc]\", \"'\", s)\n    s = re.sub(r\"[\\u201c\\u201d]\", '\"', s)\n    s = re.sub(r\"[\\u2013\\u2014\\u2212]\", \"-\", s)\n    s = s.lower()\n    return [w for w in re.findall(r\"[a-z0-9']+\", s) if w]\ndef live_body_words(path):\n    rel = \"index.html\" if path == \"/\" else path.strip(\"/\") + \"/index.html\"\n    fn = os.path.join(SP, \"raw\", rel)",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "live_body_words",
+        "kind": 2,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "def live_body_words(path):\n    rel = \"index.html\" if path == \"/\" else path.strip(\"/\") + \"/index.html\"\n    fn = os.path.join(SP, \"raw\", rel)\n    if not os.path.exists(fn):\n        return None\n    with open(fn, encoding=\"utf-8\", errors=\"replace\") as f:\n        soup = BeautifulSoup(f.read(), \"lxml\")\n    for s in soup.find_all([\"script\", \"style\", \"noscript\", \"svg\", \"template\"]):\n        s.decompose()\n    for sel in CHROME_SELECTORS:",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "block_words",
+        "kind": 2,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "def block_words(b, acc):\n    t = b.get(\"type\")\n    for k in (\"text\", \"title\", \"label\", \"caption\", \"html\", \"sub\", \"lead\", \"rest\", \"submit\"):\n        if b.get(k):\n            acc.extend(words(re.sub(r\"<[^>]+>\", \" \", str(b[k]))))\n    if t == \"list\":\n        for i in b.get(\"items\", []):\n            acc.extend(words(i.get(\"text\", \"\")))\n    if t == \"accordion\":\n        for i in b.get(\"items\", []):",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "our_words",
+        "kind": 2,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "def our_words(rec, listing_words):\n    acc = []\n    for s in rec.get(\"sections\", []):\n        for b in s[\"blocks\"]:\n            block_words(b, acc)\n            # A postgrid renders a live list of posts; its words come from the index.\n            if b.get(\"type\") == \"postgrid\":\n                acc.extend(listing_words)\n    if rec.get(\"html\"):\n        acc.extend(words(re.sub(r\"<[^>]+>\", \" \", rec[\"html\"])))",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "def main():\n    targets = []\n    for fn in (\"pages.json\", \"posts.json\", \"testimonials.json\"):\n        with open(os.path.join(REPO, \"content\", fn), encoding=\"utf-8\") as f:\n            targets.extend(json.load(f))\n    # Words the blog/archive templates emit from the post index (titles, excerpts,\n    # dates, categories) rather than from the page's own stored content.\n    with open(os.path.join(REPO, \"content\", \"posts.json\"), encoding=\"utf-8\") as f:\n        posts = json.load(f)\n    listing_words = []",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "REPO",
+        "kind": 5,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))\nSP = os.environ.get(\"ITLR_SCRATCH\") or (\n    r\"C:/Users/ronja/AppData/Local/Temp/claude/\"\n    r\"c--Users-ronja-iCloudDrive-Documents-GitHub-in-the-light-roofing-website/\"\n    r\"e4f72178-8f47-4887-9127-6503e961e26b/scratchpad\"\n)\n# Chrome that repeats on every page and is handled by the layout, not the content.\nCHROME_SELECTORS = [\n    \"header\", \"footer\", \"nav\", \".elementor-location-header\", \".elementor-location-footer\",\n    \"#wpadminbar\", \".ti-widget\", \".forminator-ui\", \".elementor-popup-modal\",",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "SP",
+        "kind": 5,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "SP = os.environ.get(\"ITLR_SCRATCH\") or (\n    r\"C:/Users/ronja/AppData/Local/Temp/claude/\"\n    r\"c--Users-ronja-iCloudDrive-Documents-GitHub-in-the-light-roofing-website/\"\n    r\"e4f72178-8f47-4887-9127-6503e961e26b/scratchpad\"\n)\n# Chrome that repeats on every page and is handled by the layout, not the content.\nCHROME_SELECTORS = [\n    \"header\", \"footer\", \"nav\", \".elementor-location-header\", \".elementor-location-footer\",\n    \"#wpadminbar\", \".ti-widget\", \".forminator-ui\", \".elementor-popup-modal\",\n    \"[data-elementor-type='header']\", \"[data-elementor-type='footer']\",",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "CHROME_SELECTORS",
+        "kind": 5,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "CHROME_SELECTORS = [\n    \"header\", \"footer\", \"nav\", \".elementor-location-header\", \".elementor-location-footer\",\n    \"#wpadminbar\", \".ti-widget\", \".forminator-ui\", \".elementor-popup-modal\",\n    \"[data-elementor-type='header']\", \"[data-elementor-type='footer']\",\n    \"[data-elementor-type='popup']\", \".e-floating-buttons\", \".skip-link\",\n    \".breadcrumb\", \".elementor-widget-breadcrumbs\",\n]\ndef words(s):\n    s = html.unescape(s or \"\")\n    s = re.sub(r\"[\\u2018\\u2019\\u02bc]\", \"'\", s)",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "IGNORE",
+        "kind": 5,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "IGNORE = set(words(\"\"\"\n previous next read more show less see all reviews review google facebook verified main content\n trustindex powered by excellent based on rating stars star out of write a\n posted anonymous ago days day weeks week months month years year hours hour\n minutes minute just now translated original language load skip to content\n menu close open toggle search submit sending please wait thank you error\n required field invalid email phone name message captcha copyright all rights\n reserved privacy policy terms sitemap\n\"\"\"))\n# Strings that live in the SINGLE-POST Elementor template rather than in any post's",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    },
+    {
+        "label": "POST_TEMPLATE_CHROME",
+        "kind": 5,
+        "importPath": "tools.verify_text",
+        "description": "tools.verify_text",
+        "peekOfCode": "POST_TEMPLATE_CHROME = set(words(\n    \"related posts Get a No Cost ROOf REPLACEMENT Estimate\"))\n# On /the-different-roof-coating-options/ the live Link Whisper plugin splits the\n# word \"repair,\" into <span>repai</span><span>r</span><span>,</span>, so the live DOM\n# tokenises as \"repai\". Our extracted copy has the correct unsplit \"roof repair,\".\n# Not a loss -- our text is the more faithful of the two.\nIGNORE.add(\"repai\")\nIGNORE |= POST_TEMPLATE_CHROME\ndef main():\n    targets = []",
+        "detail": "tools.verify_text",
+        "documentation": {}
+    }
+]
