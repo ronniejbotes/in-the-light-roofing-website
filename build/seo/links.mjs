@@ -16,8 +16,8 @@
  * Every target is checked against the published tree; a link to nothing is
  * never written.
  *
- * FAQ BLOCK -- on the eight service pages, the roof-types hub, Allentown and
- * Contact: questions a buyer actually types, answered from what the site
+ * FAQ BLOCK -- on the eight service pages, the roof-types hub, Allentown,
+ * Bethlehem, Center Valley, Macungie and Contact: questions a buyer actually types, answered from what the site
  * already says, with the source noted in the data. No warranty years, no
  * lifespans, no code citations, no availability -- those are unverified or
  * gated. Plain HTML, no FAQPage schema: Google retired the FAQ rich result in
@@ -96,7 +96,12 @@ const TOWNS = {
   '/service-area/walnutport/': { name: 'Walnutport', slug: 'walnutport' },
   '/service-area/lehigh-valley/': { name: 'the Lehigh Valley', slug: 'lehigh-valley' },
 }
-const TOP_TOWNS = ['/service-area/allentown/', '/service-area/roofers-bethlehem-pa/', '/service-area/easton/', '/service-area/center-valley-roofing-contractor/']
+/* The four towns every service page links to. Bethlehem, Center Valley and
+   Macungie are the client's priority markets (27 September 2026: "the best
+   ones"), so they take three of the four slots; Allentown keeps the fourth as
+   the home base. Easton is still reached from the navigation and the
+   /service-area/ hub. */
+const TOP_TOWNS = ['/service-area/roofers-bethlehem-pa/', '/service-area/center-valley-roofing-contractor/', '/service-area/macungie/', '/service-area/allentown/']
 
 const townLink = (url) => ({ url, label: `Roofing in ${TOWNS[url].name.replace(/^the /, 'the ')}, PA`.replace('the Lehigh Valley, PA', 'the Lehigh Valley'), text: `Roof repair, replacement, inspections and storm damage repair for homes in ${TOWNS[url].name}.` })
 const svcLink = (url, town) => ({ url, label: SERVICES[url].label, text: town ? `${SERVICES[url].label} for homes in ${town}, from our Allentown office.` : SERVICES[url].text })
@@ -152,6 +157,27 @@ const FAQS = {
   '/service-area/allentown/': { heading: 'Questions from Allentown homeowners', items: [
     { q: 'Where is In The Light Roofing located?', a: 'We are based at 871 N Fenwick St, Allentown, PA 18109, and have served homeowners across the Lehigh Valley since 2017. Call (484) 553-0213 or email info@inthelightroofing.com.', src: '/contact/ and the footer' },
     { q: 'Should I get a roof inspection before buying a home in Allentown?', a: 'Yes. A roof can look fine from the street while hiding soft decking, cracked shingles, failed flashing or old attic leaks, which is common on older housing stock. A written inspection gives you something concrete to take to the seller. See our guide to <a href="/roof-inspections-home-buying-allentown/">roof inspections when buying in Allentown</a>.', src: '/roof-inspections-home-buying-allentown/' },
+  ] },
+  /* The three priority towns (27 September 2026). Their Elementor FAQs are
+     the same eight generic questions on every town page; these are the local
+     ones. Place facts (county, ZIP codes, neighborhoods, landmarks, which
+     office issues permits) are public geography, checked against Wikipedia
+     and the City of Bethlehem's own HARB pages; everything said about the
+     company is already on the site. */
+  '/service-area/roofers-bethlehem-pa/': { heading: 'Roofing in Bethlehem, PA: local questions', items: [
+    { q: 'Which parts of Bethlehem do you serve?', a: 'All of it. Bethlehem sits in both Lehigh and Northampton counties, and we work across Center City, the West Side, the East Side, the North Side and the South Side, in ZIP codes 18015, 18017, 18018 and 18020. Our office is at 871 N Fenwick St in neighboring Allentown, and estimates are free: call (484) 553-0213.', src: 'address from /contact/; neighborhoods, counties and ZIP codes are public geography' },
+    { q: 'Does a new roof in a Bethlehem historic district need approval?', a: 'Usually, yes. In the Central Bethlehem Historic District, exterior changes that can be seen from a public street, new roofing materials included, are reviewed by the Historical and Architectural Review Board, and City Council grants a Certificate of Appropriateness before a building permit is issued. Homes in the city’s historic conservation districts, on the South Side among them, go through a similar review by the Historic Conservation Commission. Check with the City of Bethlehem before you commit to a material, and mention it when you book your estimate.', src: 'City of Bethlehem HARB and HCC process (bethlehem-pa.gov)' },
+    { q: 'What does Bethlehem’s weather do to a roof?', a: 'Winters bring repeated freeze-and-thaw cycles, which open small cracks and let ice dams build at the eaves, and summer storms bring heavy, wind-driven rain. Both find the weak spots first: worn shingles, lifted flashing and clogged gutters. Our posts on <a href="/delaying-roof-repairs-in-bethlehem/">the cost of delaying roof repairs in Bethlehem</a> and <a href="/energy-efficient-roofing-in-bethlehem/">energy-efficient roofing in Bethlehem</a> go into more detail.', src: '/delaying-roof-repairs-in-bethlehem/ and /energy-efficient-roofing-in-bethlehem/' },
+  ] },
+  '/service-area/center-valley-roofing-contractor/': { heading: 'Roofing in Center Valley, PA: local questions', items: [
+    { q: 'Do you work in Center Valley?', a: 'Yes. Center Valley is in Upper Saucon Township in southern Lehigh County, where Routes 309 and 378 meet, and uses the 18034 ZIP code; it is home to DeSales University, Penn State Lehigh Valley and the Promenade Saucon Valley. We come out from our office at 871 N Fenwick St in Allentown, and estimates are free: call (484) 553-0213.', src: 'address from /contact/; location and landmarks are public geography (Wikipedia)' },
+    { q: 'Who issues roofing permits in Center Valley?', a: 'Upper Saucon Township. Center Valley is an unincorporated community with no borough or city government of its own, so building permits for Center Valley homes go through the township. Whether a roofing job needs one depends on its scope, so check with the township before work starts.', src: 'Center Valley is unincorporated, in Upper Saucon Township (Wikipedia)' },
+    { q: 'Should I repair or replace my Center Valley roof?', a: 'It depends on the roof’s age and how widespread the damage is. One leak or a few damaged shingles on a sound roof is a repair; wear across the whole roof on an aging one points toward replacement, and an inspection will tell you which. Our guide to <a href="/roof-repair-vs-replacement-center-valley/">repair versus replacement in Center Valley</a> walks through the signs, and <a href="/energy-efficient-roofing-in-center-valley/">energy-efficient roofing in Center Valley</a> covers what a new roof can do for your energy bills.', src: '/services/roof-repairs/ FAQ and the two Center Valley posts' },
+  ] },
+  '/service-area/macungie/': { heading: 'Roofing in Macungie, PA: local questions', items: [
+    { q: 'Do you work in Macungie and Lower Macungie Township?', a: 'Yes, in both. Macungie Borough covers about a square mile around Main Street (Route 100) and is almost completely surrounded by Lower Macungie Township, so many homes with a Macungie 18062 address are in the township. We come out from our office at 871 N Fenwick St in Allentown, and estimates are free: call (484) 553-0213.', src: 'address from /contact/; borough and township geography from Wikipedia' },
+    { q: 'Who issues roofing permits for a Macungie home?', a: 'It depends which side of the borough line the house is on: Macungie Borough for homes in the borough, Lower Macungie Township for homes in the township. Whether a roofing job needs a permit depends on its scope, so check with the right office before work starts.', src: 'municipal boundaries (Wikipedia)' },
+    { q: 'What should Macungie homeowners check after a storm?', a: 'Stay off the roof. From the ground, look for missing or lifted shingles, bent flashing and branches on the roof; inside, check ceilings and the attic for new stains, and photograph everything before anything is moved. Our post on <a href="/storm-damage-repair-in-macungie/">storm damage repair in Macungie</a> covers the next steps, and our <a href="/services/storm-damage-repair/">storm damage repair</a> service documents the damage with photos for your insurer.', src: '/storm-damage-repair-in-macungie/ and the storm damage FAQ above' },
   ] },
   '/contact/': { heading: 'Before you call', items: [
     { q: 'Do you speak Spanish?', a: 'Yes. Hablamos español. Call or email and we will arrange your estimate in Spanish.', src: '"Hablamos español" in the hero and footer' },

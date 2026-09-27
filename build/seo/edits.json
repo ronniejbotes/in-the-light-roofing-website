@@ -19,7 +19,7 @@
   "/services/storm-damage-repair/": "Storm Damage Roof Repair in Allentown | In The Light Roofing",
   "/service-area/allentown/": "Roofing Contractor in Allentown, PA | In The Light Roofing",
   "/service-area/roofers-bethlehem-pa/": "Roofers in Bethlehem, PA | In The Light Roofing",
-  "/service-area/center-valley-roofing-contractor/": "Roofing Contractor, Center Valley PA | In The Light Roofing",
+  "/service-area/center-valley-roofing-contractor/": "Center Valley, PA Roofing Contractor | In The Light Roofing",
   "/service-area/easton/": "Roofing Contractor in Easton, PA | In The Light Roofing",
   "/service-area/whitehall/": "Roofing Contractor in Whitehall, PA | In The Light Roofing",
   "/service-area/macungie/": "Roofing Contractor in Macungie, PA | In The Light Roofing",
@@ -47,7 +47,7 @@
   "/lehigh-valley-roof-ice-dam-prevention/": "Lehigh Valley Roof Ice Dam Prevention: Start in the Attic"
  },
  "descriptions": {
-  "/": "Roof repair, replacement and storm damage repair for homes across the Lehigh Valley, from our base in Allentown, PA. Se habla español. Call (484) 553-0213.",
+  "/": "Roof repair, replacement and storm damage repair in Bethlehem, Center Valley, Macungie and across the Lehigh Valley. Se habla español. Call (484) 553-0213.",
   "/about-us/": "Meet Bryson Berard, owner of In The Light Roofing, and the team behind our roof repairs and replacements across the Lehigh Valley since 2017. (484) 553-0213.",
   "/contact/": "In The Light Roofing: (484) 553-0213, info@inthelightroofing.com, 871 N Fenwick St, Allentown, PA 18109. Free roofing estimates across the Lehigh Valley.",
   "/past-work/": "Read what Lehigh Valley homeowners say about In The Light Roofing's roof repairs and replacements, in their own words. Free estimates: call (484) 553-0213.",
@@ -99,7 +99,7 @@
    },
    {
     "find": "Roofing Done Right in Pennsylvania | Lehigh Valley | Center Valley | Macungie | Bethlehem and more.",
-    "replace": "Roofing Done Right Across the Lehigh Valley: Allentown, Bethlehem, Easton, Macungie and More"
+    "replace": "Roofing Done Right Across the Lehigh Valley: Bethlehem, Center Valley, Macungie, Allentown and More"
    },
    {
     "find": "Hear directly from satisfied customers across Pennsylvania who trust In The Light Roofing",
@@ -344,12 +344,24 @@
    {
     "find": "As trusted roofers in Bethlehem, PA, we guarantee satisfaction. We do this through clear communication and skilled work.",
     "replace": "As roofers in Bethlehem, PA, we prioritize clear communication and skilled work."
+   },
+   {
+    "find": "<h2 class=\"elementor-heading-title elementor-size-default\">Expert Roofing Services Tailored for You​</h2>",
+    "replace": "<h2 class=\"elementor-heading-title elementor-size-default\">Roofing Services for Bethlehem Homes</h2>"
    }
   ],
   "/service-area/center-valley-roofing-contractor/": [
    {
     "find": "Expert Center Valley Roofing Contractor\n<span>for Top-Quality Home Services</span>",
     "replace": "Center Valley Roofing Contractor\n<span>for Roof Repair, Replacement and Inspections</span>"
+   },
+   {
+    "find": "<h2 class=\"elementor-heading-title elementor-size-default\">Frequently Asked Questions</h2>",
+    "replace": "<h2 class=\"elementor-heading-title elementor-size-default\">Frequently Asked Questions About Roofing in Center Valley</h2>"
+   },
+   {
+    "find": "<h2 class=\"elementor-heading-title elementor-size-default\">Why Choose In the Light Roofing?</h2>",
+    "replace": "<h2 class=\"elementor-heading-title elementor-size-default\">Why Center Valley Homeowners Choose In The Light Roofing</h2>"
    }
   ],
   "/service-area/easton/": [
@@ -388,6 +400,14 @@
    {
     "find": "In the Light Roofing is honored to contribute to preserving the beauty and structural integrity of homes in this welcoming town.",
     "replace": "In the Light Roofing is honored to contribute to preserving the beauty and structural integrity of homes in this welcoming town. If a storm has left shingles in your yard, our guide to <a href=\"/storm-damage-repair-in-macungie/\">storm damage repair in Macungie</a> explains what to check first and when to call."
+   },
+   {
+    "find": "<h2 class=\"elementor-heading-title elementor-size-default\">Frequently Asked Questions</h2>",
+    "replace": "<h2 class=\"elementor-heading-title elementor-size-default\">Frequently Asked Questions About Roofing in Macungie</h2>"
+   },
+   {
+    "find": "<h2 class=\"elementor-heading-title elementor-size-default\">Expert Roofing Services Tailored for You​</h2>",
+    "replace": "<h2 class=\"elementor-heading-title elementor-size-default\">Roofing Services for Macungie Homes</h2>"
    }
   ],
   "/service-area/northampton/": [

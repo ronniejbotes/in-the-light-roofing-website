@@ -108,6 +108,26 @@ export const SERVICES = [
   { url: '/services/epdm-rubber-roofing/', name: 'EPDM Rubber Roofing', type: 'EPDM flat roofing' },
 ]
 
+/* The town pages, each tied to the place it is about. On a town page the
+   business node's areaServed lists every town the company serves, which says
+   nothing about which one this page is for; a Service node scoped to one City,
+   identified by its Wikipedia article, does. Bethlehem, Center Valley and
+   Macungie are the client's priority markets (27 September 2026); the rest
+   get the same node because the reasoning is the same. */
+const TOWN_PAGES = {
+  '/service-area/roofers-bethlehem-pa/': { name: 'Bethlehem', wiki: 'Bethlehem,_Pennsylvania' },
+  '/service-area/center-valley-roofing-contractor/': { name: 'Center Valley', wiki: 'Center_Valley,_Pennsylvania' },
+  '/service-area/macungie/': { name: 'Macungie', wiki: 'Macungie,_Pennsylvania' },
+  '/service-area/allentown/': { name: 'Allentown', wiki: 'Allentown,_Pennsylvania' },
+  '/service-area/easton/': { name: 'Easton', wiki: 'Easton,_Pennsylvania' },
+  '/service-area/whitehall/': { name: 'Whitehall', wiki: 'Whitehall_Township,_Lehigh_County,_Pennsylvania' },
+  '/service-area/northampton/': { name: 'Northampton', wiki: 'Northampton,_Pennsylvania' },
+  '/service-area/catasauqua/': { name: 'Catasauqua', wiki: 'Catasauqua,_Pennsylvania' },
+  '/service-area/coplay/': { name: 'Coplay', wiki: 'Coplay,_Pennsylvania' },
+  '/service-area/slatington/': { name: 'Slatington', wiki: 'Slatington,_Pennsylvania' },
+  '/service-area/walnutport/': { name: 'Walnutport', wiki: 'Walnutport,_Pennsylvania' },
+}
+
 /* Exact duplicates: canonical to the master, and nothing else. The campaign
    page arrived as noindex,nofollow with no canonical; it becomes index,follow
    so the canonical is the one signal. publish.mjs also 301s the two homepage
@@ -204,6 +224,29 @@ function serviceNode(svc, description) {
     ...(description ? { description } : {}),
     provider: { '@id': ORG_ID },
     areaServed: areaServed(),
+  }
+}
+
+function townServiceNode(url, town, description) {
+  return {
+    '@type': 'Service',
+    '@id': `${SITE}${url}#service`,
+    name: `Roofing in ${town.name}, PA`,
+    serviceType: 'Roofing contractor',
+    url: `${SITE}${url}`,
+    ...(description ? { description } : {}),
+    provider: { '@id': ORG_ID },
+    areaServed: {
+      '@type': 'City',
+      name: `${town.name}, PA`,
+      sameAs: `https://en.wikipedia.org/wiki/${town.wiki}`,
+      containedInPlace: { '@type': 'State', name: 'Pennsylvania' },
+    },
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: `Roofing services in ${town.name}`,
+      itemListElement: SERVICES.slice(0, 6).map((s) => ({ '@type': 'Offer', itemOffered: { '@id': `${SITE}${s.url}#service` } })),
+    },
   }
 }
 
@@ -347,6 +390,12 @@ export async function transformDoc(doc, ctx) {
       graph.push(serviceNode(svc, getMeta(html, 'description') || undefined))
       if (webpage && !webpage.about) webpage.about = { '@id': `${SITE}${svc.url}#service` }
       bump('serviceNodes')
+    }
+    const town = TOWN_PAGES[url]
+    if (town && !graph.some((n) => hasType(n, 'Service'))) {
+      graph.push(townServiceNode(url, town, getMeta(html, 'description') || undefined))
+      if (webpage && !webpage.about) webpage.about = { '@id': `${SITE}${url}#service` }
+      bump('townServiceNodes')
     }
     html = replaceJsonLd(html, y.block, y.data)
   } else {
