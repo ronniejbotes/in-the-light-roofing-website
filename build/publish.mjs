@@ -37,6 +37,7 @@ import { createHash } from 'node:crypto'
 import { declutter, rewritePaths } from './declutter.mjs'
 import { seo } from './seo/index.mjs'
 import { ACTION as FORM_ACTION, HONEYPOT_FIELD, PAGE_FIELD, FIELD_LABELS } from './seo/forms.mjs'
+import { reviewsPhp, REVIEWS_ENDPOINT } from './reviews-live.mjs'
 import { existsSync } from 'node:fs'
 import { join, resolve, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -711,6 +712,12 @@ async function main() {
   await mkdir(join(OUT, '_forms'), { recursive: true })
   await writeFile(join(OUT, '_forms', 'submit.php'), submitPhp(FIELD_LABELS), 'utf8')
 
+  // The live Google reviews overrides/reviews.js asks for. Answers {"ok":false}
+  // until its key is placed outside the web root (see build/reviews-live.mjs),
+  // and the page then shows the stored reviews, so it is safe to ship unset.
+  await mkdir(join(OUT, dirname(REVIEWS_ENDPOINT)), { recursive: true })
+  await writeFile(join(OUT, REVIEWS_ENDPOINT), reviewsPhp(), 'utf8')
+
   // The mirror has no 404 page of its own; without one Apache shows its stock
   // error page, which does not look like this site at all.
   if (!existsSync(join(OUT, '404.html'))) {
@@ -737,6 +744,7 @@ async function main() {
   console.log(`  ${removedPortraits} portraits of people taken off the site left out`)
   console.log(`  ${rules.length} redirects written to .htaccess` + (redirectedDrafts ? `, ${redirectedDrafts} redirected duplicate pages removed` : ''))
   const mappedForms = Object.keys(FIELD_LABELS).length
+  console.log(`  live reviews: ${REVIEWS_ENDPOINT.slice(1)} (needs itlr-private/google-places.php beside the web root)`)
   console.log(`  form handler: _forms/submit.php -> info@inthelightroofing.com`
     + (mappedForms ? `, field labels for ${mappedForms} forms` : ', no field labels (SEO pass skipped)'))
   console.log(`  de-WordPressed: ${clean.movedDirs.length} dirs moved, `

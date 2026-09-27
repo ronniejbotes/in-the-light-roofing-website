@@ -19,7 +19,7 @@ CSS, JS into a footer snippet (Elementor → Custom Code, or a snippets plugin).
 | File | What it does |
 |---|---|
 | `overrides.css` / `overrides.js` | Service-grid icon sizing; Past Work carousel as a full-width continuous crawl, with rounded cards, hover-to-hold and an estimate prompt beneath it |
-| `reviews.css` / `reviews.js` | 3D testimonial marquee replacing the Trustindex widget |
+| `reviews.css` / `reviews.js` | 3D testimonial marquee replacing the Trustindex widget; live Google rating, count and reviews from `/_reviews/google.php` when the host has a key, the stored nine otherwise |
 | `process.css` / `process.js` | The 5-step process section as a scroll-driven stage |
 | `team.css` / `team.js` | The crew carousel as a photo stack, and the founder/team section order |
 | `assets/` | The five step renders (generated; see below) |

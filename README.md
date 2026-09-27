@@ -30,6 +30,20 @@ the fixes in overrides/, combined only at publish time.
 
 Never edit the `deploy` branch by hand: the next `npm run deploy` overwrites it.
 
+**Live Google reviews need one file on the host, once.** The homepage reviews
+and the header's Google count come live from `/_reviews/google.php`
+(`build/reviews-live.mjs`). It needs a Google Cloud API key with *Places API
+(New)* enabled, kept **outside** the web root because this repo is public:
+
+```php
+<?php // <site folder>/itlr-private/google-places.php, beside public_html
+return ['key' => 'AIza...', 'place_id' => ''];
+```
+
+Until that file exists the site shows the nine stored reviews exactly as it
+always has. The endpoint calls Google about four times a day, whatever the
+traffic.
+
 **Deploying is `npm run deploy`, not `npm run build`.** The fixes in
 `overrides/` are injected per-request by `build/serve.mjs`, so until they are
 baked in they exist only while the dev server is running. `npm run build` builds
