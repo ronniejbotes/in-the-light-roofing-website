@@ -229,8 +229,13 @@
    *
    * The group crew photo (SEMI8066) is untouched -- you cannot take one person
    * out of a photograph of six, and that needs a new photo, not code.
+   *
+   * A second crew member came off on 27 September 2026, at the client's
+   * request: SEMI8001 default, SEMI7982 hover. Two elements carry his pair --
+   * 13fd32f on the homepage, 6ac0876 on /about-us/ -- again checked against
+   * every stylesheet that names either file.
    * ---------------------------------------------------------------------- */
-  var FORMER_STAFF = ['56194a8', '6d5023c', '8ac57c0']
+  var FORMER_STAFF = ['56194a8', '6d5023c', '8ac57c0', '13fd32f', '6ac0876']
 
   function removeFormerStaffSlides() {
     var touched = []

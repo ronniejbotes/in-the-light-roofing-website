@@ -67,6 +67,16 @@ const OVERRIDES = {
   '_mobile.css': 'mobile.css',
 }
 
+/* Portraits of people no longer shown on the site, under wp-content/uploads/.
+   SEMI7879/SEMI7885: a former employee. SEMI8001/SEMI7982: a crew member taken
+   off at the client's request, 27 September 2026. */
+const REMOVED_PORTRAITS = [
+  '2026/03/SEMI7879.jpg', '2026/03/SEMI7879.jpg.webp',
+  '2026/03/SEMI7885.jpg', '2026/03/SEMI7885.jpg.webp',
+  '2026/03/SEMI8001.jpg', '2026/03/SEMI8001.jpg.webp',
+  '2026/03/SEMI7982.jpg', '2026/03/SEMI7982.jpg.webp',
+]
+
 /** Short content hash, so a changed file gets a URL no cache has seen. */
 async function stamp(file) {
   const p = join(OVR, file)
@@ -588,6 +598,19 @@ async function main() {
   // 1. The mirror, verbatim.
   await cp(MIRROR, OUT, { recursive: true })
 
+  // 1b. ...less the portraits of people taken off the site. overrides.css and
+  // overrides.js already keep them off every page, but the files themselves
+  // would still be served to anyone holding the URL, and a portrait of someone
+  // who asked to come off the site should not be reachable on it at all. No
+  // page references them: only the Elementor stylesheets do, on the slides that
+  // are suppressed, so nothing ever requests them. Kept in step with
+  // FORMER_STAFF in overrides.js and NEVER_USE in overrides/team.js.
+  let removedPortraits = 0
+  for (const name of REMOVED_PORTRAITS) {
+    const p = join(OUT, 'wp-content', 'uploads', name)
+    if (existsSync(p)) { await rm(p, { force: true }); removedPortraits++ }
+  }
+
   // 2. The overrides, as the URLs serve.mjs exposes them.
   let wrote = 0
   for (const [url, file] of Object.entries(OVERRIDES)) {
@@ -711,6 +734,7 @@ async function main() {
   console.log(`  ${files} files`)
   console.log(`  ${injected} HTML pages injected  (${skippedXml} feeds left alone)`)
   console.log(`  ${wrote} override files, ${assetCount} assets`)
+  console.log(`  ${removedPortraits} portraits of people taken off the site left out`)
   console.log(`  ${rules.length} redirects written to .htaccess` + (redirectedDrafts ? `, ${redirectedDrafts} redirected duplicate pages removed` : ''))
   const mappedForms = Object.keys(FIELD_LABELS).length
   console.log(`  form handler: _forms/submit.php -> info@inthelightroofing.com`

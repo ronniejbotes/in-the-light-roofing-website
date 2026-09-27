@@ -8,7 +8,7 @@
  *
  * What it makes (perf audit fix 4, tools/.tmp-research/perf.json):
  *
- *   derived/team/SEMI<n>-420.webp     The five crew portraits. Originals are
+ *   derived/team/SEMI<n>-420.webp     The four crew portraits. Originals are
  *                                     1366x2048 (93-211 KB each); the team
  *                                     stack renders them at ~170-200 px wide,
  *                                     so 420 px covers a 2x screen.
@@ -36,7 +36,9 @@
  * size (see shots/perf/ for the crops that were checked).
  *
  * The former employee's portraits (SEMI7879, SEMI7885) are never generated,
- * so no derivative of them can exist for team.js to pick up.
+ * so no derivative of them can exist for team.js to pick up. Nor are SEMI8001
+ * and SEMI7982, the crew member taken off at the client's request on
+ * 27 September 2026.
  */
 import sharp from 'sharp'
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises'
@@ -50,10 +52,10 @@ const OUT = join(ROOT, 'overrides', 'assets', 'derived')
 const CHECK = process.argv.includes('--check')
 
 const QUALITY = 78
-const TEAM = ['SEMI7900', 'SEMI7949', 'SEMI7953', 'SEMI8001', 'SEMI8023']
+const TEAM = ['SEMI7900', 'SEMI7949', 'SEMI7953', 'SEMI8023']
 const TEAM_WIDTH = 420
 const GALLERY_WIDTH = 760
-const NEVER = /SEMI7879|SEMI7885/i
+const NEVER = /SEMI7879|SEMI7885|SEMI8001|SEMI7982/i
 
 /** The gallery's data-thumbnail URLs, as the mirror serves them. */
 async function galleryOriginals() {

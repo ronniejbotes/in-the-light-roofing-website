@@ -274,25 +274,38 @@
  *
  * :has() hides the whole slide immediately where supported; the JS removal is
  * the fallback and the thing that keeps the carousel's slide count honest.
+ *
+ * 13fd32f (homepage) and 6ac0876 (/about-us/) are a second crew member, taken
+ * off at the client's request on 27 September 2026 (SEMI8001, hover SEMI7982).
  * ------------------------------------------------------------------------- */
 .elementor-element-56194a8,
 .elementor-element-6d5023c,
 .elementor-element-8ac57c0,
+.elementor-element-13fd32f,
+.elementor-element-6ac0876,
 .elementor-element-56194a8:hover,
 .elementor-element-6d5023c:hover,
 .elementor-element-8ac57c0:hover,
+.elementor-element-13fd32f:hover,
+.elementor-element-6ac0876:hover,
 .elementor-element-56194a8::before,
 .elementor-element-6d5023c::before,
 .elementor-element-8ac57c0::before,
+.elementor-element-13fd32f::before,
+.elementor-element-6ac0876::before,
 .elementor-element-56194a8:hover::before,
 .elementor-element-6d5023c:hover::before,
-.elementor-element-8ac57c0:hover::before {
+.elementor-element-8ac57c0:hover::before,
+.elementor-element-13fd32f:hover::before,
+.elementor-element-6ac0876:hover::before {
   background-image: none !important;
 }
 
 .swiper-slide:has(.elementor-element-56194a8),
 .swiper-slide:has(.elementor-element-6d5023c),
-.swiper-slide:has(.elementor-element-8ac57c0) {
+.swiper-slide:has(.elementor-element-8ac57c0),
+.swiper-slide:has(.elementor-element-13fd32f),
+.swiper-slide:has(.elementor-element-6ac0876) {
   display: none !important;
 }
 

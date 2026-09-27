@@ -501,7 +501,7 @@ function ownerAndGroupPhotos(html, rep, dims) {
 }
 
 /**
- * (a) Team portraits in CSS. The crew carousel paints the five portraits as
+ * (a) Team portraits in CSS. The crew carousel paints the four portraits as
  * CSS backgrounds (1366x2048, 93-211 KB each) on slides that overrides/team.js
  * replaces with a photo stack rendering them at ~180 px. team.js maps the URL
  * it reads to the 420 px derivative, but by the time it runs the browser has
