@@ -29,3 +29,6 @@ publish/
 # Scratch builds and preview logs from the SEO work
 .out-*/
 .serve-*.log
+
+# A VS Code extension's Python import-completion cache; editor state, never part of the site
+PythonImportHelper-v2-Completion.json
