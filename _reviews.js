@@ -64,6 +64,15 @@ const REVIEWS = [
  * captured to overrides/reviews.json. Nothing is written, trimmed or improved.
  * Names, dates and wording are the customers' own, typos included.
  *
+ * AND LIVE, ONCE THE HOST HAS A KEY
+ * /_reviews/google.php (build/reviews-live.mjs) answers with the Business
+ * Profile's live rating, live review count and the reviews Google returns for
+ * it -- at most five, Google's choice. Those go first, newest first, with the
+ * real star rating each customer gave; the nine above fill the rest and are the
+ * whole marquee whenever the endpoint has no answer (no key yet, Google down,
+ * or the dev server, which runs no PHP). The live count also replaces the
+ * hard-coded "Based on 237 Reviews" in the header on every page.
+ *
  * NO REVIEW SCHEMA IS EMITTED, DELIBERATELY. Review or aggregateRating markup
  * on a business's own pages makes the whole domain ineligible for review rich
  * results. These are plain HTML; the stars belong to the Business Profile.
@@ -82,6 +91,17 @@ const REVIEWS = [
    */
   var MQ_NARROW = window.matchMedia ? window.matchMedia('(max-width: 700px)') : null
   var MQ_MID = window.matchMedia ? window.matchMedia('(max-width: 1024px)') : null
+
+  var LIVE_URL = '/_reviews/google.php'
+  /* The Business Profile, by the id the header badge already links with. */
+  var PROFILE_CID = '0x21c950328309980d'
+  var ALL_REVIEWS_URL = 'https://www.google.com/search?q=In+The+Light+Roofing+reviews'
+  /* The marquee was timed for nine cards; more cards, same speed. */
+  var BASE_DURATION = 46
+  var BASE_COUNT = 9
+
+  /** The endpoint's answer once it has given a usable one, else null. */
+  var live = null
 
   function columnsFor() {
     if (MQ_NARROW && MQ_NARROW.matches) return 2
@@ -111,7 +131,18 @@ const REVIEWS = [
     var meta = document.createElement('div')
     var nm = document.createElement('figcaption')
     nm.className = 'itlr-review__name'
-    nm.textContent = r.name
+    // Google's terms for live reviews: the author is named and, where Google
+    // gives one, linked to their own profile.
+    if (r.profile) {
+      var link = document.createElement('a')
+      link.href = r.profile
+      link.target = '_blank'
+      link.rel = 'noopener nofollow'
+      link.textContent = r.name
+      nm.appendChild(link)
+    } else {
+      nm.textContent = r.name
+    }
     var dt = document.createElement('p')
     dt.className = 'itlr-review__date'
     dt.textContent = r.date + ' · Google'
@@ -119,10 +150,13 @@ const REVIEWS = [
 
     head.appendChild(av); head.appendChild(meta)
 
+    // The stars the customer actually gave. The stored nine are all fives;
+    // a live review shows whatever it is.
+    var rating = Math.max(1, Math.min(5, Math.round(r.rating || 5)))
     var stars = document.createElement('div')
     stars.className = 'itlr-review__stars'
-    stars.textContent = '★★★★★'
-    stars.setAttribute('aria-label', '5 out of 5')
+    stars.textContent = new Array(rating + 1).join('★') + new Array(6 - rating).join('☆')
+    stars.setAttribute('aria-label', rating + ' out of 5')
 
     var q = document.createElement('blockquote')
     q.className = 'itlr-review__body'
@@ -132,10 +166,93 @@ const REVIEWS = [
     return el
   }
 
-  function build(columns) {
+  /**
+   * What the marquee shows: the live reviews newest first, then the stored
+   * nine that Google did not just return. A customer who is in both appears
+   * once, in Google's current wording.
+   */
+  function reviewList() {
+    if (!live) return REVIEWS
+    var out = []
+    var seen = {}
+    var key = function (name) { return String(name).toLowerCase().replace(/[^a-z]/g, '') }
+    for (var i = 0; i < live.reviews.length; i++) {
+      var r = live.reviews[i]
+      if (!r || !r.name || !r.text) continue
+      seen[key(r.name)] = 1
+      out.push({ name: r.name, date: r.ago || '', text: r.text, rating: r.rating, profile: r.profile })
+    }
+    for (var j = 0; j < REVIEWS.length; j++) {
+      if (!seen[key(REVIEWS[j].name)]) out.push(REVIEWS[j])
+    }
+    return out
+  }
+
+  function starsText(value) {
+    var full = Math.round(value)
+    return new Array(full + 1).join('★') + new Array(6 - full).join('☆')
+  }
+
+  /**
+   * The live line above the marquee: rating, total and the two links. Only
+   * ever drawn from the endpoint's answer, so a number here is always Google's
+   * own, never one typed into the page.
+   */
+  function summary() {
+    var bar = document.createElement('div')
+    bar.className = 'itlr-reviews-live'
+
+    var badge = document.createElement('span')
+    badge.className = 'itlr-reviews-live__badge'
+    badge.textContent = 'Live from Google'
+    bar.appendChild(badge)
+
+    if (typeof live.rating === 'number') {
+      var score = document.createElement('span')
+      score.className = 'itlr-reviews-live__score'
+      score.textContent = live.rating.toFixed(1)
+      var st = document.createElement('span')
+      st.className = 'itlr-reviews-live__stars'
+      st.textContent = starsText(live.rating)
+      st.setAttribute('aria-label', live.rating.toFixed(1) + ' out of 5')
+      bar.appendChild(score); bar.appendChild(st)
+    }
+    if (typeof live.count === 'number') {
+      var count = document.createElement('span')
+      count.className = 'itlr-reviews-live__count'
+      count.textContent = 'Based on ' + live.count.toLocaleString('en-US') + ' Google reviews'
+      bar.appendChild(count)
+    }
+
+    var links = document.createElement('span')
+    links.className = 'itlr-reviews-live__links'
+    var all = document.createElement('a')
+    all.href = live.mapsUrl || ALL_REVIEWS_URL
+    all.target = '_blank'; all.rel = 'noopener'
+    all.textContent = 'See all reviews'
+    links.appendChild(all)
+    if (live.placeId) {
+      var write = document.createElement('a')
+      write.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(live.placeId)
+      write.target = '_blank'; write.rel = 'noopener'
+      write.textContent = 'Leave a review'
+      links.appendChild(write)
+    }
+    bar.appendChild(links)
+
+    // Required wherever Places content is shown without a Google map.
+    var attr = document.createElement('span')
+    attr.className = 'itlr-reviews-live__attr'
+    attr.textContent = 'Google Maps'
+    bar.appendChild(attr)
+    return bar
+  }
+
+  function build(columns, list) {
     var wrap = document.createElement('div')
     wrap.className = 'itlr-reviews'
     wrap.setAttribute('data-columns', String(columns))
+    wrap.style.setProperty('--itlr-duration', Math.round(BASE_DURATION * Math.max(1, list.length / BASE_COUNT)) + 's')
 
     var stage = document.createElement('div')
     stage.className = 'itlr-reviews__stage'
@@ -143,12 +260,12 @@ const REVIEWS = [
     for (var c = 0; c < columns; c++) {
       var col = document.createElement('div')
       col.className = 'itlr-reviews__col' + (c % 2 ? ' itlr-reviews__col--reverse' : '')
-      // Every column carries the same nine reviews in a different order, so
+      // Every column carries the same reviews in a different order, so
       // a screen reader gets them once, from the first column; the others
       // are the same words again and are hidden from assistive technology.
       if (c > 0) col.setAttribute('aria-hidden', 'true')
       // Offset each column so they do not read as four copies of one list.
-      var rotated = REVIEWS.slice(c * 2).concat(REVIEWS.slice(0, c * 2))
+      var rotated = list.slice(c * 2).concat(list.slice(0, c * 2))
       // Twice through, and no more: the keyframe travels exactly half the
       // track, so the second copy is what makes the loop seamless (the last
       // frame is pixel-identical to the first) and a third would only add
@@ -173,16 +290,18 @@ const REVIEWS = [
     var foot = document.createElement('p')
     foot.className = 'itlr-reviews-foot'
     var a = document.createElement('a')
-    a.href = 'https://www.google.com/search?q=In+The+Light+Roofing+reviews'
+    a.href = (live && live.mapsUrl) || ALL_REVIEWS_URL
     a.target = '_blank'
     a.rel = 'noopener'
-    // No review count is printed. The site currently shows four different
-    // totals (237, 232, 18, 39) and the Business Profile shows another; a
-    // hard-coded number is what created that mess and it rots on its own.
+    // No review count is typed into the page. The site currently shows four
+    // different totals (237, 232, 18, 39) and the Business Profile shows
+    // another; a hard-coded number is what created that mess and it rots on
+    // its own. The only count shown is the live one, in summary().
     a.textContent = 'Read every review on Google'
     foot.appendChild(a)
 
     var frag = document.createDocumentFragment()
+    if (live) frag.appendChild(summary())
     frag.appendChild(wrap)
     frag.appendChild(foot)
     return frag
@@ -215,14 +334,60 @@ const REVIEWS = [
     for (var i = 0; i < stale.length; i++) stale[i].remove()
 
     var columns = columnsFor()
+    var source = live ? 'live:' + live.fetched : 'stored'
     var existing = h.querySelector('.itlr-reviews')
-    if (existing && h.querySelector('.itlr-reviews-foot') && existing.getAttribute('data-columns') === String(columns)) return true
+    if (existing && h.querySelector('.itlr-reviews-foot')
+      && existing.getAttribute('data-columns') === String(columns)
+      && existing.getAttribute('data-source') === source) return true
 
-    var old = h.querySelectorAll('.itlr-reviews, .itlr-reviews-foot')
+    var old = h.querySelectorAll('.itlr-reviews, .itlr-reviews-foot, .itlr-reviews-live')
     for (var j = 0; j < old.length; j++) old[j].remove()
 
-    h.appendChild(build(columns))
+    var frag = build(columns, reviewList())
+    frag.querySelector('.itlr-reviews').setAttribute('data-source', source)
+    h.appendChild(frag)
     return true
+  }
+
+  /**
+   * The Google badge in the header, on every page. The mirror prints a typed
+   * "Based on 237 Reviews"; the publish pass (seo/content.mjs) drops that
+   * number for "Read Our Google Reviews" because nothing kept it current. With
+   * a live answer the count is Google's own and current, so it goes back in.
+   * Found by the link it sits in (the Business Profile's own id), so the
+   * Facebook badge beside it is never touched.
+   */
+  function updateHeaderCount() {
+    if (!live || typeof live.count !== 'number') return
+    var label = 'Based on ' + live.count.toLocaleString('en-US') + ' Reviews'
+    var links = document.querySelectorAll('a[href*="' + PROFILE_CID + '"]')
+    for (var i = 0; i < links.length; i++) {
+      var t = links[i].textContent
+      if (!/Based on\s+[\d,]+\s+Reviews|Read Our Google Reviews/i.test(t) || t.trim() === label) continue
+      links[i].textContent = label
+    }
+  }
+
+  /**
+   * Ask the endpoint once per page, after the page has settled: this is a
+   * section below the hero and a badge, neither worth competing with the
+   * first paint for. The answer is HTTP-cached for fifteen minutes, so moving
+   * between pages costs nothing. Any failure leaves the stored reviews up.
+   */
+  function loadLive() {
+    if (!window.fetch || !window.JSON) return
+    var ctrl = window.AbortController ? new AbortController() : null
+    var timer = ctrl ? setTimeout(function () { ctrl.abort() }, 6000) : null
+    fetch(LIVE_URL, { credentials: 'same-origin', signal: ctrl ? ctrl.signal : undefined })
+      .then(function (res) { return res.ok ? res.json() : null })
+      .then(function (data) {
+        if (timer) clearTimeout(timer)
+        if (!data || data.ok !== true || !data.reviews || !data.reviews.length) return
+        live = data
+        updateHeaderCount()
+        mount()
+      })
+      .catch(function () { /* stored reviews stay up */ })
   }
 
   // Crossing 700 px or 1024 px changes how many columns show; rebuild then.
@@ -238,8 +403,16 @@ const REVIEWS = [
   var tries = 0
   var timer = setInterval(function () {
     mount()
+    updateHeaderCount()
     if (++tries > 80) clearInterval(timer)
   }, 250)
   if (document.readyState !== 'loading') mount()
   else document.addEventListener('DOMContentLoaded', mount)
+
+  function later() {
+    if (window.requestIdleCallback) window.requestIdleCallback(loadLive, { timeout: 2500 })
+    else setTimeout(loadLive, 1200)
+  }
+  if (document.readyState === 'complete') later()
+  else window.addEventListener('load', later)
 })()

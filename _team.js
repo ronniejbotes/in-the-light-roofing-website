@@ -28,7 +28,7 @@
    * photograph is which person is exactly the kind of invention that has no
    * place on a real business's website.
    *
-   * Fill this in with the five real names, in portrait order, and the caption
+   * Fill this in with the four real names, in portrait order, and the caption
    * row appears by itself. Anything left blank simply renders no caption.
    */
   var CREW_NAMES = []
@@ -37,8 +37,11 @@
    * slides and overrides.css nulls his background, so he should never reach
    * this code -- but this rebuilds the section from whatever portraits it
    * finds, and a filename check costs nothing next to the cost of putting a
-   * man who no longer works here back on the homepage. */
-  var NEVER_USE = /SEMI7879|SEMI7885/i
+   * man who no longer works here back on the homepage.
+   *
+   * SEMI8001 and SEMI7982 are a second crew member, taken off at the client's
+   * request on 27 September 2026, by the same three layers. */
+  var NEVER_USE = /SEMI7879|SEMI7885|SEMI8001|SEMI7982/i
 
   /* The owner's portrait.
    *
@@ -57,15 +60,15 @@
    *
    * The originals are 1366x2048 and 93-211 KB each; a card here shows them at
    * about 180 px wide. tools/make-derivatives.mjs writes a 420 px WebP of each
-   * of the five current portraits to overrides/assets/derived/team/ (served
+   * of the four current portraits to overrides/assets/derived/team/ (served
    * at /_assets/derived/team/<yyyy>-<mm>-<name>-420.webp), and the publish
    * pass points the carousel's CSS at the same files so the originals are
    * never fetched. This mapping covers the dev server, where the CSS is not
-   * rewritten, and any portrait the pass missed. Only these five have a
+   * rewritten, and any portrait the pass missed. Only these four have a
    * derivative; anything else -- and anything matching NEVER_USE -- keeps
    * the URL it came with, and a derivative that fails to load falls back to
    * the original (see build()). */
-  var TEAM_DERIVED = ['SEMI7900', 'SEMI7949', 'SEMI7953', 'SEMI8001', 'SEMI8023']
+  var TEAM_DERIVED = ['SEMI7900', 'SEMI7949', 'SEMI7953', 'SEMI8023']
   var DERIVED_WIDTH = 420
 
   function derivative(url) {
