@@ -470,12 +470,8 @@ function dropAttr(tag, name) {
  * full-width on phones (390 css px at 2x = 780), so 600px / 100vw picks the
  * 801w candidate in both cases.
  *
- * (d) The group photo SEMI8066: `sizes="auto, (max-width: 1365px) 100vw,
- * 1365px"` makes Chrome pick the 1365w file (265 KB) for a 1090 px slot;
- * measured rendered widths 1090 and 1051 at 1440, 1401 at 1920, 390 on
- * phones. Below 1500 px the 1024w candidate (125 KB) covers it -- 6 % of
- * upscaling on a cover-cropped photograph -- and above that the 1365w file
- * is the largest there is anyway.
+ * (d) The homepage group photo used to be tuned here too; it is now replaced
+ * outright, with its own srcset and sizes, by build/seo/photos.mjs.
  */
 function ownerAndGroupPhotos(html, rep, dims) {
   return html.replace(/<img\b[^>]*>/gi, (tag) => {
@@ -489,12 +485,6 @@ function ownerAndGroupPhotos(html, rep, dims) {
       out = setAttr(out, 'sizes', '(max-width: 767px) 100vw, 600px')
       rep.ownerPortraitFixed++
       return out
-    }
-    if (/\/SEMI8066\.jpg\.webp$/.test(src) && /\ssrcset=/.test(tag)) {
-      rep.groupPhotoSizesFixed++
-      // Phones render it at 90 % of the viewport (351 of 390 px), so 90vw at
-      // 2x asks for 702 px and gets the 768w file instead of the 1024w one.
-      return setAttr(tag, 'sizes', '(max-width: 767px) 90vw, (max-width: 1024px) 100vw, (max-width: 1500px) 1024px, 1365px')
     }
     return tag
   })
@@ -642,7 +632,7 @@ export async function before(ctx) {
     deferred: {}, clickceaseAsync: 0, recaptchaKeptEager: 0,
     heroInvisibleRemoved: 0, heroAnimationKeysRemoved: 0, settingsUnparseable: 0,
     videosLazied: 0,
-    galleryThumbsRewritten: 0, galleryImgsRewritten: 0, ownerPortraitFixed: 0, groupPhotoSizesFixed: 0, portraitCssRewritten: 0,
+    galleryThumbsRewritten: 0, galleryImgsRewritten: 0, ownerPortraitFixed: 0, portraitCssRewritten: 0,
     cssLinksBefore: 0, cssLinksRemoved: 0, cssLinksAfter: 0, cssBundlesWritten: 0, cssRunsSkipped: 0,
   })
   cssChecked.clear()

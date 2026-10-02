@@ -227,8 +227,9 @@
    * still a portrait of a real person being served to promote a company he has
    * left.
    *
-   * The group crew photo (SEMI8066) is untouched -- you cannot take one person
-   * out of a photograph of six, and that needs a new photo, not code.
+   * The group crew photo (SEMI8066) is untouched here -- you cannot take one
+   * person out of a photograph of six. It has since been replaced outright by
+   * a new full-crew photo the client supplied (build/seo/photos.mjs).
    *
    * A second crew member came off on 27 September 2026, at the client's
    * request: SEMI8001 default, SEMI7982 hover. Two elements carry his pair --
