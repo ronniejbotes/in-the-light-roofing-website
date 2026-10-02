@@ -21,6 +21,12 @@ date_default_timezone_set('America/New_York');
 
 $TO = 'info@inthelightroofing.com';
 $FROM = 'In The Light Roofing website <info@inthelightroofing.com>';
+// The envelope sender (Return-Path), which is the address SPF checks. Left to
+// PHP it is the hosting account's own server address, so the domain's SPF
+// record is never consulted and the From domain cannot pass DMARC. Set to the
+// From address, Gmail checks inthelightroofing.com's SPF -- which must list
+// Hostinger (include:_spf.mail.hostinger.com) for the mail to pass.
+$ENVELOPE = 'info@inthelightroofing.com';
 $THANKS = '/thank-you/';
 
 // A CV, not a video. The extensions are the ones the careers form itself names.
@@ -326,7 +332,7 @@ if ($attachment === null) {
         . '--' . $boundary . "--\r\n";
 }
 
-if (!mail($TO, $subject, $message, implode("\r\n", $headers))) {
+if (!mail($TO, $subject, $message, implode("\r\n", $headers), '-f' . $ENVELOPE)) {
     itlr_fail($page);
 }
 
