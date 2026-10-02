@@ -170,6 +170,12 @@ Options -Indexes
   # --- Redirects the live site serves, from mirror/_redirects -----------------
 ${redirectLines.map((l) => '  ' + l).join('\n')}
 
+  # --- Old WordPress media URLs -----------------------------------------------
+  # declutter.mjs moves wp-content/uploads to assets/ with every filename kept,
+  # so an image address Google Images, a shared link or a review site holds
+  # still lands on the same file instead of a 404.
+  RewriteRule ^wp-content/uploads/(.*)$ /assets/$1 [R=301,NE,L]
+
   # --- Two endpoints the live site answers with PHP --------------------------
   # LiteSpeed's guest-mode script POSTs here on every page load and parses the
   # reply as JSON. Unanswered, the parse throws and takes out the rest of that
