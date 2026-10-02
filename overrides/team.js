@@ -33,6 +33,26 @@
    */
   var CREW_NAMES = []
 
+  /* The photographs the stack shows, in order, owner first.
+   *
+   * The client's colour-graded portraits from 2 October 2026: each of the
+   * seven current crew alone in front of the shop mural, cropped to the card
+   * by tools/make-crew-portraits.mjs. They replace the four studio portraits
+   * the Elementor carousel still carries; when this list is empty the stack
+   * falls back to reading those, as it did before. The first is Bryson
+   * Berard -- same face, glasses and beard as owner-headshot.png, which the
+   * site captions with his name. */
+  var CREW_PHOTOS = [
+    '/_assets/crew/crew-01-owner.webp',
+    '/_assets/crew/crew-02.webp',
+    '/_assets/crew/crew-03.webp',
+    '/_assets/crew/crew-04.webp',
+    '/_assets/crew/crew-05.webp',
+    '/_assets/crew/crew-06.webp',
+    '/_assets/crew/crew-07.webp',
+  ]
+  var CREW_ALTS = ['Bryson Berard, owner of In The Light Roofing']
+
   /* Portraits belonging to a former employee. overrides.js already removes his
    * slides and overrides.css nulls his background, so he should never reach
    * this code -- but this rebuilds the section from whatever portraits it
@@ -158,7 +178,8 @@
         + '<span class="itlr-team__photo">'
         + '<img src="' + esc(small || portraits[i]) + '"'
         + (small ? ' data-itlr-original="' + esc(portraits[i]) + '"' : '')
-        + ' alt="' + (name ? esc(name) + ', In The Light Roofing' : '') + '"'
+        + ' alt="' + (name ? esc(name) + ', In The Light Roofing'
+          : CREW_PHOTOS.length ? esc(CREW_ALTS[i] || 'In The Light Roofing crew member') : '') + '"'
         + ' loading="lazy" decoding="async"></span>'
         + (name ? '<span class="itlr-team__name">' + esc(name) + '</span>' : '')
         + '</button>'
@@ -341,7 +362,7 @@
     var widget = sw && (sw.closest('[data-widget_type]') || sw.closest('.elementor-widget'))
     if (!widget) return false
 
-    var portraits = ownerFirst(readPortraits(sec))
+    var portraits = CREW_PHOTOS.length ? CREW_PHOTOS.slice() : ownerFirst(readPortraits(sec))
     // Below three and this is not the crew carousel, or the backgrounds have
     // not resolved yet. Either way, leave Elementor's carousel alone.
     if (portraits.length < 3) return false
