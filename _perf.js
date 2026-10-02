@@ -18,6 +18,27 @@
 (function () {
   'use strict'
 
+  /*
+   * Silence the chat widget's chime. Fastbots' embed.js plays a "level up"
+   * sound (widget-sounds/*.mp3, from its CDN) three times on every page load,
+   * which the client asked to have gone. It is a setting in the Fastbots
+   * dashboard, but this site has no access to that, so the sound is refused
+   * here instead: any media element whose source is one of the widget's sound
+   * files is reported as playing and never makes a noise. Nothing else on the
+   * site plays audio, and this file runs before the widget is woken below, so
+   * the patch is always in place first.
+   */
+  var WIDGET_SOUND = /\/widget-sounds\//i
+  if (window.HTMLMediaElement) {
+    var realPlay = HTMLMediaElement.prototype.play
+    HTMLMediaElement.prototype.play = function () {
+      if (WIDGET_SOUND.test(this.currentSrc || this.src || '')) {
+        return window.Promise ? Promise.resolve() : undefined
+      }
+      return realPlay.apply(this, arguments)
+    }
+  }
+
   var SELECTOR = 'script[data-itlr-defer]'
   var IDLE_FALLBACK_MS = 2500
 
