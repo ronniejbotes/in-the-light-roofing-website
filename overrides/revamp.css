@@ -1,0 +1,375 @@
+/*
+ * A cleaner, more modern finish over the Elementor build: softer cards,
+ * consistent pill buttons, a frosted sticky header, and gentle scroll-in
+ * motion (driven by revamp.js). Loaded after every other override except
+ * mobile.css, which must keep the last word on small screens.
+ *
+ * One easing curve everywhere -- a fast start that settles softly -- so the
+ * whole site moves the same way. No bounce, nothing longer than ~0.8s.
+ */
+:root {
+  --itlr-cyan: #00b6f1;
+  --itlr-cyan-deep: #0095c8;
+  --itlr-ink: #14161e;
+  --itlr-ease: cubic-bezier(.22, 1, .36, 1);
+  --itlr-radius: 18px;
+  --itlr-shadow-sm: 0 2px 6px rgb(20 22 30 / .05), 0 10px 28px rgb(20 22 30 / .07);
+  --itlr-shadow-lg: 0 4px 10px rgb(20 22 30 / .06), 0 22px 48px rgb(20 22 30 / .14);
+}
+
+/* ------------------------------------------------------------ reveals */
+
+.itlr-motion .itlr-rv {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity .7s var(--itlr-ease) var(--itlr-d, 0ms),
+    transform .8s var(--itlr-ease) var(--itlr-d, 0ms);
+}
+.itlr-motion .itlr-rv.is-in {
+  opacity: 1;
+  transform: none;
+}
+/* Photographs come in with a slight settle rather than a slide. */
+.itlr-motion .elementor-widget-image.itlr-rv,
+.itlr-motion .itlr-crew-photos__item.itlr-rv {
+  transform: scale(.97);
+}
+.itlr-motion .elementor-widget-image.itlr-rv.is-in,
+.itlr-motion .itlr-crew-photos__item.itlr-rv.is-in {
+  transform: none;
+}
+
+/* The short underline under each section heading draws itself in. */
+.itlr-motion .elementor-widget-image.itlr-rv img[src*="section-line"] {
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .9s var(--itlr-ease) calc(var(--itlr-d, 0ms) + 150ms);
+}
+.itlr-motion .elementor-widget-image.itlr-rv.is-in img[src*="section-line"] {
+  transform: scaleX(1);
+}
+
+/* ------------------------------------------------------ progress bar */
+
+.itlr-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 100000;
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--itlr-cyan), #5fd4ff);
+  box-shadow: 0 0 10px rgb(0 182 241 / .55);
+}
+
+/* ------------------------------------------------------------ header */
+
+/* Elementor adds .elementor-sticky--effects once the sticky header has moved
+   20px. Frosted rather than solid, so the page shows through faintly. */
+header .elementor-sticky--effects {
+  /* Nearly opaque: the logo file has a white ground, and over a dark section
+     a fainter header turns grey and shows the logo as a white box. */
+  background-color: rgb(255 255 255 / .94) !important;
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
+  box-shadow: 0 1px 0 rgb(20 22 30 / .06), 0 10px 30px rgb(20 22 30 / .08);
+  transition: background-color .35s var(--itlr-ease), box-shadow .35s var(--itlr-ease);
+}
+
+/* Nav links: a cyan underline that grows from the centre. */
+header .hfe-nav-menu > li > a.hfe-menu-item,
+header .elementor-nav-menu > li > a {
+  position: relative;
+}
+header .hfe-nav-menu > li > a.hfe-menu-item::after,
+header .elementor-nav-menu > li > a::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--itlr-cyan);
+  transform: scaleX(0);
+  transition: transform .35s var(--itlr-ease);
+}
+header .hfe-nav-menu > li > a.hfe-menu-item:hover::after,
+header .hfe-nav-menu > li.current-menu-item > a.hfe-menu-item::after,
+header .elementor-nav-menu > li > a:hover::after {
+  transform: scaleX(1);
+}
+
+/* ----------------------------------------------------------- buttons */
+
+.elementor-button {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px !important;
+  transition:
+    transform .3s var(--itlr-ease),
+    box-shadow .3s var(--itlr-ease),
+    background-color .3s var(--itlr-ease) !important;
+}
+/* A soft band of light that sweeps across on hover. */
+.elementor-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / .28), transparent);
+  transform: skewX(-18deg) translateX(0);
+  transition: transform .7s var(--itlr-ease);
+  pointer-events: none;
+}
+.elementor-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgb(0 182 241 / .32);
+}
+.elementor-button:hover::after {
+  transform: skewX(-18deg) translateX(420%);
+}
+.elementor-button:active {
+  transform: translateY(0);
+  transition-duration: .1s !important;
+}
+.elementor-button .elementor-button-icon {
+  transition: transform .3s var(--itlr-ease);
+}
+.elementor-button:hover .elementor-button-icon {
+  transform: translateX(3px);
+}
+
+/* ---------------------------------------------- homepage service tiles */
+
+/* The six photo tiles under "Complete Roofing Services". */
+.expert-roofing-box {
+  position: relative;
+  border-radius: var(--itlr-radius);
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 10px 26px rgb(0 0 0 / .28);
+  transition: transform .45s var(--itlr-ease), box-shadow .45s var(--itlr-ease);
+}
+.expert-roofing-box::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--itlr-cyan);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s var(--itlr-ease);
+  z-index: 2;
+}
+.expert-roofing-box:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 44px rgb(0 0 0 / .42);
+}
+.expert-roofing-box:hover::after {
+  transform: scaleX(1);
+}
+.expert-roofing-box .elementor-image-box-img img {
+  transition: transform .45s var(--itlr-ease);
+}
+.expert-roofing-box:hover .elementor-image-box-img img {
+  transform: translateY(-4px) scale(1.08);
+}
+
+/* ------------------------------------------------ "Why choose us" cards */
+
+.superior-quality-box {
+  transition: transform .45s var(--itlr-ease);
+}
+/* The card itself is the content panel under the icon. */
+.superior-quality-box .elementor-icon-box-content {
+  border-radius: var(--itlr-radius);
+  border-color: rgb(20 22 30 / .08) !important;
+  box-shadow: var(--itlr-shadow-sm);
+  transition: box-shadow .45s var(--itlr-ease), border-color .45s var(--itlr-ease);
+}
+.superior-quality-box:hover .elementor-icon-box-content {
+  box-shadow: var(--itlr-shadow-lg);
+  border-color: rgb(0 182 241 / .35) !important;
+}
+.superior-quality-box .elementor-icon {
+  transition: transform .45s var(--itlr-ease), box-shadow .45s var(--itlr-ease);
+  box-shadow: 0 0 0 0 rgb(0 182 241 / .35);
+}
+.superior-quality-box:hover {
+  transform: translateY(-6px);
+}
+.superior-quality-box:hover .elementor-icon {
+  transform: scale(1.06) rotate(-4deg);
+  box-shadow: 0 0 0 10px rgb(0 182 241 / .12);
+}
+
+/* --------------------------------------------------- service-area tiles */
+
+.city-box {
+  transition: transform .4s var(--itlr-ease);
+}
+.city-box:hover {
+  transform: translateY(-5px);
+}
+.city-box img {
+  transition: transform .4s var(--itlr-ease);
+}
+.city-box:hover img {
+  transform: scale(1.08);
+}
+
+/* ------------------------------------------- service-page blue tiles */
+
+.servi-blurb {
+  border-radius: 14px;
+  overflow: hidden;
+  transition:
+    transform .4s var(--itlr-ease),
+    box-shadow .4s var(--itlr-ease),
+    background-color .4s var(--itlr-ease) !important;
+}
+.servi-blurb:hover {
+  transform: translateY(-4px);
+  background-color: var(--itlr-cyan-deep) !important;
+  box-shadow: 0 16px 34px rgb(0 149 200 / .35);
+}
+.servi-blurb .elementor-image-box-img img {
+  transition: transform .4s var(--itlr-ease);
+}
+.servi-blurb:hover .elementor-image-box-img img {
+  transform: translateY(-3px) scale(1.1);
+}
+
+/* The white estimate card that rides down the side of service pages. */
+.elementor-inner-section:has(.form-banner-title) {
+  border-radius: var(--itlr-radius);
+  overflow: hidden;
+  box-shadow: 0 18px 44px rgb(0 0 0 / .28);
+}
+
+/* --------------------------------------------------------------- FAQs */
+
+.elementor-accordion-item {
+  border-width: 1px !important;
+  border-color: rgb(20 22 30 / .14) !important;
+  border-radius: var(--itlr-radius) !important;
+  background: #fff;
+  box-shadow: var(--itlr-shadow-sm);
+  transition:
+    box-shadow .35s var(--itlr-ease),
+    border-color .35s var(--itlr-ease),
+    transform .35s var(--itlr-ease);
+}
+.elementor-accordion-item:hover {
+  box-shadow: var(--itlr-shadow-lg);
+  border-color: rgb(0 182 241 / .45) !important;
+}
+.elementor-accordion-item:has(.elementor-tab-title.elementor-active) {
+  border-color: var(--itlr-cyan) !important;
+  box-shadow: 0 0 0 4px rgb(0 182 241 / .10), var(--itlr-shadow-lg);
+}
+.elementor-accordion .elementor-tab-title {
+  transition: color .25s var(--itlr-ease);
+}
+.elementor-accordion .elementor-tab-title:hover,
+.elementor-accordion .elementor-tab-title.elementor-active {
+  color: var(--itlr-cyan-deep);
+}
+.elementor-accordion .elementor-accordion-icon svg {
+  transition: transform .35s var(--itlr-ease);
+}
+.elementor-accordion .elementor-tab-title:hover .elementor-accordion-icon svg {
+  transform: rotate(90deg);
+}
+
+/* ----------------------------------------------------- estimate forms */
+
+.get-form-banner {
+  border-radius: var(--itlr-radius);
+}
+.get-form-banner input,
+.get-form-banner textarea,
+.get-form-banner select {
+  transition: box-shadow .25s var(--itlr-ease), border-color .25s var(--itlr-ease);
+}
+.get-form-banner input:focus,
+.get-form-banner textarea:focus,
+.get-form-banner select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(0 182 241 / .35);
+}
+
+/* --------------------------------------------------------- reduce motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .elementor-button,
+  .elementor-button::after,
+  .expert-roofing-box,
+  .servi-blurb,
+  .superior-quality-box,
+  .city-box,
+  .elementor-accordion-item {
+    transition: none !important;
+  }
+  .elementor-button:hover,
+  .expert-roofing-box:hover,
+  .servi-blurb:hover,
+  .superior-quality-box:hover,
+  .city-box:hover {
+    transform: none;
+  }
+  .elementor-button::after { display: none; }
+}
+
+/* -------------------------------------------------------- hero title */
+
+.itlr-hl {
+  display: inline-block;
+}
+html:not(.itlr-hero-in) .itlr-hl {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+}
+.itlr-hero-in .itlr-hl {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity .8s var(--itlr-ease) var(--itlr-d, 0ms),
+    transform .9s var(--itlr-ease) var(--itlr-d, 0ms);
+}
+
+/* ------------------------------------------------------ dark sections */
+
+.itlr-dark {
+  position: relative;
+  isolation: isolate;
+}
+.itlr-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* Drifts by background-position, not transform: a scaled layer would poke
+     past the section edge and give phones a sideways scroll. */
+  background:
+    radial-gradient(closest-side, rgb(0 182 241 / .16), transparent) 0 0 / 70% 90% no-repeat,
+    radial-gradient(closest-side, rgb(0 182 241 / .09), transparent) 100% 100% / 60% 80% no-repeat;
+  animation: itlr-drift 22s ease-in-out infinite alternate;
+}
+@keyframes itlr-drift {
+  from { background-position: -8% -20%, 108% 120%; }
+  to   { background-position: 22% 10%, 78% 90%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .itlr-dark::before { animation: none; }
+}

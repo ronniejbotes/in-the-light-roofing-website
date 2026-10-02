@@ -134,6 +134,8 @@ createServer(async (req, res) => {
     '/_perf.css': 'perf.css',
     '/_perf.js': 'perf.js',
     '/_mobile.css': 'mobile.css',
+    '/_revamp.css': 'revamp.css',
+    '/_revamp.js': 'revamp.js',
   }
   // OVERRIDES=off means "serve exactly what is in the directory". Previewing
   // publish/ that way, this shortcut used to hand back the source override
@@ -199,6 +201,7 @@ createServer(async (req, res) => {
         + '<link rel="stylesheet" href="/_careers.css">'
         + '<link rel="stylesheet" href="/_links.css">'
         + '<link rel="stylesheet" href="/_perf.css">'
+        + '<link rel="stylesheet" href="/_revamp.css">'
         + '<link rel="stylesheet" href="/_mobile.css">'
         + '<script src="/_perf.js" defer></script>'
         + '<script src="/_overrides.js" defer></script>'
@@ -206,6 +209,7 @@ createServer(async (req, res) => {
         + '<script src="/_process.js" defer></script>'
         + '<script src="/_team.js" defer></script>'
         + '<script src="/_careers.js" defer></script>'
+        + '<script src="/_revamp.js" defer></script>'
       const html = body.toString('utf8')
       const i = html.lastIndexOf('</head>')
       out = Buffer.from(i === -1 ? html + tags : html.slice(0, i) + tags + html.slice(i), 'utf8')

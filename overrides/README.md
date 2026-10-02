@@ -22,6 +22,7 @@ CSS, JS into a footer snippet (Elementor → Custom Code, or a snippets plugin).
 | `reviews.css` / `reviews.js` | 3D testimonial marquee replacing the Trustindex widget; live Google rating, count and reviews from `/_reviews/google.php` when the host has a key, the stored nine otherwise |
 | `process.css` / `process.js` | The 5-step process section as a scroll-driven stage |
 | `team.css` / `team.js` | The crew carousel as a photo stack, and the founder/team section order |
+| `revamp.css` / `revamp.js` | Site-wide polish: scroll-in reveals, frosted sticky header, reading-progress bar, pill buttons with a light sweep, softer cards and tiles with hover lift, restyled FAQs, a drifting glow on the dark sections, and the hero heading lifting in. All of it is skipped under reduced motion |
 | `assets/` | The five step renders (generated; see below) |
 | `reviews.json` | The nine Google reviews, captured verbatim |
 

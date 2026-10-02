@@ -983,6 +983,13 @@ html.itlr-gate-open { touch-action: none; }
  * last field of the form it is pointing at, and the padding is applied to the
  * same breakpoint so desktop keeps its layout untouched.
  * ------------------------------------------------------------------------- */
+/* Every rule for the bar sits inside the phone breakpoint, but the script adds
+   the element on every screen. Without this, desktop renders it unstyled below
+   the footer: two icons stretched to the full page width, ~3000px of empty
+   scroll. */
+@media (min-width: 768px) {
+  .itlr-callbar { display: none; }
+}
 @media (max-width: 767px) {
   /* The reserve is written by the script from the bar's measured height, because
      the bar grows with the visitor's font size and with the home indicator on an
