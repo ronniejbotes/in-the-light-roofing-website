@@ -75,10 +75,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Full colour. The old studio portraits were black-and-white and a grayscale
-     filter kept the set uniform; the 2 Oct 2026 replacements are colour-graded
-     as a set by the client, so the filter would only throw that work away. */
+  /* Black and white at rest, the colour grade revealed on hover -- the
+     client's choice (2 Oct 2026), kept for the colour-graded portraits too. */
+  filter: grayscale(1);
+  transition: filter .35s ease;
 }
+
+.itlr-team__card:hover .itlr-team__photo img { filter: grayscale(0); }
 
 /* The caption row only exists when a name was supplied. See team.js -- the
    repo holds no crew names, and inventing one for a real person is not a thing
@@ -179,6 +182,7 @@
     aspect-ratio: 3 / 4;
   }
 
+  .itlr-team__photo img { filter: grayscale(1); }
 
   .itlr-team__hint { display: none; }
 }
