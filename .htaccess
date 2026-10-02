@@ -61,10 +61,7 @@ Options -Indexes
 </IfModule>
 
 <IfModule mod_headers.c>
-  # STAGING. This is a byte-faithful copy of a live client site sitting on a
-  # different hostname; indexed, it competes with the real domain. Removed only
-  # by publishing with PUBLISH_PUBLIC=1, which is a deliberate act.
-  Header set X-Robots-Tag "noindex, nofollow"
+  # Published as production: no noindex header.
 </IfModule>
 
 <IfModule mod_mime.c>
