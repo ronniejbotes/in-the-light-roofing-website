@@ -37,6 +37,11 @@ npm run verify:build     # must pass — it gates URL, link and SEO parity
 > client site on a second hostname, and indexed it would compete with the real
 > domain. `PUBLISH_PUBLIC=1` lifts that, and is only correct on the real domain.
 >
+> **Production (since 2 Oct 2026):** Hostinger builds inthelightroofing.com
+> itself from `main` with `npm run build`, which sets `PUBLISH_PUBLIC=1` and
+> writes `dist/`. Every push to `main` therefore goes live. `npm run deploy`
+> still builds the noindex staging copy onto the `deploy` branch.
+>
 > Uploading `dist/` instead gets you the earlier rebuild: different hero,
 > different typography, and none of the work in `overrides/`.
 
