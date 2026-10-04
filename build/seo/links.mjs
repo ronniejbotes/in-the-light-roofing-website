@@ -229,7 +229,12 @@ function relatedFor(url) {
   const post = POSTS.find((p) => p.url === url)
   if (post) {
     const links = []
-    const svc = [...post.keys][0] || '/services/'
+    // A post about storm damage or an insurance claim should send its reader to
+    // that service, not to general repairs, even when its address says "repair".
+    // Matched on the address, so an "emergency repair" post with no storm in it
+    // still goes to roof repair.
+    const TOPIC_FIRST = [[/insurance|claim/, '/services/insurance-claim-facilitation/'], [/storm|hail|\bwind\b/, '/services/storm-damage-repair/']]
+    const svc = TOPIC_FIRST.find(([re]) => re.test(post.url))?.[1] || [...post.keys][0] || '/services/'
     links.push(svc === '/services/' ? { url: '/services/', label: 'Our Roofing Services', text: 'Roof repair, replacement, installation, inspections, storm damage and insurance claim help.' } : svcLink(svc))
     for (const t of [...post.towns].slice(0, 1)) links.push(townLink(t))
     if (svc !== '/services/') links.push(...postsFor(svc, url, 2))
