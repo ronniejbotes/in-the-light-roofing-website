@@ -581,6 +581,18 @@
     "find": "Local roofers understand the unique weather challenges and building codes in Allentown.",
     "replace": "<a href=\"/service-area/allentown/\">Local roofers</a> understand the unique weather challenges and building codes in Allentown."
    }
+  ],
+  "/how-many-layers-of-roofing-are-allowed-in-pa/": [
+   {
+    "find": "Signs include constant leaks, shingle loss, and mold that may force a roof replacement.",
+    "replace": "Signs include constant leaks, shingle loss, and mold that may force a <a href=\"/services/roof-replacement/\">roof replacement</a>."
+   }
+  ],
+  "/skylight-leak-repair-in-allentown/": [
+   {
+    "find": "or need assistance with roof repair, roof replacement, or storm damage roof repair",
+    "replace": "or need assistance with <a href=\"/services/roof-repairs/\">roof repair</a>, roof replacement, or storm damage roof repair"
+   }
   ]
  },
  "ohio": {
