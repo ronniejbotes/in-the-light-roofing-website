@@ -118,6 +118,10 @@
    {
     "find": "Our team of skilled roofers brings decades of combined experience to every job.",
     "replace": "Our team of skilled roofers brings hands-on experience to every job."
+   },
+   {
+    "find": "including Allentown, Bethlehem, Easton, Macungie, and more.",
+    "replace": "including <a href=\"/service-area/allentown/\">Allentown</a>, <a href=\"/service-area/roofers-bethlehem-pa/\">Bethlehem</a>, <a href=\"/service-area/easton/\">Easton</a>, <a href=\"/service-area/macungie/\">Macungie</a>, and more."
    }
   ],
   "/about-us/": [
