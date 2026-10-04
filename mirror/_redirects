@@ -27,3 +27,32 @@
 # reference the lowercase name lose the icon on any case-sensitive host --
 # which is every Linux and macOS checkout, and most static hosts.
 /wp-content/uploads/2023/12/Insurance.svg  /wp-content/uploads/2023/12/INSURANCE.svg        301
+
+# WordPress 301'd the bare slug of every child page to its nested address.
+# The static build had no rule for them, so each returned 404 after the move.
+# NOT /asphalt-shingle-roofing/, /roof-inspections/, /new-roof-installation/
+# or /roof-replacement/: those bare slugs are real archive pages.
+/allentown/                                /service-area/allentown/                         301
+/catasauqua/                               /service-area/catasauqua/                        301
+/center-valley-roofing-contractor/         /service-area/center-valley-roofing-contractor/  301
+/coplay/                                   /service-area/coplay/                            301
+/easton/                                   /service-area/easton/                            301
+/epdm-rubber-roofing/                      /services/epdm-rubber-roofing/                   301
+/insurance-claim-facilitation/             /services/insurance-claim-facilitation/          301
+/lehigh-valley/                            /service-area/lehigh-valley/                     301
+/macungie/                                 /service-area/macungie/                          301
+/northampton/                              /service-area/northampton/                       301
+/roof-repairs-campaign/                    /services/roof-repairs-campaign/                 301
+/roof-repairs/                             /services/roof-repairs/                          301
+/roofers-bethlehem-pa/                     /service-area/roofers-bethlehem-pa/              301
+/slatington/                               /service-area/slatington/                        301
+/storm-damage-repair/                      /services/storm-damage-repair/                   301
+/walnutport/                               /service-area/walnutport/                        301
+/whitehall/                                /service-area/whitehall/                         301
+
+# Old addresses Google still knows, sent to the page that replaced them.
+/category/roofing/                         /roofing/                                        301
+/category/roofing/page/3/                  /roofing/page/3/                                 301
+/service-area/roofing-contractors-bethlehem-pa/  /service-area/roofers-bethlehem-pa/        301
+/7-signs-its-time-to-replace-your-roof-in-allentown-pa/  /signs-its-time-for-roof-replacement/  301
+/pros-and-cons-of-slate-roofs-for-pa-homes/  /pros-and-cons-of-slate-roofing-for-pa-homes/  301
