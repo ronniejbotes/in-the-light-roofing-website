@@ -593,6 +593,18 @@
     "find": "or need assistance with roof repair, roof replacement, or storm damage roof repair",
     "replace": "or need assistance with <a href=\"/services/roof-repairs/\">roof repair</a>, roof replacement, or storm damage roof repair"
    }
+  ],
+  "/can-you-still-live-in-your-home-while-it-is-being-reroofed/": [
+   {
+    "find": "href=\"tel:(484) 232-1770\" rel=\"nofollow noopener external\" rel=\"nofollow noopener external\">(484) 232-1770</a>",
+    "replace": "href=\"tel:+14845530213\" rel=\"nofollow noopener external\" rel=\"nofollow noopener external\">(484) 553-0213</a>"
+   }
+  ],
+  "/what-is-the-best-time-of-year-to-have-your-roof-replaced/": [
+   {
+    "find": "href=\"tel:(484) 232-1770\" rel=\"nofollow noopener external\" rel=\"nofollow noopener external\">(484) 232-1770</a>",
+    "replace": "href=\"tel:+14845530213\" rel=\"nofollow noopener external\" rel=\"nofollow noopener external\">(484) 553-0213</a>"
+   }
   ]
  },
  "ohio": {
