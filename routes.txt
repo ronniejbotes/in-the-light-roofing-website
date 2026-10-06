@@ -9,14 +9,14 @@
 # Verified 2026-09-06: a HEAD request to every one of the 426 returned HTTP 200.
 # Re-verify with tools/mirror-audit-routes.mjs before trusting this again.
 #
-#   229  pages
+#   230  pages
 #    34  paginated archives
 #    13  service areas
 #    10  services
 #   127  tag archives (noindex on live, orphaned, but they return 200)
 #    17  testimonials
 #
-# total: 430
+# total: 431
 
 /
 /10-most-common-roofing-myths-busted/
@@ -436,6 +436,7 @@
 /understanding-roof-insurance-policy/
 /ways-to-extend-roof-lifespan-in-allentown/
 /ways-to-prepare-your-roof-for-storm-season/
+/what-a-roofing-estimate-should-include-pa/
 /what-allentown-homeowners-should-expect-new-roof-installation/
 /what-is-the-best-time-of-year-to-have-your-roof-replaced/
 /what-to-expect-during-a-full-roof-replacement-in-allentown/
