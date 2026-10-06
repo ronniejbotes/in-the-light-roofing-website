@@ -278,6 +278,10 @@
    {
     "find": "<p>Trusted Center Valley Roofing Company</p>",
     "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "including storms, heavy rain, or hail, it's crucial to schedule a roof inspection.",
+    "replace": "including storms, heavy rain, or <a href=\"/hail-damage-on-asphalt-shingles/\">hail</a>, it's crucial to schedule a roof inspection."
    }
   ],
   "/services/roof-repairs/": [
