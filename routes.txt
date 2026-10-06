@@ -9,14 +9,14 @@
 # Verified 2026-09-06: a HEAD request to every one of the 426 returned HTTP 200.
 # Re-verify with tools/mirror-audit-routes.mjs before trusting this again.
 #
-#   228  pages
+#   229  pages
 #    34  paginated archives
 #    13  service areas
 #    10  services
 #   127  tag archives (noindex on live, orphaned, but they return 200)
 #    17  testimonials
 #
-# total: 429
+# total: 430
 
 /
 /10-most-common-roofing-myths-busted/
@@ -158,6 +158,7 @@
 /roof-cleaning-services-can-prevent-cost/
 /roof-coatings-allentown-pa/
 /roof-damage/
+/roof-decking-replacement/
 /roof-flashing-and-why-its-crucial/
 /roof-flashing-failure-signs-solutions/
 /roof-humidity-preparation-allentown/

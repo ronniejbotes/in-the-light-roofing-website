@@ -320,6 +320,10 @@
    {
     "find": "<p>Trusted Center Valley Roofing Company</p>",
     "replace": "<p>Lehigh Valley Roofing Company Since 2017</p>"
+   },
+   {
+    "find": "including damaged shingles, sagging areas, or consistent issues,",
+    "replace": "including damaged shingles, <a href=\"/roof-decking-replacement/\">sagging areas</a>, or consistent issues,"
    }
   ],
   "/services/storm-damage-repair/": [
