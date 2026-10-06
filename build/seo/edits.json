@@ -296,6 +296,10 @@
    {
     "find": "comprehensive <a href=\"https://g.co/kgs/upMJXvq\" target=\"_blank\" rel=\"nofollow noopener external\">roof repair services</a>.",
     "replace": "comprehensive roof repair services."
+   },
+   {
+    "find": "excels at identifying the source of leaks and providing solutions that prevent further damage.",
+    "replace": "excels at identifying <a href=\"/roof-valley-leak-repair/\">the source of leaks</a> and providing solutions that prevent further damage."
    }
   ],
   "/services/roof-repairs-campaign/": [
