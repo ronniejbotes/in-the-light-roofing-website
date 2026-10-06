@@ -334,6 +334,10 @@
    {
     "find": "When storms leave your roof in disarray, trust In the Light Roofing for swift and reliable storm damage repair.",
     "replace": "When storms leave your roof in disarray, trust In the Light Roofing for swift and reliable storm damage repair. If the damage is covered by your homeowner's policy, we can also <a href=\"/services/insurance-claim-facilitation/\">help with your roof insurance claim</a>."
+   },
+   {
+    "find": "Visible signs of exterior damage, such as missing or damaged shingles, are clear indicators that your roof requires immediate attention.",
+    "replace": "Visible signs of exterior damage, such as <a href=\"/signs-of-wind-damage-on-roof/\">missing or damaged shingles</a>, are clear indicators that your roof requires immediate attention."
    }
   ],
   "/service-area/allentown/": [
