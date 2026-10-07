@@ -102,6 +102,32 @@ const PROTECT = [
   'cdn.callrail.com/companies/528409341/wp-0-5-3/',
 ]
 
+/**
+ * Links to other sites that happen to use WordPress paths.
+ *
+ * The moves and renames here describe this site's own files. Another site's
+ * /wp-content/uploads/ file moved nowhere, and rewriting the link sends the
+ * reader to a page that does not exist: the estimate post's link to the
+ * Pennsylvania Attorney General's copy of the Act went out as
+ * cdn.attorneygeneral.gov/assets/... and answered 403 (found 7 October 2026).
+ * Any absolute URL on another host with a wp-content or wp-includes path is
+ * parked before the sweep and put back after it.
+ */
+const FOREIGN = /https?:\/\/(?!(?:www\.)?inthelightroofing\.)[a-z0-9.-]+\.[a-z]{2,}\/(?:wp-content|wp-includes)\/[^\s"'<>)]*/gi
+
+function parkForeign(text, parked) {
+  return text.replace(FOREIGN, (url) => {
+    parked.push(url)
+    return `\u0000FOREIGN${parked.length - 1}\u0000`
+  })
+}
+
+function unparkForeign(text, parked) {
+  let s = text
+  parked.forEach((url, i) => { s = s.split(`\u0000FOREIGN${i}\u0000`).join(url) })
+  return s
+}
+
 /* Body classes that name WordPress or the theme and are used by nothing --
    confirmed zero references in every .css and .js file in the mirror. */
 const DROP_CLASSES = [
@@ -181,7 +207,8 @@ async function moveDir(OUT, from, to) {
 
 /** Rewrite every reference to the moved paths, in whatever form it appears. */
 export function rewritePaths(text) {
-  let s = text
+  const foreign = []
+  let s = parkForeign(text, foreign)
   for (const [from, to] of DIRS) {
     // Absolute, with any of the known hosts in front.
     for (const h of HOSTS) {
@@ -202,11 +229,12 @@ export function rewritePaths(text) {
     // Written as '\/' this collapses to '/' and the line quietly does nothing.
     s = s.split(h.replace(/\//g, '\\/')).join('')
   }
-  return s
+  return unparkForeign(s, foreign)
 }
 
 function applyRenames(text) {
-  let s = text
+  const foreign = []
+  let s = parkForeign(text, foreign)
 
   // Park the URLs that must not be touched behind a sentinel that contains no
   // renameable substring, then put them back once the sweep has run.
@@ -222,7 +250,7 @@ function applyRenames(text) {
   s = s.split(WP_PREFIX[0]).join(WP_PREFIX[1])
 
   for (const [token, keep] of parked) s = s.split(token).join(keep)
-  return s
+  return unparkForeign(s, foreign)
 }
 
 /** Strip WordPress-only tags, comments and body classes from a document. */
