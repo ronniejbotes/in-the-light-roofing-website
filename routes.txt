@@ -9,14 +9,14 @@
 # Verified 2026-09-06: a HEAD request to every one of the 426 returned HTTP 200.
 # Re-verify with tools/mirror-audit-routes.mjs before trusting this again.
 #
-#   230  pages
+#   231  pages
 #    34  paginated archives
 #    13  service areas
 #    10  services
 #   127  tag archives (noindex on live, orphaned, but they return 200)
 #    17  testimonials
 #
-# total: 431
+# total: 432
 
 /
 /10-most-common-roofing-myths-busted/
@@ -140,6 +140,7 @@
 /outside-sales-representative-bethlehem-center-valley/
 /past-work/
 /peak-summer-roof-repairs-allentown/
+/plumbing-vent-pipe-roof-leak/
 /powerful-epdm-roofing-benefits/
 /prepare-roof-for-heavy-rainstorms-in-pa/
 /preparing-for-end-of-summer-roof-inspections-in-allentown/
