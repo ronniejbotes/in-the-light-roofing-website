@@ -17,11 +17,23 @@
  *   2. About Us, a new two-photo band (crew with the van, then the van)
  *      between Bryson's story and "Contact Our Roofing Team". Styled in
  *      overrides/overrides.css under .itlr-crew-photos.
+ *   3. /what-to-expect-during-a-full-roof-replacement-in-allentown/, the
+ *      post's featured image (7 October 2026). It was a stock photo preview
+ *      with the library's watermark repeated across the frame. It becomes
+ *      resi-14, one of the company's own job photographs already on the site
+ *      (the Coplay page and the cool roof post show it): two roofers partway
+ *      through a tear-off. It is the same 1024x552 with the same 300 and 768
+ *      wide copies, so every width, height and srcset entry still holds.
+ *      Every reference moves, in both forms the page writes it: plain in the
+ *      <img>, its srcset and og:image, slash-escaped in the JSON-LD's
+ *      thumbnailUrl, url and contentUrl. The alt and the ImageObject caption
+ *      were another post's title; both now say what the photograph shows.
+ *      build/publish.mjs leaves the old files out of the build.
  *
  * Done here rather than in overrides.js so the photographs are in the HTML a
  * crawler reads, with real alt text, instead of being painted in by script.
  */
-import { escapeAttr } from './lib.mjs'
+import { escapeAttr, getYoastGraph, replaceJsonLd, SITE } from './lib.mjs'
 
 const P = '/_assets/photos/'
 
@@ -54,6 +66,46 @@ function band() {
     + `<div class="itlr-crew-photos__inner">${figs}</div></section>`
 }
 
+/* Item 3: a post's featured image, swapped by path. The paths stop before the
+   extension so the 300 and 768 wide copies follow the full-size file. */
+const FEATURED = {
+  '/what-to-expect-during-a-full-roof-replacement-in-allentown/': {
+    from: '/assets/2024/11/What-to-Expect-During-a-Full-Roof-Replacement-in-Allentown',
+    to: '/assets/2024/10/resi-14',
+    alt: 'Two roofers tearing off the old shingles on a light blue two-story house, with a ladder against the roof and blue tarps on the ground',
+  },
+}
+
+/** Moves every reference; returns { refs, alt, caption } so a miss is reported. */
+function swapFeatured(doc, spec) {
+  const slashEscaped = (s) => s.replace(/\//g, '\\/')
+  let refs = 0
+  for (const [a, b] of [[spec.from, spec.to], [slashEscaped(spec.from), slashEscaped(spec.to)]]) {
+    const parts = doc.html.split(a)
+    refs += parts.length - 1
+    doc.html = parts.join(b)
+  }
+  let alt = false
+  const src = `src="${spec.to}.webp"`
+  doc.html = doc.html.replace(/<img\b[^>]*>/gi, (tag) => {
+    if (!tag.includes(src)) return tag
+    alt = true
+    const value = ` alt="${escapeAttr(spec.alt)}"`
+    return /\salt=("[^"]*"|'[^']*')/i.test(tag)
+      ? tag.replace(/\salt=("[^"]*"|'[^']*')/i, value)
+      : tag.replace(/\s*\/?>$/, (end) => `${value}${end}`)
+  })
+  let caption = false
+  const y = getYoastGraph(doc.html)
+  const node = y && y.graph.find((n) => n['@id'] === `${SITE}${doc.url}#primaryimage`)
+  if (node) {
+    node.caption = spec.alt
+    doc.html = replaceJsonLd(doc.html, y.block, y.data)
+    caption = true
+  }
+  return { refs, alt, caption }
+}
+
 export function transformDoc(doc, ctx) {
   const rep = ctx.report.photos
   if (doc.url === '/') {
@@ -76,6 +128,13 @@ export function transformDoc(doc, ctx) {
       rep.aboutBand = true
     } else {
       console.warn('  ! photos: About Us team section (835db18) not found')
+    }
+  }
+  if (FEATURED[doc.url]) {
+    const done = swapFeatured(doc, FEATURED[doc.url])
+    rep.featuredImageRefs = (rep.featuredImageRefs || 0) + done.refs
+    if (!done.refs || !done.alt || !done.caption) {
+      console.warn(`  ! photos: featured image swap on ${doc.url} incomplete: ${JSON.stringify(done)}`)
     }
   }
 }

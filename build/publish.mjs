@@ -80,6 +80,17 @@ const REMOVED_PORTRAITS = [
   '2026/03/SEMI7982.jpg', '2026/03/SEMI7982.jpg.webp',
 ]
 
+/* Images no page uses any more, under wp-content/uploads/, left out so the
+   files are not served either. The full roof replacement post's old featured
+   image in its three sizes: a stock photo preview with the library's
+   watermark across it, swapped for a job photograph by build/seo/photos.mjs
+   on 7 October 2026. */
+const RETIRED_IMAGES = [
+  '2024/11/What-to-Expect-During-a-Full-Roof-Replacement-in-Allentown.webp',
+  '2024/11/What-to-Expect-During-a-Full-Roof-Replacement-in-Allentown-300x162.webp',
+  '2024/11/What-to-Expect-During-a-Full-Roof-Replacement-in-Allentown-768x414.webp',
+]
+
 /** Short content hash, so a changed file gets a URL no cache has seen. */
 async function stamp(file) {
   const p = join(OVR, file)
@@ -626,6 +637,13 @@ async function main() {
     if (existsSync(p)) { await rm(p, { force: true }); removedPortraits++ }
   }
 
+  // 1c. ...and the images retired from every page (RETIRED_IMAGES above).
+  let retiredImages = 0
+  for (const name of RETIRED_IMAGES) {
+    const p = join(OUT, 'wp-content', 'uploads', name)
+    if (existsSync(p)) { await rm(p, { force: true }); retiredImages++ }
+  }
+
   // 2. The overrides, as the URLs serve.mjs exposes them.
   let wrote = 0
   for (const [url, file] of Object.entries(OVERRIDES)) {
@@ -799,6 +817,7 @@ async function main() {
   console.log(`  ${injected} HTML pages injected  (${skippedXml} feeds left alone)`)
   console.log(`  ${wrote} override files, ${assetCount} assets, ${replaced} files replaced in place`)
   console.log(`  ${removedPortraits} portraits of people taken off the site left out`)
+  console.log(`  ${retiredImages} retired images left out`)
   console.log(`  ${rules.length} redirects written to .htaccess` + (redirectedDrafts ? `, ${redirectedDrafts} redirected duplicate pages removed` : ''))
   const mappedForms = Object.keys(FIELD_LABELS).length
   console.log(`  live reviews: ${REVIEWS_ENDPOINT.slice(1)} (needs itlr-private/google-places.php beside the web root)`)
