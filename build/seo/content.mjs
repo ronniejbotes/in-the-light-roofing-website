@@ -256,11 +256,14 @@ export const GLOBAL_REPLACEMENTS = [
   ['spring roof inspection Lehigh Valley works best when the decision begins with observed conditions rather than assumptions. Owners often see a symptom and jump directly to a product, repair or proposal. A...', 'Winter in the Lehigh Valley rarely leaves a roof exactly the way it found it.'],
   ['roof repair or replacement Allentown works best when the decision begins with observed conditions rather than assumptions. Owners often see a symptom and jump directly to a product, repair or proposal. A...', 'Deciding between a roof repair and a full replacement is one of the larger calls an Allentown homeowner has to make, and it almost never arrives at a convenient moment.'],
   ['Lehigh Valley roof ice dam prevention works best when the decision begins with observed conditions rather than assumptions. Owners often see a symptom and jump directly to a product, repair or proposal....', 'Ice dams are one of the few roof problems in the Lehigh Valley that build slowly enough to stop before they ever reach your ceiling.'],
-  // Four posts ship the SEO contractor's WordPress username as their author
-  // while the other 188 say "Admin". meta.mjs has already re-attributed every
-  // post's JSON-LD author to the organization, so this tag is the last place a
-  // third-party account name is printed. It joins the other 188.
-  ['<meta name="author" content="SEODev2" />', '<meta name="author" content="Admin" />'],
+  // Every post names a WordPress login as its author in this tag: the SEO
+  // contractor's username on four posts, "Admin" on all the others. meta.mjs
+  // makes the business the JSON-LD author of every post, which leaves this tag
+  // as the only place either login is printed. The owner decided on
+  // 7 October 2026 that posts carry no author's name unless one is genuinely
+  // needed. None is, so the tag goes rather than being given another name.
+  ['<meta name="author" content="SEODev2" />', ''],
+  ['<meta name="author" content="Admin" />', ''],
   // The ice-dam post's editorial title changes with its rewritten body, and the
   // old wording is the same string in six places on its own page -- title,
   // og:title, the Article headline, the WebPage name, the breadcrumb and the H1
